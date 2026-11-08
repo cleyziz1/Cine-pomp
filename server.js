@@ -530,8 +530,18 @@ app.get('/api/gdrive/stream/:fileId', async (req, res) => {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     };
+    const CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB por chunk para funcionar no Player Nativo mesmo na Vercel Serverless (limite 4.5MB)
     if (req.headers.range) {
-      baseHeaders.Range = req.headers.range;
+      const match = req.headers.range.match(/bytes=(\d+)-(\d*)/);
+      if (match && process.env.VERCEL) {
+        const start = parseInt(match[1], 10);
+        const end = match[2] ? Math.min(parseInt(match[2], 10), start + CHUNK_SIZE - 1) : start + CHUNK_SIZE - 1;
+        baseHeaders.Range = `bytes=${start}-${end}`;
+      } else {
+        baseHeaders.Range = req.headers.range;
+      }
+    } else if (process.env.VERCEL) {
+      baseHeaders.Range = `bytes=0-${CHUNK_SIZE - 1}`;
     }
 
     let upstream = await fetch(downloadUrl, {

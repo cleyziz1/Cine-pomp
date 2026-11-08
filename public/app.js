@@ -628,10 +628,8 @@
     return h !== 'localhost' && h !== '127.0.0.1';
   }
 
-  function getOptimalPlayerType(driveFileId) {
-    if (driveFileId && isCloudHost()) {
-      return 'drive_preview';
-    }
+  function getOptimalPlayerType() {
+    // Sempre usa o Player Nativo CINE POMPEIA por padrão!
     return 'native';
   }
 
@@ -1692,13 +1690,7 @@
         },
         { once: true }
       );
-      // Caso o arquivo no Google Drive seja .MKV com codec que o <video> não decodifica nativamente, alterna automaticamente para o Player Oficial do Google Drive!
-      nativeVideo.onerror = () => {
-        const fId = media.driveFileId || extractDriveFileId(media.rawUrl || media.streamUrl);
-        if (fId) {
-          switchPlayerRenderer('drive_preview');
-        }
-      };
+      nativeVideo.onerror = null;
     }
   }
 
