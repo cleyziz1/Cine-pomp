@@ -521,59 +521,38 @@ app.post('/api/drive/sync-folder', async (req, res) => {
 app.get('/api/gdrive/stream/:fileId', async (req, res) => {
   const { fileId } = req.params;
   try {
-    // Endpoint direto do Google User Content que ignora o aviso de antivírus para arquivos grandes
-    let downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
+    // Endpoint direto do Google User Content
+    const downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
       fileId
     )}&export=download&confirm=t`;
 
-    const baseHeaders = {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    };
-    const CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB por chunk para funcionar no Player Nativo mesmo na Vercel Serverless (limite 4.5MB)
+    // IMPORTANTE: O Google Drive bloqueia downloads abertos ("Range: bytes=0-") com "Quota exceeded",
+    // mas libera 100% das requisições quando enviamos um Range delimitado ("bytes=START-END")!
+    // Além disso, blocos de 2MB funcionam perfeitamente tanto no Node local quanto na Vercel Serverless.
+    const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB por bloco
+    let start = 0;
+    let end = CHUNK_SIZE - 1;
+
     if (req.headers.range) {
       const match = req.headers.range.match(/bytes=(\d+)-(\d*)/);
-      if (match && process.env.VERCEL) {
-        const start = parseInt(match[1], 10);
-        const end = match[2] ? Math.min(parseInt(match[2], 10), start + CHUNK_SIZE - 1) : start + CHUNK_SIZE - 1;
-        baseHeaders.Range = `bytes=${start}-${end}`;
-      } else {
-        baseHeaders.Range = req.headers.range;
+      if (match) {
+        start = parseInt(match[1], 10);
+        end = match[2]
+          ? Math.min(parseInt(match[2], 10), start + CHUNK_SIZE - 1)
+          : start + CHUNK_SIZE - 1;
       }
-    } else if (process.env.VERCEL) {
-      baseHeaders.Range = `bytes=0-${CHUNK_SIZE - 1}`;
     }
 
-    let upstream = await fetch(downloadUrl, {
+    const baseHeaders = {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      Range: `bytes=${start}-${end}`
+    };
+
+    const upstream = await fetch(downloadUrl, {
       headers: baseHeaders,
       redirect: 'follow'
     });
-
-    // Se o Google Drive retornar uma página HTML de confirmação com UUID (acontece em alguns arquivos de vários GB)
-    const contentType = upstream.headers.get('content-type') || '';
-    if (contentType.includes('text/html')) {
-      const htmlText = await upstream.text();
-      const uuidMatch = htmlText.match(/name="uuid"\s+value="([^"]+)"/);
-      const confirmMatch = htmlText.match(/name="confirm"\s+value="([^"]+)"/);
-      if (uuidMatch && uuidMatch[1]) {
-        const confirmVal = (confirmMatch && confirmMatch[1]) || 't';
-        downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
-          fileId
-        )}&export=download&confirm=${encodeURIComponent(confirmVal)}&uuid=${encodeURIComponent(
-          uuidMatch[1]
-        )}`;
-        upstream = await fetch(downloadUrl, {
-          headers: baseHeaders,
-          redirect: 'follow'
-        });
-      } else {
-        return res
-          .status(403)
-          .send(
-            'O Google Drive bloqueou o acesso direto. Verifique se o vídeo está compartilhado como "Qualquer pessoa com o link".'
-          );
-      }
-    }
 
     if (!upstream.ok && upstream.status !== 206) {
       return res
@@ -581,27 +560,25 @@ app.get('/api/gdrive/stream/:fileId', async (req, res) => {
         .send('Não foi possível reproduzir o arquivo do Google Drive.');
     }
 
-    res.status(upstream.status);
-    ['content-type', 'content-length', 'content-range', 'accept-ranges'].forEach((h) => {
-      const val = upstream.headers.get(h);
-      if (val) res.setHeader(h, val);
-    });
+    const contentRange = upstream.headers.get('content-range');
+    const disposition = upstream.headers.get('content-disposition') || '';
+    const buffer = Buffer.from(await upstream.arrayBuffer());
 
-    const finalType = res.getHeader('content-type') || '';
-    if (!finalType || finalType.includes('application/octet-stream')) {
-      res.setHeader('content-type', 'video/mp4');
+    res.status(206);
+    if (contentRange) {
+      res.setHeader('Content-Range', contentRange);
     }
-    if (!res.getHeader('accept-ranges')) {
-      res.setHeader('accept-ranges', 'bytes');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Content-Length', String(buffer.length));
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+
+    if (/\.webm/i.test(disposition)) {
+      res.setHeader('Content-Type', 'video/webm');
+    } else {
+      res.setHeader('Content-Type', 'video/mp4');
     }
 
-    const nodeStream = Readable.fromWeb(upstream.body);
-    req.on('close', () => {
-      try {
-        nodeStream.destroy();
-      } catch (_) {}
-    });
-    nodeStream.pipe(res);
+    return res.end(buffer);
   } catch (err) {
     if (!res.headersSent) {
       res.status(500).send('Erro no streaming do Google Drive: ' + err.message);
