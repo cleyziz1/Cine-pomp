@@ -64,15 +64,32 @@ const os = require('os');
 const TMP_CATALOG_FILE = path.join(os.tmpdir(), 'drive_catalog.json');
 
 function loadDriveCatalog() {
-  for (const file of [TMP_CATALOG_FILE, DRIVE_CATALOG_FILE]) {
+  const mergedMoviesMap = new Map();
+  const mergedFoldersMap = new Map();
+
+  for (const file of [DRIVE_CATALOG_FILE, TMP_CATALOG_FILE]) {
     try {
       if (fs.existsSync(file)) {
         const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
         if (parsed && Array.isArray(parsed.movies)) {
-          return parsed;
+          for (const m of parsed.movies) {
+            if (m && m.id) mergedMoviesMap.set(m.id, m);
+          }
+        }
+        if (parsed && Array.isArray(parsed.folders)) {
+          for (const f of parsed.folders) {
+            if (f && f.folderId) mergedFoldersMap.set(f.folderId, f);
+          }
         }
       }
     } catch (_) {}
+  }
+
+  if (mergedMoviesMap.size > 0) {
+    return {
+      folders: Array.from(mergedFoldersMap.values()),
+      movies: Array.from(mergedMoviesMap.values())
+    };
   }
   return DEFAULT_DRIVE_CATALOG;
 }
@@ -128,17 +145,24 @@ function buildStreamUrl(rawUrl) {
 // Limpa o nome de um arquivo de vídeo (ex: "Interestelar.2014.1080p.Dublado.mkv" -> { title: "Interestelar", year: "2014" })
 function parseMovieFilename(filename) {
   let clean = String(filename || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/gi, '"')
     .replace(/\.(mp4|mkv|webm|avi|mov|m4v)$/i, '')
-    .replace(/[._]/g, ' ');
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/[._]/g, ' ')
+    .replace(/^\s*\d{1,3}\s*[-.]\s*/, '');
 
   const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
   const year = yearMatch ? yearMatch[1] : '';
 
   // Remove tags técnicas comuns após o ano ou no final
   clean = clean
-    .replace(/\b(1080p|720p|2160p|4k|blu-?ray|web-?dl|webrip|hdrip|x264|x265|hevc|aac|dual|dublado|legendado|pt-?br|5\.1)\b.*/i, '')
+    .replace(/\b(open\s*matte|imax|remastered|1080p|720p|2160p|4k|blu-?ray|web-?dl|webrip|hdrip|x264|x265|h264|h265|hevc|aac|ac3|dual|dublado|legendado|pt-?br|5\.1|brshares)\b.*/i, '')
     .replace(/\(\s*(19\d{2}|20\d{2})\s*\)/g, '')
+    .replace(/\([^)]*\)/g, '')
     .replace(/\b(19\d{2}|20\d{2})\b/g, '')
+    .replace(/[-–—]+\s*$/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -160,7 +184,10 @@ async function fetchMetadataByTitle(title, year) {
     url.searchParams.set('query', title);
     if (year) url.searchParams.set('year', year);
 
-    const res = await fetch(url.toString());
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3200);
+    const res = await fetch(url.toString(), { signal: controller.signal });
+    clearTimeout(timer);
     if (!res.ok) return null;
     const data = await res.json();
     const hit = (data.results || []).find((r) => r.media_type === 'movie' || r.media_type === 'tv') || (data.results || [])[0];
@@ -424,44 +451,47 @@ app.post('/api/drive/sync-folder', async (req, res) => {
       });
     }
 
-    let addedCount = 0;
-    for (const file of discoveredFiles) {
-      // Evita duplicar se o mesmo driveFileId já estiver no catálogo
-      const alreadyExists = driveCatalog.movies.some((m) => m.driveFileId === file.fileId);
-      if (alreadyExists) continue;
+    const newFiles = discoveredFiles.filter(
+      (file) => !driveCatalog.movies.some((m) => m.driveFileId === file.fileId)
+    );
 
-      const parsed = parseMovieFilename(file.fileName);
-      const meta = await fetchMetadataByTitle(parsed.title, parsed.year);
+    const createdMovies = await Promise.all(
+      newFiles.map(async (file, idx) => {
+        const parsed = parseMovieFilename(file.fileName);
+        const meta = await fetchMetadataByTitle(parsed.title, parsed.year);
 
-      const newMovie = {
-        id: `drive_${file.fileId}`,
-        title: (meta && meta.title) || parsed.title,
-        year: (meta && meta.year) || parsed.year,
-        rating: (meta && meta.rating) || '8.5',
-        category:
-          defaultCategory !== 'Auto'
-            ? defaultCategory
-            : (meta && meta.category) || 'Filmes do Google Drive',
-        featured: addedCount === 0,
-        driveFileId: file.fileId,
-        rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
-        streamUrl: `/api/gdrive/stream/${file.fileId}`,
-        poster:
-          (meta && meta.poster) ||
-          `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
-        backdrop:
-          (meta && meta.backdrop) ||
-          (meta && meta.poster) ||
-          '',
-        overview:
-          (meta && meta.overview) ||
-          `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
-        addedAt: Date.now()
-      };
+        return {
+          id: `drive_${file.fileId}`,
+          title: (meta && meta.title) || parsed.title,
+          year: (meta && meta.year) || parsed.year,
+          rating: (meta && meta.rating) || '8.5',
+          category:
+            defaultCategory !== 'Auto'
+              ? defaultCategory
+              : (meta && meta.category) || 'Filmes do Google Drive',
+          featured: idx === 0,
+          driveFileId: file.fileId,
+          rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
+          streamUrl: `/api/gdrive/stream/${file.fileId}`,
+          poster:
+            (meta && meta.poster) ||
+            `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
+          backdrop:
+            (meta && meta.backdrop) ||
+            (meta && meta.poster) ||
+            '',
+          overview:
+            (meta && meta.overview) ||
+            `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
+          addedAt: Date.now() - idx
+        };
+      })
+    );
 
+    for (const newMovie of createdMovies) {
       driveCatalog.movies.unshift(newMovie);
-      addedCount += 1;
     }
+    const addedCount = createdMovies.length;
 
     // Registra a pasta sincronizada
     if (!driveCatalog.folders.some((f) => f.folderId === folderId)) {
@@ -477,7 +507,8 @@ app.post('/api/drive/sync-folder', async (req, res) => {
       success: true,
       discoveredCount: discoveredFiles.length,
       addedCount,
-      totalMovies: driveCatalog.movies.length
+      totalMovies: driveCatalog.movies.length,
+      movies: driveCatalog.movies
     });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao sincronizar pasta do Drive: ' + err.message });

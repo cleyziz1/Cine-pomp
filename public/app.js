@@ -37,35 +37,404 @@
 
   const DEFAULT_LOCAL_MOVIES = [
     {
-      id: 'demo_1',
-      title: 'Tears of Steel (Exemplo Stream Nativo HD)',
-      year: '2012',
-      rating: '8.1',
+      id: 'drive_1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU',
+      title: 'Homem-Aranha: Um Novo Dia',
+      year: '2026',
+      rating: '8.5',
       category: 'Ficção & Fantasia',
       featured: true,
-      driveFileId: null,
-      rawUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-      streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-      poster: 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg',
-      backdrop: 'https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg',
+      driveFileId: '1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU',
+      rawUrl: 'https://drive.google.com/file/d/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/view',
+      streamUrl: '/api/gdrive/stream/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU',
+      poster: 'https://image.tmdb.org/t/p/w500/x0nvYzQpyJc5pdT9lMnkMuYAg0O.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/subj7knTn4DeS6KS7qI66EQKe9i.jpg',
       overview:
-        'Vídeo de demonstração para testar a sincronia instantânea do Player Nativo CINE POMPEIA. Clique em "Adicionar Filmes / Sincronizar Pasta Drive" no topo para colocar seus filmes do Google Drive (5TB)!',
-      addedAt: Date.now()
+        'É um novo dia para Peter Parker. Combatendo o crime em tempo integral como Homem-Aranha em um mundo que não se lembra mais dele e lidando com a pressão de ver seus antigos amigos seguirem em frente sem sua presença.',
+      addedAt: 1794176579000
     },
     {
-      id: 'demo_2',
-      title: 'Sintel (Exemplo Animação HD)',
-      year: '2010',
+      id: 'drive_1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ',
+      title: 'O Resgate do Soldado Ryan',
+      year: '1998',
+      rating: '8.2',
+      category: 'Lançamentos & Destaques',
+      featured: true,
+      driveFileId: '1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ',
+      rawUrl: 'https://drive.google.com/file/d/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/view',
+      streamUrl: '/api/gdrive/stream/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ',
+      poster: 'https://image.tmdb.org/t/p/w500/hMLxNLCXRDd62acfCBn6mIyW1HU.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/rW2xRFlJRbTnBJlQTSjQmjevIwb.jpg',
+      overview:
+        'Ao desembarcar na Normandia, no dia 6 de junho de 1944, o capitão Miller recebe a missão de comandar um grupo do segundo batalhão para o resgate do soldado James Ryan.',
+      addedAt: 1794176577505
+    },
+    {
+      id: 'drive_1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
+      title: 'Gigantes de Aço',
+      year: '2011',
+      rating: '7.2',
+      category: 'Ação & Aventura',
+      featured: false,
+      driveFileId: '1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
+      rawUrl: 'https://drive.google.com/file/d/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7/view',
+      streamUrl: '/api/gdrive/stream/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
+      poster: 'https://image.tmdb.org/t/p/w500/pp74uUjwQTknGPqNrerj4FvU0ce.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/pjlxrd646cBYznHoPBWTzz6FujX.jpg',
+      overview:
+        'Em um futuro próximo, as máquinas substituem os seres humanos no ringue. Charlie, um ex-lutador frustrado, se une ao filho para construir um competidor imbatível.',
+      addedAt: 1794176577342
+    },
+    {
+      id: 'drive_1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri',
+      title: 'Carros',
+      year: '2006',
+      rating: '7.0',
+      category: 'Animação & Família',
+      featured: true,
+      driveFileId: '1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri',
+      rawUrl: 'https://drive.google.com/file/d/1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri/view',
+      streamUrl: '/api/gdrive/stream/1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri',
+      poster: 'https://image.tmdb.org/t/p/w500/A7nssMRIPauZhEVf2dzwsf4EALO.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/sd4xN5xi8tKRPrJOWwNiZEile7f.jpg',
+      overview:
+        'Ao viajar para a Califórnia para a disputa da corrida final da Copa Pistão, o famoso Relâmpago McQueen acaba preso em Radiator Springs e descobre o verdadeiro significado de amizade.',
+      addedAt: 1794176577200
+    },
+    {
+      id: 'drive_1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi',
+      title: 'Carros 2',
+      year: '2011',
+      rating: '6.2',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi',
+      rawUrl: 'https://drive.google.com/file/d/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/view',
+      streamUrl: '/api/gdrive/stream/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi',
+      poster: 'https://image.tmdb.org/t/p/w500/fIKaabvE40T39nOIngcZPcPJeYe.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/robYRZk9LxJTwD7GlZCginji5k.jpg',
+      overview:
+        'O astro das corridas, Relâmpago McQueen, e o carro-guincho, Mate, viajam para disputar o primeiro Grand Prix Mundial, que irá revelar o carro mais veloz do planeta.',
+      addedAt: 1794176577100
+    },
+    {
+      id: 'drive_1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
+      title: 'Carros 3',
+      year: '2017',
+      rating: '6.9',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
+      rawUrl: 'https://drive.google.com/file/d/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B/view',
+      streamUrl: '/api/gdrive/stream/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
+      poster: 'https://image.tmdb.org/t/p/w500/oEmdfjqQnAWe1t23WiiW0icFhGv.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg',
+      overview:
+        'Durante mais uma disputa eletrizante nas pistas, o campeão Relâmpago McQueen sofre um grave acidente e precisa da ajuda da jovem treinadora Cruz Ramirez para voltar às pistas.',
+      addedAt: 1794176577000
+    },
+    {
+      id: 'drive_134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH',
+      title: 'Toy Story 5',
+      year: '2026',
       rating: '8.3',
       category: 'Animação & Família',
       featured: false,
-      driveFileId: null,
-      rawUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-      streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-      poster: 'https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg',
-      backdrop: 'https://image.tmdb.org/t/p/original/rkB4LyZHo1NHXFEDHl9vSD9r1lI.jpg',
-      overview: 'Uma jovem guerreira chamada Sintel percorre terras perigosas em busca de seu pequeno dragão amigo Scales.',
-      addedAt: Date.now() - 10000
+      driveFileId: '134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH',
+      rawUrl: 'https://drive.google.com/file/d/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/view',
+      streamUrl: '/api/gdrive/stream/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH',
+      poster: 'https://image.tmdb.org/t/p/w500/jTN1hdfP88Km63waezqIN1uUqT3.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/qjTqY5coNiz6sVtPng40IzltsoN.jpg',
+      overview:
+        'O trabalho de Buzz, Woody, Jessie e do resto da gangue fica exponencialmente mais difícil quando eles enfrentam uma nova ameaça à diversão: a tecnologia.',
+      addedAt: 1794174767601
+    },
+    {
+      id: 'drive_17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq',
+      title: 'Harry Potter e o Prisioneiro de Azkaban',
+      year: '2004',
+      rating: '8.0',
+      category: 'Ficção & Fantasia',
+      featured: true,
+      driveFileId: '17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq',
+      rawUrl: 'https://drive.google.com/file/d/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/view',
+      streamUrl: '/api/gdrive/stream/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq',
+      poster: 'https://image.tmdb.org/t/p/w500/1HdMUghqlgOIvbsU9ZtO40IPRzl.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/htmYEfH7TQgzsXHCnNXxmoYKQtL.jpg',
+      overview:
+        'É o início do terceiro ano na escola de magia e bruxaria de Hogwarts. Harry, Ron e Hermione têm muito o que aprender, mas Sirius Black escapou de Azkaban.',
+      addedAt: 1794174767433
+    },
+    {
+      id: 'drive_1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z',
+      title: 'Procurando Nemo',
+      year: '2003',
+      rating: '7.8',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z',
+      rawUrl: 'https://drive.google.com/file/d/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z/view',
+      streamUrl: '/api/gdrive/stream/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z',
+      poster: 'https://image.tmdb.org/t/p/w500/djbivExXSZb0sTO8uYaaQC5vMRM.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/eCynaAOgYYiw5yN5lBwz3IxqvaW.jpg',
+      overview:
+        'Nemo, um jovem peixe-palhaço aventureiro, é levado da Grande Barreira de Corais para um aquário. Cabe ao seu pai Marlin e à simpática Dory atravessar o oceano para resgatá-lo.',
+      addedAt: 1794173573099
+    },
+    {
+      id: 'drive_1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e',
+      title: 'Chicago P.D.: Distrito 21',
+      year: '2014',
+      rating: '8.4',
+      category: 'Séries & Episódios',
+      featured: false,
+      driveFileId: '1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e',
+      rawUrl: 'https://drive.google.com/file/d/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/view',
+      streamUrl: '/api/gdrive/stream/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e',
+      poster: 'https://image.tmdb.org/t/p/w500/3k9YHHlENlcIT8g2BqeXsaDI2Hh.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/18KSsDgcGQds7yOMC6MVRTbVJwt.jpg',
+      overview:
+        'O Distrito 21 do Departamento de Polícia de Chicago é composto pelos policiais uniformizados e pela Unidade de Inteligência que combate o crime organizado.',
+      addedAt: 1794173572919
+    },
+    {
+      id: 'drive_1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm',
+      title: 'Lilo & Stitch',
+      year: '2025',
+      rating: '7.8',
+      category: 'Animação & Família',
+      featured: true,
+      driveFileId: '1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm',
+      rawUrl: 'https://drive.google.com/file/d/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm/view',
+      streamUrl: '/api/gdrive/stream/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm',
+      poster: 'https://image.tmdb.org/t/p/w500/ottRXMCQ9jPB318syTcfIdtJWIE.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/AcxbOWUbwtIEDisfuhNGHQNfnMK.jpg',
+      overview:
+        'Stitch, um experimento alienígena, cai no Havaí e é adotado pela jovem Lilo, aprendendo o significado de Ohana (família).',
+      addedAt: 1794173572650
+    },
+    {
+      id: 'drive_1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn',
+      title: 'A Princesa e o Sapo',
+      year: '2009',
+      rating: '7.2',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn',
+      rawUrl: 'https://drive.google.com/file/d/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn/view',
+      streamUrl: '/api/gdrive/stream/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn',
+      poster: 'https://image.tmdb.org/t/p/w500/z21DCxiT2h0AnZsqp8VjFdHJw0N.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/w500/z21DCxiT2h0AnZsqp8VjFdHJw0N.jpg',
+      overview:
+        'Trabalhadora e ambiciosa, Tiana sonha em abrir seu próprio restaurante em Nova Orleans, mas tudo muda quando ela conhece o príncipe Naveen transformado em sapo.',
+      addedAt: 1794173572491
+    },
+    {
+      id: 'drive_19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN',
+      title: 'Barbie: A Princesa e a Pop Star',
+      year: '2012',
+      rating: '7.4',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN',
+      rawUrl: 'https://drive.google.com/file/d/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN/view',
+      streamUrl: '/api/gdrive/stream/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN',
+      poster: 'https://image.tmdb.org/t/p/w500/dMxSConpq47TFVTV6tcBTNIVvZp.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/kCQKdkfNc7Smox53QRalBO3Doe0.jpg',
+      overview:
+        'A princesa Tori e sua pop star favorita Keira descobrem que têm muito em comum e usam sua magia para trocar de lugar!',
+      addedAt: 1794173572331
+    },
+    {
+      id: 'drive_1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2',
+      title: 'Barbie: Escola de Princesas',
+      year: '2011',
+      rating: '7.6',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2',
+      rawUrl: 'https://drive.google.com/file/d/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/view',
+      streamUrl: '/api/gdrive/stream/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2',
+      poster: 'https://image.tmdb.org/t/p/w500/3jNK0WP5qDewsdJQl88qFy3Xu8v.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/jXD8EoKLyiQzfjWc125hrAzcJ07.jpg',
+      overview:
+        'Blair Willows é sorteada para frequentar a exclusiva Escola de Princesas e descobre um segredo real que pode mudar todo o reino.',
+      addedAt: 1794173572169
+    },
+    {
+      id: 'drive_1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_',
+      title: 'Uma Sexta-Feira Mais Louca Ainda',
+      year: '2025',
+      rating: '6.8',
+      category: 'Comédia',
+      featured: false,
+      driveFileId: '1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_',
+      rawUrl: 'https://drive.google.com/file/d/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/view',
+      streamUrl: '/api/gdrive/stream/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_',
+      poster: 'https://image.tmdb.org/t/p/w500/zAeOSpIY5FfaF4RhuZgUWyWF0VH.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/yQy9Y3p5INwkfTuHSnzYnz4MCV3.jpg',
+      overview:
+        'Anos depois de Tess e Anna passarem por uma crise de identidade, um novo feitiço faz a família inteira trocar de corpo novamente.',
+      addedAt: 1794173249678
+    },
+    {
+      id: 'drive_1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT',
+      title: 'Máquina de Guerra',
+      year: '2026',
+      rating: '7.5',
+      category: 'Ação & Aventura',
+      featured: true,
+      driveFileId: '1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT',
+      rawUrl: 'https://drive.google.com/file/d/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/view',
+      streamUrl: '/api/gdrive/stream/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT',
+      poster: 'https://image.tmdb.org/t/p/w500/48h40o6Q97hZaqH0g7bOiXOrImX.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/6yeVcxFR0j08vlv2OlL6zbewm4D.jpg',
+      overview:
+        'Em sua última missão de treinamento, um engenheiro de combate precisa liderar sua equipe de elite em uma luta pela sobrevivência contra uma máquina mortal.',
+      addedAt: 1794173249512
+    },
+    {
+      id: 'drive_11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka',
+      title: 'Velozes & Furiosos 7',
+      year: '2015',
+      rating: '7.2',
+      category: 'Ação & Aventura',
+      featured: true,
+      driveFileId: '11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka',
+      rawUrl: 'https://drive.google.com/file/d/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/view',
+      streamUrl: '/api/gdrive/stream/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka',
+      poster: 'https://image.tmdb.org/t/p/w500/spydMyyD81HjGJVwZvjajkrWW1h.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/ehzI1mVcnHqB58NqPyQwpMqcVoz.jpg',
+      overview:
+        'Deckard Shaw busca vingança contra Dominic Toretto e sua família. Dom, Brian e toda a equipe se reúnem para mais uma missão impossível.',
+      addedAt: 1794172838591
+    },
+    {
+      id: 'drive_1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk',
+      title: 'Bird Box',
+      year: '2018',
+      rating: '6.8',
+      category: 'Terror & Suspense',
+      featured: true,
+      driveFileId: '1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk',
+      rawUrl: 'https://drive.google.com/file/d/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk/view',
+      streamUrl: '/api/gdrive/stream/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk',
+      poster: 'https://image.tmdb.org/t/p/w500/kTHDVXVTT62gJY9WfZnaXdmtvZE.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/pDKFL1zcHzEpmz4MJA5JJnRbJeD.jpg',
+      overview:
+        'Uma misteriosa presença dizima grande parte da sociedade. Cinco anos depois, Malorie e seus dois filhos saem de olhos vendados pelo rio em busca de um abrigo seguro.',
+      addedAt: 1794172838434
+    },
+    {
+      id: 'drive_10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ',
+      title: 'Por Água Abaixo',
+      year: '2006',
+      rating: '6.3',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ',
+      rawUrl: 'https://drive.google.com/file/d/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/view',
+      streamUrl: '/api/gdrive/stream/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ',
+      poster: 'https://image.tmdb.org/t/p/w500/w6ODQ3TOsBtI1gDRYfQ4nucA1Qj.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/7xQk3HdCvkNmk3gblDGn9fVnbsT.jpg',
+      overview:
+        'Roddy St. James, um mimado ratinho de estimação, entra literalmente pelo cano e vai parar em uma agitada cidade subterrânea.',
+      addedAt: 1794171659286
+    },
+    {
+      id: 'drive_1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN',
+      title: 'Capitão América: Guerra Civil',
+      year: '2016',
+      rating: '7.5',
+      category: 'Ação & Aventura',
+      featured: true,
+      driveFileId: '1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN',
+      rawUrl: 'https://drive.google.com/file/d/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/view',
+      streamUrl: '/api/gdrive/stream/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN',
+      poster: 'https://image.tmdb.org/t/p/w500/dsvUR5aEVSkB1Sro7nT6Khqik71.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/7FWlcZq3r6525LWOcvO9kNWurN1.jpg',
+      overview:
+        'Depois do ataque de Ultron, os governos mundiais decidem controlar os Vingadores, colocando o Capitão América em rota de colisão com o Homem de Ferro.',
+      addedAt: 1794171659115
+    },
+    {
+      id: 'drive_1UPS01K81aZYh6sofmAUkwBjFYN7D09RH',
+      title: 'Coração Selvagem',
+      year: '2026',
+      rating: '7.3',
+      category: 'Ação & Aventura',
+      featured: false,
+      driveFileId: '1UPS01K81aZYh6sofmAUkwBjFYN7D09RH',
+      rawUrl: 'https://drive.google.com/file/d/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/view',
+      streamUrl: '/api/gdrive/stream/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH',
+      poster: 'https://image.tmdb.org/t/p/w500/n4PJa4xVo4SjIsBvTA0yGMKjTBh.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/original/kpqsljPQtWqPKJBTAEtoXtQZ9Ko.jpg',
+      overview:
+        'Um ex-soldado ferido e seu cão de guerra aposentado lutam para sobreviver na região selvagem do Alasca após um acidente aéreo.',
+      addedAt: 1794170087996
+    },
+    {
+      id: 'drive_1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV',
+      title: 'Hot Wheels AcceleRacers 1: Ignição',
+      year: '2005',
+      rating: '8.1',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV',
+      rawUrl: 'https://drive.google.com/file/d/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV/view',
+      streamUrl: '/api/gdrive/stream/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV',
+      poster: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      overview:
+        'O Dr. Tezla convoca os melhores pilotos das equipes Teku e Metal Maniacs para encarar os Reinos de Corrida contra os Racing Drones (4K Remastered).',
+      addedAt: 1794169458458
+    },
+    {
+      id: 'drive_1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6',
+      title: 'Hot Wheels AcceleRacers 2: A Velocidade do Silêncio',
+      year: '2005',
+      rating: '8.2',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6',
+      rawUrl: 'https://drive.google.com/file/d/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6/view',
+      streamUrl: '/api/gdrive/stream/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6',
+      poster: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      overview:
+        'Os pilotos Teku e Metal Maniacs enfrentam o Reino da Água e o Reino da Metrópole enquanto os misteriosos Silencerz entram na disputa (4K Remastered).',
+      addedAt: 1794169458321
+    },
+    {
+      id: 'drive_1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP',
+      title: 'Hot Wheels AcceleRacers 3: Ponto de Ruptura',
+      year: '2005',
+      rating: '8.3',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP',
+      rawUrl: 'https://drive.google.com/file/d/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP/view',
+      streamUrl: '/api/gdrive/stream/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP',
+      poster: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      overview:
+        'A disputa pelos AcceleChargers se intensifica entre os humanos, os Racing Drones e os Silencerz (4K Remastered).',
+      addedAt: 1794169458183
+    },
+    {
+      id: 'drive_1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr',
+      title: 'Hot Wheels AcceleRacers 4: A Corrida Final',
+      year: '2005',
+      rating: '8.5',
+      category: 'Animação & Família',
+      featured: false,
+      driveFileId: '1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr',
+      rawUrl: 'https://drive.google.com/file/d/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr/view',
+      streamUrl: '/api/gdrive/stream/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr',
+      poster: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      backdrop: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+      overview:
+        'Vert Wheeler enfrenta Gelorum na Corrida Cósmica definitiva enquanto os Teku e Metal Maniacs invadem o quartel-general dos Drones (4K Remastered).',
+      addedAt: 1794169458037
     }
   ];
 
@@ -212,20 +581,84 @@
     return null;
   }
 
+  function extractDriveFolderId(input) {
+    const str = String(input || '').trim();
+    if (!str) return null;
+    if (/^[a-zA-Z0-9_-]{25,55}$/.test(str)) return str;
+    const matchFolder = str.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+    if (matchFolder && matchFolder[1]) return matchFolder[1];
+    const matchIdParam = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (matchIdParam && matchIdParam[1]) return matchIdParam[1];
+    return null;
+  }
+
+  function parseMovieFilenameClient(filename) {
+    let clean = String(filename || '')
+      .replace(/&amp;/gi, '&')
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/gi, '"')
+      .replace(/\.(mp4|mkv|webm|avi|mov|m4v)$/i, '')
+      .replace(/\[[^\]]*\]/g, ' ')
+      .replace(/[._]/g, ' ')
+      .replace(/^\s*\d{1,3}\s*[-.]\s*/, '');
+
+    const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
+    const year = yearMatch ? yearMatch[1] : '';
+
+    clean = clean
+      .replace(
+        /\b(open\s*matte|imax|remastered|1080p|720p|2160p|4k|blu-?ray|web-?dl|webrip|hdrip|x264|x265|h264|h265|hevc|aac|ac3|dual|dublado|legendado|pt-?br|5\.1|brshares)\b.*/i,
+        ''
+      )
+      .replace(/\(\s*(19\d{2}|20\d{2})\s*\)/g, '')
+      .replace(/\([^)]*\)/g, '')
+      .replace(/\b(19\d{2}|20\d{2})\b/g, '')
+      .replace(/[-–—]+\s*$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return {
+      title: clean || filename,
+      year: year || new Date().getFullYear().toString()
+    };
+  }
+
+  function isCloudHost() {
+    const h = window.location.hostname;
+    return h !== 'localhost' && h !== '127.0.0.1';
+  }
+
+  function getOptimalPlayerType(driveFileId) {
+    if (driveFileId && isCloudHost()) {
+      return 'drive_preview';
+    }
+    return 'native';
+  }
+
   function loadLocalMoviesBackup() {
+    const merged = new Map();
+    for (const m of DEFAULT_LOCAL_MOVIES) {
+      merged.set(m.id, m);
+    }
     try {
-      const saved = localStorage.getItem('cine_pompeia_drive_movies');
+      const saved = localStorage.getItem('cine_pompeia_drive_movies_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          for (const m of parsed) {
+            if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2') {
+              merged.set(m.id, m);
+            }
+          }
+        }
       }
     } catch (_) {}
-    return DEFAULT_LOCAL_MOVIES;
+    return Array.from(merged.values());
   }
 
   function saveLocalMoviesBackup(movies) {
     try {
-      localStorage.setItem('cine_pompeia_drive_movies', JSON.stringify(movies));
+      localStorage.setItem('cine_pompeia_drive_movies_v2', JSON.stringify(movies));
     } catch (_) {}
   }
 
@@ -447,7 +880,7 @@
         overview: firstMovie.overview,
         streamUrl: firstMovie.streamUrl,
         driveFileId: firstMovie.driveFileId || extractDriveFileId(firstMovie.rawUrl),
-        playerType: 'native'
+        playerType: getOptimalPlayerType(firstMovie.driveFileId || extractDriveFileId(firstMovie.rawUrl))
       },
       playback: {
         status: 'paused',
@@ -629,25 +1062,43 @@
 
   async function loadDriveStreamingCatalog(category = 'all', query = '') {
     currentCategory = category;
-    try {
-      const params = new URLSearchParams({ category, query });
-      const res = await fetch(`/api/drive/catalog?${params.toString()}`);
-      if (!res.ok) throw new Error('Static fallback');
-      const data = await res.json();
-
-      // Mescla filmes salvos no navegador com os do servidor para não perder nada na Vercel
-      const localSaved = loadLocalMoviesBackup();
-      const mergedMap = new Map();
-      for (const m of [...localSaved, ...(data.movies || [])]) {
-        mergedMap.set(m.id, m);
-      }
-      allDriveMovies = Array.from(mergedMap.values());
-      saveLocalMoviesBackup(allDriveMovies);
-      renderCatalogFromMoviesList(allDriveMovies, category, query);
-    } catch (_) {
-      allDriveMovies = loadLocalMoviesBackup();
-      renderCatalogFromMoviesList(allDriveMovies, category, query);
+    const localSaved = loadLocalMoviesBackup();
+    const mergedMap = new Map();
+    for (const m of localSaved) {
+      mergedMap.set(m.id, m);
     }
+
+    try {
+      const params = new URLSearchParams({ category: 'all', query: '' });
+      const res = await fetch(`/api/drive/catalog?${params.toString()}`);
+      if (res.ok) {
+        const rawText = await res.text();
+        if (rawText) {
+          const data = JSON.parse(rawText);
+          for (const m of data.movies || []) {
+            if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2') {
+              mergedMap.set(m.id, m);
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const staticRes = await fetch('/drive_catalog.json');
+      if (staticRes.ok) {
+        const staticData = await staticRes.json();
+        for (const m of staticData.movies || []) {
+          if (m && m.id && !mergedMap.has(m.id)) {
+            mergedMap.set(m.id, m);
+          }
+        }
+      }
+    } catch (_) {}
+
+    allDriveMovies = Array.from(mergedMap.values());
+    saveLocalMoviesBackup(allDriveMovies);
+    renderCatalogFromMoviesList(allDriveMovies, category, query);
   }
 
   function createPosterCardHtml(item) {
@@ -843,6 +1294,81 @@
     });
   }
 
+  async function scanDriveFolderClientSide(folderUrl, defaultCategory) {
+    const folderId = extractDriveFolderId(folderUrl);
+    if (!folderId) {
+      throw new Error('Link de pasta inválido. Use um link de pasta compartilhada do Google Drive.');
+    }
+
+    const targetUrl = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#list`;
+    const proxyUrls = [
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+      `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    ];
+
+    let html = '';
+    for (const pUrl of proxyUrls) {
+      try {
+        const r = await fetch(pUrl);
+        if (r.ok) {
+          const text = await r.text();
+          if (text && text.includes('flip-entry')) {
+            html = text;
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!html) {
+      throw new Error(
+        'Não foi possível ler a pasta pública. Verifique se ela está compartilhada como "Qualquer pessoa com o link".'
+      );
+    }
+
+    const entryRegex = /id="entry-([a-zA-Z0-9_-]+)"[\s\S]*?<div class="flip-entry-title">([^<]+)<\/div>/g;
+    const discoveredFiles = [];
+    let match;
+    while ((match = entryRegex.exec(html)) !== null) {
+      const fileId = match[1];
+      const fileName = match[2].trim();
+      if (!/\.(jpg|jpeg|png|gif|srt|vtt|txt|nfo|pdf|zip|rar)$/i.test(fileName)) {
+        discoveredFiles.push({ fileId, fileName });
+      }
+    }
+
+    let addedCount = 0;
+    for (const file of discoveredFiles) {
+      if (allDriveMovies.some((m) => m.driveFileId === file.fileId)) continue;
+      const parsed = parseMovieFilenameClient(file.fileName);
+      const newMovie = {
+        id: `drive_${file.fileId}`,
+        title: parsed.title,
+        year: parsed.year,
+        rating: '8.5',
+        category: defaultCategory !== 'Auto' ? defaultCategory : 'Filmes do Google Drive',
+        featured: addedCount === 0,
+        driveFileId: file.fileId,
+        rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
+        streamUrl: `/api/gdrive/stream/${file.fileId}`,
+        poster: `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
+        backdrop: '',
+        overview: `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
+        addedAt: Date.now()
+      };
+      allDriveMovies.unshift(newMovie);
+      addedCount += 1;
+    }
+
+    saveLocalMoviesBackup(allDriveMovies);
+    return {
+      success: true,
+      discoveredCount: discoveredFiles.length,
+      addedCount,
+      movies: allDriveMovies
+    };
+  }
+
   syncFolderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const folderUrl = driveFolderUrlInput.value.trim();
@@ -855,26 +1381,47 @@
     syncFolderSubmitBtn.disabled = true;
 
     try {
-      const res = await fetch('/api/drive/sync-folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          folderUrl,
-          defaultCategory: driveFolderCategorySelect.value
-        })
-      });
-      const data = await res.json();
+      let data = null;
+      try {
+        const res = await fetch('/api/drive/sync-folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            folderUrl,
+            defaultCategory: driveFolderCategorySelect.value
+          })
+        });
+        const rawText = await res.text();
+        if (rawText && rawText.trim().startsWith('{')) {
+          data = JSON.parse(rawText);
+        }
+      } catch (_) {}
 
-      if (!res.ok || data.error) {
+      // Se a rota Serverless deu timeout ou retornou resposta vazia, usa o Scanner Cliente!
+      if (!data || (!data.success && !data.error)) {
+        data = await scanDriveFolderClientSide(folderUrl, driveFolderCategorySelect.value);
+      }
+
+      if (data.error) {
         syncFolderStatus.style.background = 'rgba(239, 68, 68, 0.2)';
         syncFolderStatus.style.color = '#fca5a5';
-        syncFolderStatus.textContent = data.error || 'Erro ao sincronizar pasta.';
+        syncFolderStatus.textContent = data.error;
       } else {
+        if (Array.isArray(data.movies) && data.movies.length > 0) {
+          const merged = new Map();
+          for (const m of [...allDriveMovies, ...data.movies]) {
+            if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2') {
+              merged.set(m.id, m);
+            }
+          }
+          allDriveMovies = Array.from(merged.values());
+          saveLocalMoviesBackup(allDriveMovies);
+        }
         syncFolderStatus.style.background = 'rgba(16, 185, 129, 0.2)';
         syncFolderStatus.style.color = '#34d399';
-        syncFolderStatus.textContent = `✅ Pasta sincronizada! ${data.discoveredCount} vídeo(s) encontrado(s) e ${data.addedCount} novo(s) adicionado(s)!`;
+        syncFolderStatus.textContent = `✅ Pasta sincronizada! ${data.discoveredCount} vídeo(s) encontrado(s) na pasta (${data.addedCount} novo(s) importado(s))!`;
         driveFolderUrlInput.value = '';
-        await loadDriveStreamingCatalog('all', '');
+        renderCatalogFromMoviesList(allDriveMovies, 'all', '');
         if (isP2PHost) {
           broadcastFromP2PHost('catalog_synced', { movies: allDriveMovies });
         }
@@ -1032,7 +1579,7 @@
       streamUrl: movie.streamUrl,
       rawUrl: movie.rawUrl,
       driveFileId,
-      playerType: 'native'
+      playerType: getOptimalPlayerType(driveFileId)
     });
 
     movieDetailModal.classList.add('hidden');
