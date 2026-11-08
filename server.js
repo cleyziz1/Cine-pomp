@@ -515,6 +515,34 @@ app.post('/api/drive/sync-folder', async (req, res) => {
   }
 });
 
+// Rota leve para obter o tamanho exato em bytes e extensão de um vídeo do Google Drive
+app.get('/api/gdrive/meta/:fileId', async (req, res) => {
+  const { fileId } = req.params;
+  try {
+    const downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
+      fileId
+    )}&export=download&confirm=t`;
+    const r = await fetch(downloadUrl, {
+      method: 'HEAD',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Range: 'bytes=0-0'
+      }
+    });
+    const cr = r.headers.get('content-range') || '';
+    const cd = r.headers.get('content-disposition') || '';
+    const sizeMatch = cr.match(/\/(\d+)/);
+    const extMatch = cd.match(/\.(mp4|mkv|webm|avi)/i);
+    res.json({
+      fileId,
+      size: sizeMatch ? Number(sizeMatch[1]) : 0,
+      ext: extMatch ? extMatch[1].toLowerCase() : 'mp4'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ==========================================
 // PROXY DE STREAMING DIRETO DO GOOGLE DRIVE (SUPORTA ARQUIVOS GRANDES DE 2GB~15GB + SEEK/RANGE)
 // ==========================================

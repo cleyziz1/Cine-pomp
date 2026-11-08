@@ -1,4 +1,21 @@
 (() => {
+  // Registra o Service Worker de Streaming Direto do Google Drive para o Player Nativo funcionar na Vercel/Web
+  let swReadyPromise = Promise.resolve();
+  if ('serviceWorker' in navigator) {
+    swReadyPromise = navigator.serviceWorker
+      .register('/sw.js')
+      .then(() => navigator.serviceWorker.ready)
+      .then((reg) => {
+        if (!navigator.serviceWorker.controller && reg.active) {
+          return new Promise((resolve) => {
+            navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
+            setTimeout(resolve, 600);
+          });
+        }
+      })
+      .catch(() => {});
+  }
+
   // Inicializa Socket.io com fallback seguro para ambientes Serverless (Vercel / GitHub Pages / Netlify)
   let socket = null;
   let useServerlessP2P = false;
@@ -1682,15 +1699,22 @@
         applyPlaybackToNativeVideo(playback);
       });
     } else {
-      nativeVideo.src = url;
-      nativeVideo.addEventListener(
-        'loadedmetadata',
-        () => {
-          applyPlaybackToNativeVideo(playback);
-        },
-        { once: true }
-      );
-      nativeVideo.onerror = null;
+      const assignSource = () => {
+        nativeVideo.src = url;
+        nativeVideo.addEventListener(
+          'loadedmetadata',
+          () => {
+            applyPlaybackToNativeVideo(playback);
+          },
+          { once: true }
+        );
+        nativeVideo.onerror = null;
+      };
+      if (isCloudHost() && 'serviceWorker' in navigator) {
+        swReadyPromise.finally(assignSource);
+      } else {
+        assignSource();
+      }
     }
   }
 
