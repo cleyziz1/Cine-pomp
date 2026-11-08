@@ -1,0 +1,15 @@
+{
+  "name": "cine-pompeia",
+  "version": "1.0.0",
+  "description": "Cinema Virtual Privado para até 12 amigos com Catálogo TMDb, Players Embed e Sincronia em Tempo Real via WebSockets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

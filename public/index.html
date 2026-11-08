@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CINE POMPEIA — Seu Streaming Privado Conectado ao Google Drive (12 Poltronas)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- OVERLAY DE LUZES APAGADAS -->
+  <div id="lightsOverlay" class="lights-overlay hidden"></div>
+
+  <!-- OVERLAY DE CLAQUETE (CONTAGEM 3-2-1-PLAY) -->
+  <div id="clapperOverlay" class="clapper-overlay hidden">
+    <div class="clapper-box">
+      <div class="clapper-top"></div>
+      <div class="clapper-body">
+        <div class="clapper-label">SINCRONIA CINE POMPEIA</div>
+        <div id="clapperCount" class="clapper-count">3</div>
+        <div id="clapperSub" class="clapper-sub">Iniciando reprodução sincronizada para todos!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ENTRADA (BILHETERIA PRIVADA) -->
+  <div id="lobbyModal" class="modal-backdrop">
+    <div class="lobby-card">
+      <div class="lobby-header">
+        <span class="cinema-badge">STREAMING PRIVADO • GOOGLE DRIVE 5TB • 12 POLTRONAS</span>
+        <h1 class="brand-title">🍿 CINE POMPEIA</h1>
+        <p class="lobby-subtitle">Seu cinema particular alimentado pelo Google Drive com sincronia em tempo real</p>
+      </div>
+
+      <form id="joinForm" class="lobby-form">
+        <div class="form-group">
+          <label for="userNameInput">Seu Nome ou Apelido</label>
+          <input type="text" id="userNameInput" placeholder="Ex: Carlos" maxlength="22" required />
+        </div>
+
+        <div class="form-group">
+          <label>Escolha seu Avatar na Poltrona</label>
+          <div id="avatarPicker" class="avatar-picker">
+            <button type="button" class="avatar-btn active" data-avatar="🍿">🍿</button>
+            <button type="button" class="avatar-btn" data-avatar="🕶️">🕶️</button>
+            <button type="button" class="avatar-btn" data-avatar="🎬">🎬</button>
+            <button type="button" class="avatar-btn" data-avatar="🦊">🦊</button>
+            <button type="button" class="avatar-btn" data-avatar="🐱">🐱</button>
+            <button type="button" class="avatar-btn" data-avatar="👽">👽</button>
+            <button type="button" class="avatar-btn" data-avatar="🤠">🤠</button>
+            <button type="button" class="avatar-btn" data-avatar="👻">👻</button>
+            <button type="button" class="avatar-btn" data-avatar="🤖">🤖</button>
+            <button type="button" class="avatar-btn" data-avatar="🧙‍♂️">🧙‍♂️</button>
+            <button type="button" class="avatar-btn" data-avatar="🧛">🧛</button>
+            <button type="button" class="avatar-btn" data-avatar="🦁">🦁</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="roomIdInput">Código da Sala</label>
+            <input type="text" id="roomIdInput" value="SALA-POMPEIA" placeholder="Ex: SALA-VIP" required />
+          </div>
+          <div class="form-group">
+            <label for="roomPasswordInput">Senha (Opcional)</label>
+            <input type="password" id="roomPasswordInput" placeholder="Deixe vazio se aberta" />
+          </div>
+        </div>
+
+        <div id="lobbyError" class="error-banner hidden"></div>
+
+        <button type="submit" class="btn-primary btn-large">
+          🎟️ Entrar no Cine Pompeia
+        </button>
+      </form>
+
+      <div id="activeRoomsSection" class="active-rooms-section hidden">
+        <div class="section-divider"><span>Salas Abertas Agora</span></div>
+        <div id="activeRoomsList" class="active-rooms-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GERENCIAMENTO DO GOOGLE DRIVE (SINCRONIZAR PASTA OU ADICIONAR FILME) -->
+  <div id="driveManagerModal" class="modal-backdrop hidden">
+    <div class="detail-modal-card" style="max-width: 960px;">
+      <div class="modal-header" style="padding: 1.25rem 1.75rem 0.5rem;">
+        <div>
+          <h2 style="color: var(--gold);">☁️ Central do Seu Google Drive (5TB)</h2>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 2px;">
+            Sincronize uma pasta inteira cheia de filmes do seu Google Drive ou adicione vídeos individuais com capa automática
+          </p>
+        </div>
+        <button id="closeDriveManagerBtn" class="btn-icon" title="Fechar">✕</button>
+      </div>
+
+      <div class="detail-body" style="padding-top: 0.75rem;">
+        <div class="detail-actions-grid">
+          <!-- OPÇÃO 1: SINCRONIZAR PASTA INTEIRA DO GOOGLE DRIVE -->
+          <div class="action-option-card" style="border-color: rgba(82, 123, 255, 0.5);">
+            <div class="option-header">
+              <span class="option-icon">📂</span>
+              <div>
+                <h4>Sincronizar Pasta Inteira do Google Drive (Automático)</h4>
+                <p>
+                  1. Crie uma pasta no seu Google Drive e coloque seus filmes lá.<br/>
+                  2. Clique com botão direito na pasta → <strong>Compartilhar</strong> → <strong>"Qualquer pessoa com o link"</strong>.<br/>
+                  3. Cole o link da pasta abaixo: o Cine Pompeia importa todos os vídeos e puxa os pôsteres sozinho!
+                </p>
+              </div>
+            </div>
+
+            <form id="syncFolderForm" class="option-controls">
+              <input
+                type="url"
+                id="driveFolderUrlInput"
+                class="detail-input"
+                placeholder="https://drive.google.com/drive/folders/1A2B3C4D5E6F..."
+                required
+              />
+              <select id="driveFolderCategorySelect" class="toolbar-select">
+                <option value="Auto">✨ Detectar Categoria e Capa Automaticamente pelo Nome do Arquivo</option>
+                <option value="Lançamentos & Destaques">🍿 Lançamentos & Destaques</option>
+                <option value="Ação & Aventura">💥 Ação & Aventura</option>
+                <option value="Ficção & Fantasia">🚀 Ficção & Fantasia</option>
+                <option value="Terror & Suspense">😱 Terror & Suspense</option>
+                <option value="Comédia">😂 Comédia</option>
+                <option value="Animação & Família">🎨 Animação & Família</option>
+                <option value="Drama & Aclamados">🏆 Drama & Aclamados</option>
+                <option value="Séries & Episódios">📺 Séries & Episódios</option>
+              </select>
+              <button type="submit" id="syncFolderSubmitBtn" class="btn-blue-pill btn-large">
+                🔄 Escanear Pasta do Drive & Importar Filmes
+              </button>
+              <div id="syncFolderStatus" class="status-msg hidden"></div>
+            </form>
+          </div>
+
+          <!-- OPÇÃO 2: ADICIONAR UM FILME INDIVIDUAL DO GOOGLE DRIVE -->
+          <div class="action-option-card" style="border-color: rgba(245, 197, 24, 0.45);">
+            <div class="option-header">
+              <span class="option-icon">🎬</span>
+              <div>
+                <h4>Adicionar Filme Individual do Google Drive</h4>
+                <p>
+                  Cole o link de compartilhamento de um vídeo do seu Google Drive (com permissão "Qualquer pessoa com o link").
+                  A capa, fundo widescreen e sinopse são preenchidos automaticamente!
+                </p>
+              </div>
+            </div>
+
+            <form id="addSingleMovieForm" class="option-controls">
+              <div style="display:flex; gap:0.45rem;">
+                <input
+                  type="text"
+                  id="singleMovieTitle"
+                  class="detail-input"
+                  style="flex:1;"
+                  placeholder="Nome do Filme (ex: Homem-Aranha: Um Novo Dia)"
+                  required
+                />
+                <button type="button" id="autoFillMetaBtn" class="btn-secondary btn-sm" title="Buscar pôster, fundo e sinopse automaticamente pelo nome">
+                  ✨ Puxar Capa
+                </button>
+              </div>
+
+              <input
+                type="text"
+                id="singleMovieUrl"
+                class="detail-input"
+                placeholder="Link do Vídeo no Google Drive (https://drive.google.com/file/d/.../view)"
+                required
+              />
+
+              <div style="display:grid; grid-template-columns: 1fr 95px; gap:0.45rem;">
+                <select id="singleMovieCategory" class="toolbar-select">
+                  <option value="Auto">✨ Categoria Automática</option>
+                  <option value="Lançamentos & Destaques">🍿 Lançamentos & Destaques</option>
+                  <option value="Ação & Aventura">💥 Ação & Aventura</option>
+                  <option value="Ficção & Fantasia">🚀 Ficção & Fantasia</option>
+                  <option value="Terror & Suspense">😱 Terror & Suspense</option>
+                  <option value="Comédia">😂 Comédia</option>
+                  <option value="Animação & Família">🎨 Animação & Família</option>
+                  <option value="Drama & Aclamados">🏆 Drama & Aclamados</option>
+                  <option value="Séries & Episódios">📺 Séries & Episódios</option>
+                </select>
+                <input type="text" id="singleMovieYear" class="detail-input" placeholder="Ano" />
+              </div>
+
+              <input
+                type="text"
+                id="singleMoviePoster"
+                class="detail-input"
+                placeholder="URL da Capa/Pôster (Deixe vazio para preencher sozinho)"
+              />
+              <input
+                type="hidden"
+                id="singleMovieBackdrop"
+              />
+              <textarea
+                id="singleMovieOverview"
+                class="detail-input"
+                rows="2"
+                placeholder="Sinopse (Deixe vazio para preencher sozinho)"
+              ></textarea>
+
+              <button type="submit" class="btn-gold btn-large">
+                ➕ Salvar no Catálogo do Drive
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- LISTA DE FILMES ATUAIS NO SEU GOOGLE DRIVE -->
+        <div style="margin-top: 0.5rem;">
+          <h4 style="color:#fff; margin-bottom: 0.65rem;">🎞️ Filmes Cadastrados no Seu Catálogo (<span id="managerMoviesCount">0</span>)</h4>
+          <div id="managerMoviesList" class="stremio-addons-list" style="max-height: 210px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALHES DO FILME AO CLICAR NO PÔSTER -->
+  <div id="movieDetailModal" class="modal-backdrop hidden">
+    <div class="detail-modal-card" style="max-width: 720px;">
+      <div id="detailBackdrop" class="detail-backdrop">
+        <button id="closeDetailModal" class="btn-close-floating">✕</button>
+        <div class="detail-backdrop-gradient">
+          <div class="detail-badges">
+            <span id="detailCategoryBadge" class="badge-tag">GOOGLE DRIVE HD</span>
+            <span id="detailRatingBadge" class="badge-rating">⭐ 8.5</span>
+            <span id="detailYearBadge" class="badge-meta">2026</span>
+          </div>
+          <h2 id="detailTitle" class="detail-title">Título do Filme</h2>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <p id="detailOverview" class="detail-overview"></p>
+
+        <div style="display:flex; gap:0.85rem; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+          <button id="playDriveMovieNowBtn" class="btn-blue-pill btn-large" style="flex:1;">
+            ▶ Assistir Agora na Sala (Sincronizado com as 12 Poltronas)
+          </button>
+          <button id="deleteDriveMovieBtn" class="btn-secondary btn-large" style="color:#fca5a5; border-color:rgba(239,68,68,0.35);">
+            🗑️ Remover do Catálogo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       BARRA DE NAVEGAÇÃO PRINCIPAL
+       ========================================== -->
+  <header class="cinema-topbar">
+    <div class="topbar-left">
+      <div class="logo-mark" id="logoHomeBtn" style="cursor:pointer;">🍿 <span>CINE POMPEIA</span></div>
+
+      <nav class="main-nav-tabs">
+        <button id="navCatalogBtn" class="nav-tab active">
+          🏠 Catálogo do Meu Drive
+        </button>
+        <button id="navCinemaRoomBtn" class="nav-tab">
+          🎬 Sala de Cinema (<span id="navMovieShort">Em Cartaz</span>)
+        </button>
+      </nav>
+    </div>
+
+    <div class="topbar-search">
+      <input
+        type="text"
+        id="globalSearchInput"
+        placeholder="🔍 Buscar nos filmes do seu Google Drive..."
+        autocomplete="off"
+      />
+      <button id="globalSearchClearBtn" class="search-clear-btn hidden" title="Limpar busca">✕</button>
+    </div>
+
+    <div class="topbar-right">
+      <button id="openDriveManagerBtn" class="btn-gold btn-sm">
+        ☁️ Adicionar Filmes / Sincronizar Pasta Drive
+      </button>
+      <div class="room-pill" title="Sala privada conectada em tempo real">
+        <span class="dot-live"></span>
+        <strong id="roomNameDisplay">SALA-POMPEIA</strong>
+        <span id="seatCountBadge" class="seat-count-badge">1/12 poltronas</span>
+      </div>
+      <button id="copyInviteBtn" class="btn-secondary btn-sm" title="Copiar link para convidar amigos">
+        🔗 Convidar Amigos
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       VISÃO 1: VITRINE DE STREAMING DO SEU GOOGLE DRIVE
+       ========================================== -->
+  <section id="streamingHomeView" class="streaming-home-view">
+    <div class="platform-hub-bar">
+      <button class="platform-pill active" data-category="all">
+        ✨ Todos os Filmes do Drive
+      </button>
+      <button class="platform-pill" data-category="Lançamentos & Destaques">
+        🍿 Lançamentos & Destaques
+      </button>
+      <button class="platform-pill" data-category="Ação & Aventura">
+        💥 Ação & Aventura
+      </button>
+      <button class="platform-pill" data-category="Ficção & Fantasia">
+        🚀 Ficção & Fantasia
+      </button>
+      <button class="platform-pill" data-category="Terror & Suspense">
+        😱 Terror & Suspense
+      </button>
+      <button class="platform-pill" data-category="Comédia">
+        😂 Comédia
+      </button>
+      <button class="platform-pill" data-category="Animação & Família">
+        🎨 Animação & Família
+      </button>
+      <button class="platform-pill" data-category="Séries & Episódios">
+        📺 Séries & Episódios
+      </button>
+    </div>
+
+    <!-- HERO BANNER DO FILME EM DESTAQUE NO SEU DRIVE -->
+    <div id="heroBanner" class="hero-banner">
+      <div class="hero-gradient-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="hero-top-badge">☁️ DIRETO DO SEU GOOGLE DRIVE (5TB)</span>
+          <span id="heroRating" class="hero-rating">⭐ 8.5</span>
+          <span id="heroYear" class="hero-year">2026</span>
+        </div>
+        <h1 id="heroTitle" class="hero-title">Bem-vindo ao Cine Pompeia</h1>
+        <p id="heroOverview" class="hero-overview">
+          Conecte sua pasta do Google Drive ou adicione seus filmes para assistir com até 12 amigos em sincronia perfeita!
+        </p>
+        <div class="hero-buttons">
+          <button id="heroWatchNowBtn" class="btn-hero-play">
+            ▶ Assistir Agora na Sala
+          </button>
+          <button id="heroManageDriveBtn" class="btn-hero-info">
+            ☁️ Adicionar Filmes / Sincronizar Pasta do Drive
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTADOS DE BUSCA / FILTRO -->
+    <div id="searchResultsSection" class="search-results-section hidden">
+      <div class="section-title-row">
+        <h2 id="searchResultsTitle">Filmes Encontrados no Seu Drive</h2>
+        <button id="backToHomeRowsBtn" class="btn-secondary btn-sm">← Mostrar Todas as Fileiras</button>
+      </div>
+      <div id="searchResultsGrid" class="poster-grid"></div>
+    </div>
+
+    <!-- TRILHOS HORIZONTAIS (CARROSSÉIS DO SEU GOOGLE DRIVE) -->
+    <div id="streamingRowsContainer" class="streaming-rows-container"></div>
+  </section>
+
+  <!-- ==========================================
+       VISÃO 2: SALA DE CINEMA COM PLAYER NATIVO CINE POMPEIA (GOOGLE DRIVE STREAM)
+       ========================================== -->
+  <main id="cinemaRoomView" class="cinema-layout hidden">
+    <section class="auditorium-section">
+      <!-- BARRA SUPERIOR DO PROJETOR NATIVO -->
+      <div class="player-subtoolbar">
+        <div class="toolbar-group">
+          <span class="shield-badge">☁️ Google Drive Stream Direto • Player Nativo CINE POMPEIA</span>
+          <button id="openDriveFromRoomBtn" class="btn-secondary btn-sm">
+            🎞️ Trocar Filme do Drive
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button id="clapperSyncBtn" class="btn-clapper" title="Dispara uma contagem 3-2-1-JÁ e sincroniza o início para todos os 12 amigos!">
+            🎬 Claquete 3-2-1
+          </button>
+          <button id="toggleLightsBtn" class="btn-secondary btn-sm">💡 Luzes</button>
+          <button id="toggleControlModeBtn" class="btn-secondary btn-sm">👑 Só Anfitrião</button>
+        </div>
+      </div>
+
+      <!-- MOLDURA DO TELÃO COM O PLAYER NATIVO CINE POMPEIA -->
+      <div class="screen-stage">
+        <div class="screen-wrapper" id="screenWrapper">
+          <!-- Botão "<- Voltar" no canto superior esquerdo dentro do player -->
+          <button id="playerBackToCatalogBtn" class="player-floating-back-btn">
+            ← Voltar ao Catálogo
+          </button>
+
+          <div id="cineNativePlayerContainer" class="cine-native-container">
+            <video
+              id="nativeVideo"
+              class="cinema-player"
+              playsinline
+              crossorigin="anonymous"
+            ></video>
+
+            <!-- Menu de Velocidade (Botão Engrenagem ⚙️) -->
+            <div id="nativeSourcesDrawer" class="native-sources-drawer hidden" style="width: 240px;">
+              <div class="drawer-header">
+                <strong>⚙️ Velocidade de Reprodução</strong>
+                <button id="closeSourcesDrawerBtn" class="btn-icon">✕</button>
+              </div>
+              <div class="native-stremio-list">
+                <div class="stremio-stream-item speed-option" data-speed="0.75"><span class="stremio-stream-title">0.75x (Lento)</span></div>
+                <div class="stremio-stream-item speed-option" data-speed="1"><span class="stremio-stream-title">1.0x (Normal)</span><span class="stremio-pt-badge">PADRÃO</span></div>
+                <div class="stremio-stream-item speed-option" data-speed="1.25"><span class="stremio-stream-title">1.25x (Rápido)</span></div>
+                <div class="stremio-stream-item speed-option" data-speed="1.5"><span class="stremio-stream-title">1.5x (Super Rápido)</span></div>
+              </div>
+            </div>
+
+            <!-- Botão Central de Play -->
+            <button id="nativeCenterPlayBtn" class="native-center-play" title="Play / Pause Sincronizado">
+              ▶
+            </button>
+
+            <!-- Barra Inferior do Player Nativo: Scrubber azul + [▶] [-10] [+10] [🔊] [00:11 / 2:25:00] ... [⚙️] [📺] [⬇️] [⛶] -->
+            <div class="cine-custom-controls">
+              <input
+                type="range"
+                id="nativeSeekBar"
+                class="cine-seek-bar-blue"
+                min="0"
+                max="100"
+                step="0.1"
+                value="0"
+              />
+              <div class="cine-controls-row">
+                <div class="cine-controls-left">
+                  <button id="nativePlayPauseBtn" class="sony-ctrl-btn" title="Play / Pause">▶</button>
+                  <button id="nativeRewindBtn" class="sony-ctrl-btn text-btn" title="Voltar 10 segundos">-10</button>
+                  <button id="nativeForwardBtn" class="sony-ctrl-btn text-btn" title="Avançar 10 segundos">+10</button>
+                  <div class="cine-volume-box">
+                    <button id="nativeMuteBtn" class="sony-ctrl-btn" title="Volume / Mudo">🔊</button>
+                    <input type="range" id="nativeVolumeBar" min="0" max="1" step="0.05" value="1" class="cine-volume-slider" />
+                  </div>
+                  <span id="nativeTimeLabel" class="sony-time-label">00:00 / 00:00</span>
+                </div>
+
+                <div class="cine-controls-right">
+                  <button id="nativeSettingsGearBtn" class="sony-ctrl-btn" title="Velocidade de Reprodução">⚙️</button>
+                  <button id="nativeCastSyncBtn" class="sony-ctrl-btn" title="Sincronizar Todos na Sala">📺</button>
+                  <a id="nativeDownloadBtn" href="#" download class="sony-ctrl-btn" title="Baixar Vídeo do Drive" style="text-decoration:none;">⬇️</a>
+                  <button id="nativeFullscreenBtn" class="sony-ctrl-btn" title="Tela Cheia">⛶</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Camada de Reações Flutuantes na Tela -->
+          <div id="screenReactionsLayer" class="screen-reactions-layer"></div>
+        </div>
+      </div>
+
+      <!-- PAINEL DE SINCRONIA E REAÇÕES RÁPIDAS -->
+      <div class="sync-status-bar">
+        <div class="sync-info">
+          <span id="syncModeIndicator" class="sync-badge">⚡ Sincronia WebSocket Automática Ativa</span>
+          <span id="syncTimerDisplay" class="sync-timer">⏱️ Tempo do Filme: 00:00</span>
+          <button id="resyncMeBtn" class="btn-secondary btn-xs">
+            🔄 Sincronizar Com Anfitrião
+          </button>
+        </div>
+
+        <div class="reaction-bar">
+          <span class="reaction-label">Reagir da Poltrona:</span>
+          <button class="reaction-btn" data-emoji="🍿">🍿</button>
+          <button class="reaction-btn" data-emoji="😂">😂</button>
+          <button class="reaction-btn" data-emoji="😱">😱</button>
+          <button class="reaction-btn" data-emoji="🔥">🔥</button>
+          <button class="reaction-btn" data-emoji="👏">👏</button>
+          <button class="reaction-btn" data-emoji="❤️">❤️</button>
+        </div>
+      </div>
+
+      <!-- PLATEIA: MAPA VISUAL DE 12 POLTRONAS DE CINEMA -->
+      <div class="seating-auditorium">
+        <div class="seating-header">
+          <div>
+            <h3>🛋️ Plateia da Sala (12 Poltronas Numeradas)</h3>
+            <p>Clique em qualquer poltrona vazia para mudar de lugar • O Anfitrião (👑) pode clicar em um amigo para passar o controle remoto</p>
+          </div>
+          <div class="seating-legend">
+            <span class="legend-item"><i class="seat-dot free"></i> Livre</span>
+            <span class="legend-item"><i class="seat-dot occupied"></i> Ocupada</span>
+            <span class="legend-item"><i class="seat-dot mine"></i> Sua Poltrona</span>
+          </div>
+        </div>
+
+        <div class="seat-row-container">
+          <span class="row-label">FILEIRA A</span>
+          <div id="seatRowA" class="seat-row"></div>
+          <span class="row-label">VIP</span>
+        </div>
+
+        <div class="seat-row-container">
+          <span class="row-label">FILEIRA B</span>
+          <div id="seatRowB" class="seat-row"></div>
+          <span class="row-label">MASTER</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUNA DIREITA: FICHA DO FILME EM CARTAZ + CHAT AO VIVO -->
+    <aside class="sidebar-section">
+      <div class="movie-info-card">
+        <img id="currentMoviePoster" src="https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg" alt="Pôster" class="movie-poster-mini" />
+        <div class="movie-info-text">
+          <div class="movie-meta-top">
+            <span id="currentMovieIds" class="tmdb-id-tag">☁️ GOOGLE DRIVE HD</span>
+          </div>
+          <h4 id="currentMovieHeading">Em Cartaz</h4>
+          <p id="currentMovieOverview" class="movie-overview-clamp">
+            Reprodução direta do seu Google Drive sincronizada entre amigos.
+          </p>
+        </div>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-header">
+          <h3>💬 Chat da Sessão</h3>
+          <span id="onlineFriendsCount" class="online-tag">1 na sala</span>
+        </div>
+
+        <div id="chatMessages" class="chat-messages"></div>
+
+        <form id="chatForm" class="chat-input-bar">
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Comente sobre o filme..."
+            maxlength="350"
+            autocomplete="off"
+          />
+          <button type="submit" class="btn-primary">Enviar</button>
+        </form>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+.env
+custom_streams.json
+stremio_addons.json
+*.log
