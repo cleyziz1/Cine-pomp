@@ -7,9 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
   <!-- OVERLAY DE LUZES APAGADAS -->
@@ -372,8 +373,11 @@
       <!-- BARRA SUPERIOR DO PROJETOR NATIVO -->
       <div class="player-subtoolbar">
         <div class="toolbar-group">
-          <span class="shield-badge">☁️ Google Drive Stream Direto • Player Nativo CINE POMPEIA</span>
-          <button id="openDriveFromRoomBtn" class="btn-secondary btn-sm">
+          <button id="useNativeStreamBtn" class="shield-badge">⚡ Player Nativo (Auto-Sync)</button>
+          <button id="useDrivePreviewBtn" class="btn-secondary btn-sm" title="Use este modo caso seu arquivo no Drive seja .MKV ou o áudio não toque no navegador">
+            ☁️ Player Interno do Drive (.MKV / 4K)
+          </button>
+          <button id="openDriveFromRoomBtn" class="btn-gold btn-sm">
             🎞️ Trocar Filme do Drive
           </button>
         </div>
@@ -394,6 +398,15 @@
           <button id="playerBackToCatalogBtn" class="player-floating-back-btn">
             ← Voltar ao Catálogo
           </button>
+
+          <!-- IFRAME OFICIAL DO GOOGLE DRIVE (PARA ARQUIVOS .MKV OU FALLBACK EM NUVEM) -->
+          <iframe
+            id="drivePreviewIframe"
+            class="cinema-player hidden"
+            src="about:blank"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allowfullscreen
+          ></iframe>
 
           <div id="cineNativePlayerContainer" class="cine-native-container">
             <video
@@ -546,6 +559,6 @@
     </aside>
   </main>
 
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

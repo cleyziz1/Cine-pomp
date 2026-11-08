@@ -60,20 +60,32 @@ const DEFAULT_DRIVE_CATALOG = {
   ]
 };
 
+const os = require('os');
+const TMP_CATALOG_FILE = path.join(os.tmpdir(), 'drive_catalog.json');
+
 function loadDriveCatalog() {
-  try {
-    if (fs.existsSync(DRIVE_CATALOG_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(DRIVE_CATALOG_FILE, 'utf8'));
-      if (parsed && Array.isArray(parsed.movies)) {
-        return parsed;
+  for (const file of [TMP_CATALOG_FILE, DRIVE_CATALOG_FILE]) {
+    try {
+      if (fs.existsSync(file)) {
+        const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+        if (parsed && Array.isArray(parsed.movies)) {
+          return parsed;
+        }
       }
-    }
-  } catch (_) {}
+    } catch (_) {}
+  }
   return DEFAULT_DRIVE_CATALOG;
 }
 
 function saveDriveCatalog(catalog) {
-  fs.writeFileSync(DRIVE_CATALOG_FILE, JSON.stringify(catalog, null, 2), 'utf8');
+  const json = JSON.stringify(catalog, null, 2);
+  try {
+    fs.writeFileSync(DRIVE_CATALOG_FILE, json, 'utf8');
+  } catch (_) {
+    try {
+      fs.writeFileSync(TMP_CATALOG_FILE, json, 'utf8');
+    } catch (__) {}
+  }
 }
 
 let driveCatalog = loadDriveCatalog();
@@ -971,6 +983,10 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`\n🍿 CINE-POMPEIA (Google Drive Edition) rodando em http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`\n🍿 CINE-POMPEIA (Google Drive Edition) rodando em http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
