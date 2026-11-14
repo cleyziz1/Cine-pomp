@@ -1,39 +1,10 @@
 (() => {
-  // Registra o Service Worker de Streaming Direto do Google Drive para o Player Nativo funcionar na Vercel/Web
-  let swReadyPromise = Promise.resolve();
+  // Remove qualquer Service Worker antigo que bloqueava streams do Google Drive por CORS no navegador
   if ('serviceWorker' in navigator) {
-    swReadyPromise = navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
-      .then((reg) => {
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-        return navigator.serviceWorker.ready;
-      })
-      .then((reg) => {
-        if (navigator.serviceWorker.controller) return;
-        return new Promise((resolve) => {
-          const onCtrl = () => resolve();
-          navigator.serviceWorker.addEventListener('controllerchange', onCtrl, { once: true });
-          setTimeout(() => {
-            navigator.serviceWorker.removeEventListener('controllerchange', onCtrl);
-            // Em hard-reload (Ctrl+F5) ou 1a visita, o navegador pode segurar controller=null até um reload normal.
-            // Faz no máximo 1 reload automático na sessão para ativar o motor de streaming do Player Nativo.
-            if (
-              !navigator.serviceWorker.controller &&
-              reg &&
-              reg.active &&
-              window.location.hostname !== 'localhost' &&
-              window.location.hostname !== '127.0.0.1' &&
-              !sessionStorage.getItem('cine_sw_reloaded')
-            ) {
-              sessionStorage.setItem('cine_sw_reloaded', '1');
-              window.location.reload();
-              return;
-            }
-            resolve();
-          }, 2500);
-        });
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((regs) => {
+        regs.forEach((r) => r.unregister().catch(() => {}));
       })
       .catch(() => {});
   }
@@ -563,6 +534,10 @@
   const drivePreviewIframe = document.getElementById('drivePreviewIframe');
   const cineNativePlayerContainer = document.getElementById('cineNativePlayerContainer');
   const nativeVideo = document.getElementById('nativeVideo');
+  const nativeLoadingBadge = document.getElementById('nativeLoadingBadge');
+  const nativeErrorBanner = document.getElementById('nativeErrorBanner');
+  const subtitleFileInput = document.getElementById('subtitleFileInput');
+  const subtitleClearBtn = document.getElementById('subtitleClearBtn');
   const nativeSourcesDrawer = document.getElementById('nativeSourcesDrawer');
   const closeSourcesDrawerBtn = document.getElementById('closeSourcesDrawerBtn');
   const nativeCenterPlayBtn = document.getElementById('nativeCenterPlayBtn');
@@ -1732,6 +1707,70 @@
     }
   });
 
+  let activeSubtitleUrl = null;
+
+  function setNativeLoading(isLoading, label = '⏳ Carregando vídeo...') {
+    if (!nativeLoadingBadge) return;
+    nativeLoadingBadge.textContent = label;
+    nativeLoadingBadge.classList.toggle('hidden', !isLoading);
+  }
+
+  function setNativeError(message) {
+    if (!nativeErrorBanner) return;
+    if (!message) {
+      nativeErrorBanner.classList.add('hidden');
+      nativeErrorBanner.textContent = '';
+    } else {
+      nativeErrorBanner.textContent = message;
+      nativeErrorBanner.classList.remove('hidden');
+    }
+  }
+
+  function clearNativeSubtitles() {
+    nativeVideo.querySelectorAll('track').forEach((t) => t.remove());
+    if (activeSubtitleUrl) {
+      try {
+        URL.revokeObjectURL(activeSubtitleUrl);
+      } catch (_) {}
+      activeSubtitleUrl = null;
+    }
+    if (subtitleClearBtn) subtitleClearBtn.classList.add('hidden');
+  }
+
+  function attachSubtitleVttUrl(vttUrl, label = 'Português (WebVTT)') {
+    clearNativeSubtitles();
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = label;
+    track.srclang = 'pt';
+    track.src = vttUrl;
+    track.default = true;
+    nativeVideo.appendChild(track);
+    if (nativeVideo.textTracks && nativeVideo.textTracks[0]) {
+      nativeVideo.textTracks[0].mode = 'showing';
+    }
+    if (subtitleClearBtn) subtitleClearBtn.classList.remove('hidden');
+  }
+
+  function saveResumePosition(movieId, timeSec) {
+    if (!movieId || !Number.isFinite(timeSec) || timeSec < 5) return;
+    try {
+      const map = JSON.parse(localStorage.getItem('cine_pompeia_resume_times') || '{}');
+      map[movieId] = Math.floor(timeSec);
+      localStorage.setItem('cine_pompeia_resume_times', JSON.stringify(map));
+    } catch (_) {}
+  }
+
+  function getResumePosition(movieId) {
+    if (!movieId) return 0;
+    try {
+      const map = JSON.parse(localStorage.getItem('cine_pompeia_resume_times') || '{}');
+      return Number(map[movieId]) || 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   function updatePlayerMedia(media, playback) {
     const signature = JSON.stringify({
       streamUrl: media.streamUrl,
@@ -1742,7 +1781,10 @@
     if (signature === lastLoadedMediaSignature) return;
     lastLoadedMediaSignature = signature;
 
+    setNativeError('');
+
     if (media.playerType === 'drive_preview') {
+      setNativeLoading(false);
       switchPlayerRenderer('drive_preview');
       return;
     }
@@ -1757,31 +1799,45 @@
       hlsInstance = null;
     }
 
+    if (media.subtitleUrl) {
+      attachSubtitleVttUrl(media.subtitleUrl, media.subtitleLabel || 'Legenda');
+    }
+
     const isHls = url.includes('.m3u8');
     if (isHls && window.Hls && window.Hls.isSupported()) {
+      setNativeLoading(true, '⏳ Carregando stream HLS...');
       hlsInstance = new window.Hls();
       hlsInstance.loadSource(url);
       hlsInstance.attachMedia(nativeVideo);
       hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        setNativeLoading(false);
         applyPlaybackToNativeVideo(playback);
       });
+      hlsInstance.on(window.Hls.Events.ERROR, (_, data) => {
+        if (data && data.fatal) {
+          setNativeLoading(false);
+          setNativeError('Erro ao carregar stream HLS. Verifique a conexão.');
+        }
+      });
     } else {
-      const assignSource = () => {
-        nativeVideo.src = url;
-        nativeVideo.addEventListener(
-          'loadedmetadata',
-          () => {
-            applyPlaybackToNativeVideo(playback);
-          },
-          { once: true }
-        );
-        nativeVideo.onerror = null;
-      };
-      if (isCloudHost() && 'serviceWorker' in navigator) {
-        swReadyPromise.finally(assignSource);
-      } else {
-        assignSource();
-      }
+      setNativeLoading(true, '⏳ Carregando metadados...');
+      nativeVideo.src = url;
+      nativeVideo.load();
+      nativeVideo.addEventListener(
+        'loadedmetadata',
+        () => {
+          setNativeLoading(false);
+          const effectivePlayback = { ...(playback || {}) };
+          if ((!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) && roomState && roomState.participantCount <= 1) {
+            const savedPos = getResumePosition(media.id);
+            if (savedPos > 5 && (!nativeVideo.duration || savedPos < nativeVideo.duration - 15)) {
+              effectivePlayback.currentTime = savedPos;
+            }
+          }
+          applyPlaybackToNativeVideo(effectivePlayback);
+        },
+        { once: true }
+      );
     }
   }
 
@@ -1934,7 +1990,73 @@
     }
   });
 
-  nativeVideo.addEventListener('timeupdate', updateCustomPlayerUi);
+  if (subtitleFileInput) {
+    subtitleFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      let text = await file.text();
+      if (/\.srt$/i.test(file.name) && !text.trim().startsWith('WEBVTT')) {
+        text =
+          'WEBVTT\n\n' +
+          text
+            .replace(/\r+/g, '')
+            .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+      }
+      const blob = new Blob([text], { type: 'text/vtt' });
+      const blobUrl = URL.createObjectURL(blob);
+      activeSubtitleUrl = blobUrl;
+      attachSubtitleVttUrl(blobUrl, file.name);
+      nativeSourcesDrawer.classList.add('hidden');
+      subtitleFileInput.value = '';
+    });
+  }
+
+  if (subtitleClearBtn) {
+    subtitleClearBtn.addEventListener('click', () => {
+      clearNativeSubtitles();
+      nativeSourcesDrawer.classList.add('hidden');
+    });
+  }
+
+  nativeVideo.addEventListener('loadstart', () => setNativeLoading(true, '⏳ Conectando ao vídeo...'));
+  nativeVideo.addEventListener('waiting', () => setNativeLoading(true, '⏳ Buffering...'));
+  nativeVideo.addEventListener('stalled', () => setNativeLoading(true, '⏳ Conexão lenta, aguarde...'));
+  nativeVideo.addEventListener('loadedmetadata', () => {
+    setNativeLoading(false);
+    setNativeError('');
+    updateCustomPlayerUi();
+  });
+  nativeVideo.addEventListener('durationchange', updateCustomPlayerUi);
+  nativeVideo.addEventListener('canplay', () => setNativeLoading(false));
+  nativeVideo.addEventListener('playing', () => {
+    setNativeLoading(false);
+    setNativeError('');
+  });
+  nativeVideo.addEventListener('volumechange', () => {
+    nativeMuteBtn.textContent = nativeVideo.muted || nativeVideo.volume === 0 ? '🔇' : '🔊';
+    nativeVolumeBar.value = String(nativeVideo.muted ? 0 : nativeVideo.volume);
+  });
+  nativeVideo.addEventListener('error', () => {
+    setNativeLoading(false);
+    const err = nativeVideo.error;
+    const code = err ? err.code : 0;
+    const messages = {
+      1: 'Reprodução cancelada pelo usuário.',
+      2: 'Erro de rede ao transmitir o vídeo do servidor/Google Drive.',
+      3: 'Erro ao decodificar o vídeo (codec incompatível com este navegador). Tente o Player Interno do Drive (.MKV / 4K).',
+      4: 'Formato ou origem de vídeo não suportada / arquivo inacessível. Verifique se está público no Drive.'
+    };
+    setNativeError(messages[code] || 'Não foi possível reproduzir este vídeo no Player Nativo.');
+  });
+
+  nativeVideo.addEventListener('timeupdate', () => {
+    updateCustomPlayerUi();
+    if (roomState && roomState.media && roomState.media.id && !nativeVideo.paused) {
+      if (Math.floor(nativeVideo.currentTime) % 5 === 0) {
+        saveResumePosition(roomState.media.id, nativeVideo.currentTime);
+      }
+    }
+  });
   nativeVideo.addEventListener('play', () => {
     updateCustomPlayerUi();
     if (isApplyingRemoteSync || !iCanControl()) return;

@@ -515,9 +515,84 @@ app.post('/api/drive/sync-folder', async (req, res) => {
   }
 });
 
-// Rota leve para obter o tamanho exato em bytes e extensão de um vídeo do Google Drive
-app.get('/api/gdrive/meta/:fileId', async (req, res) => {
-  const { fileId } = req.params;
+// ============================================================================
+// INTEGRAÇÃO GOOGLE DRIVE API v3 + STREAMING HTTP 206 COM PIPE E BACKPRESSURE
+// ============================================================================
+const driveMetaCache = new Map();
+const META_CACHE_TTL_MS = 10 * 60 * 1000;
+
+function isValidDriveFileId(fileId) {
+  return /^[a-zA-Z0-9_-]{20,60}$/.test(String(fileId || '').trim());
+}
+
+function isFileAuthorizedInCatalog(fileId) {
+  if (!isValidDriveFileId(fileId)) return false;
+  if (driveCatalog && Array.isArray(driveCatalog.movies)) {
+    if (driveCatalog.movies.some((m) => m.driveFileId === fileId)) return true;
+  }
+  return false;
+}
+
+function inferMimeType(nameOrDisposition, apiMimeType) {
+  if (apiMimeType && apiMimeType.startsWith('video/')) {
+    // Chrome/Edge reproduzem H.264/AAC dentro de MKV melhor quando servido como video/mp4 ou video/x-matroska
+    if (apiMimeType === 'video/x-matroska') return 'video/mp4';
+    return apiMimeType;
+  }
+  const str = String(nameOrDisposition || '').toLowerCase();
+  if (str.includes('.webm')) return 'video/webm';
+  if (str.includes('.ogg') || str.includes('.ogv')) return 'video/ogg';
+  return 'video/mp4';
+}
+
+async function getDriveFileMetadata(fileId) {
+  const cached = driveMetaCache.get(fileId);
+  if (cached && Date.now() - cached.cachedAt < META_CACHE_TTL_MS) {
+    return cached.meta;
+  }
+
+  const googleApiKey = (process.env.GOOGLE_DRIVE_API_KEY || '').trim();
+  const googleOAuthToken = (process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '').trim();
+
+  // 1. Tenta Google Drive API v3 oficial quando credenciais estiverem configuradas no backend
+  if (googleApiKey || googleOAuthToken) {
+    try {
+      const apiUrl = new URL(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`);
+      apiUrl.searchParams.set('fields', 'id,name,mimeType,size,capabilities(canDownload)');
+      apiUrl.searchParams.set('supportsAllDrives', 'true');
+      if (googleApiKey && !googleOAuthToken) {
+        apiUrl.searchParams.set('key', googleApiKey);
+      }
+
+      const headers = {};
+      if (googleOAuthToken) {
+        headers.Authorization = `Bearer ${googleOAuthToken}`;
+      }
+
+      const apiRes = await fetch(apiUrl.toString(), { headers });
+      if (apiRes.ok) {
+        const data = await apiRes.json();
+        const canDownload = data.capabilities ? data.capabilities.canDownload !== false : true;
+        const meta = {
+          id: data.id,
+          name: data.name || `${fileId}.mp4`,
+          mimeType: inferMimeType(data.name, data.mimeType),
+          size: Number(data.size || 0),
+          canDownload,
+          source: 'drive_api_v3'
+        };
+        driveMetaCache.set(fileId, { meta, cachedAt: Date.now() });
+        return meta;
+      }
+      if (apiRes.status === 404 || apiRes.status === 403 || apiRes.status === 401) {
+        return { errorStatus: apiRes.status, error: 'Arquivo não encontrado ou sem permissão na Google Drive API v3.' };
+      }
+    } catch (err) {
+      console.warn(`[Drive API v3] Falha ao consultar metadados de ${fileId}: ${err.message}`);
+    }
+  }
+
+  // 2. Fallback seguro via HEAD com Range delimitado (para arquivos públicos compartilhados sem OAuth no .env)
   try {
     const downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
       fileId
@@ -527,92 +602,230 @@ app.get('/api/gdrive/meta/:fileId', async (req, res) => {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         Range: 'bytes=0-0'
-      }
+      },
+      redirect: 'follow'
     });
+
+    if (r.status === 404) {
+      return { errorStatus: 404, error: 'Arquivo não encontrado no Google Drive.' };
+    }
+    if (r.status === 401 || r.status === 403) {
+      return { errorStatus: 403, error: 'Acesso negado ao arquivo do Google Drive.' };
+    }
+
     const cr = r.headers.get('content-range') || '';
     const cd = r.headers.get('content-disposition') || '';
+    const ct = r.headers.get('content-type') || '';
+
+    if (ct.includes('text/html') && !cr) {
+      return { errorStatus: 403, error: 'Arquivo não está público ou exige autenticação no Google Drive.' };
+    }
+
     const sizeMatch = cr.match(/\/(\d+)/);
-    const extMatch = cd.match(/\.(mp4|mkv|webm|avi)/i);
-    res.json({
-      fileId,
-      size: sizeMatch ? Number(sizeMatch[1]) : 0,
-      ext: extMatch ? extMatch[1].toLowerCase() : 'mp4'
-    });
+    const totalSize = sizeMatch ? Number(sizeMatch[1]) : 0;
+    const filenameMatch = cd.match(/filename="([^"]+)"/i);
+    const fileName = filenameMatch ? filenameMatch[1] : `${fileId}.mp4`;
+
+    const meta = {
+      id: fileId,
+      name: fileName,
+      mimeType: inferMimeType(fileName, ct),
+      size: totalSize,
+      canDownload: totalSize > 0,
+      source: 'drive_public_head'
+    };
+    driveMetaCache.set(fileId, { meta, cachedAt: Date.now() });
+    return meta;
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return { errorStatus: 502, error: 'Falha ao consultar arquivo no Google Drive: ' + err.message };
   }
-});
+}
 
-// ==========================================
-// PROXY DE STREAMING DIRETO DO GOOGLE DRIVE (SUPORTA ARQUIVOS GRANDES DE 2GB~15GB + SEEK/RANGE)
-// ==========================================
-app.get('/api/gdrive/stream/:fileId', async (req, res) => {
-  const { fileId } = req.params;
+async function handleVideoMetadataRequest(req, res) {
+  const fileId = req.params.id || req.params.fileId;
+  if (!isValidDriveFileId(fileId)) {
+    return res.status(400).json({ error: 'ID de arquivo do Google Drive inválido.' });
+  }
+  const meta = await getDriveFileMetadata(fileId);
+  if (meta.errorStatus) {
+    return res.status(meta.errorStatus).json({ error: meta.error });
+  }
+  return res.json({
+    id: meta.id,
+    fileId: meta.id,
+    name: meta.name,
+    mimeType: meta.mimeType,
+    size: meta.size,
+    canDownload: meta.canDownload,
+    source: meta.source
+  });
+}
+
+async function handleVideoStreamRequest(req, res) {
+  const fileId = req.params.id || req.params.fileId;
+
+  if (!isValidDriveFileId(fileId)) {
+    return res.status(400).json({ error: 'ID de arquivo inválido.' });
+  }
+
+  // Garante que apenas arquivos cadastrados no catálogo autorizado (ou com permissão explícita) sejam transmitidos
+  if (!isFileAuthorizedInCatalog(fileId) && !process.env.ALLOW_UNLISTED_DRIVE_IDS) {
+    console.warn(`[Stream Auth] Bloqueado acesso a arquivo não autorizado no catálogo: ${fileId}`);
+    return res.status(403).json({ error: 'Arquivo não autorizado neste catálogo.' });
+  }
+
+  const abortController = new AbortController();
+  let upstreamNodeStream = null;
+
+  const cleanupUpstream = () => {
+    try {
+      abortController.abort();
+    } catch (_) {}
+    if (upstreamNodeStream) {
+      try {
+        upstreamNodeStream.destroy();
+      } catch (_) {}
+    }
+  };
+  req.on('close', cleanupUpstream);
+
   try {
-    // Endpoint direto do Google User Content
-    const downloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
-      fileId
-    )}&export=download&confirm=t`;
+    const meta = await getDriveFileMetadata(fileId);
+    if (meta.errorStatus) {
+      console.warn(`[Stream Meta Error] fileId=${fileId} status=${meta.errorStatus}`);
+      return res.status(meta.errorStatus).json({ error: meta.error });
+    }
+    if (!meta.canDownload || !meta.size) {
+      return res.status(403).json({ error: 'Arquivo sem permissão de download ou tamanho indisponível.' });
+    }
 
-    // IMPORTANTE: O Google Drive bloqueia downloads abertos ("Range: bytes=0-") com "Quota exceeded",
-    // mas libera 100% das requisições quando enviamos um Range delimitado ("bytes=START-END")!
-    // Além disso, blocos de 2MB funcionam perfeitamente tanto no Node local quanto na Vercel Serverless.
-    const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB por bloco
+    const totalSize = meta.size;
+    // Blocos limitados para streaming progressivo com baixo consumo de RAM e compatibilidade Serverless/Drive
+    const MAX_CHUNK_BYTES = process.env.VERCEL ? 2 * 1024 * 1024 : 4 * 1024 * 1024;
+    const rangeHeader = req.headers.range;
+
     let start = 0;
-    let end = CHUNK_SIZE - 1;
+    let end = Math.min(MAX_CHUNK_BYTES - 1, totalSize - 1);
 
-    if (req.headers.range) {
-      const match = req.headers.range.match(/bytes=(\d+)-(\d*)/);
-      if (match) {
+    if (rangeHeader) {
+      const match = String(rangeHeader).match(/^bytes=(\d*)-(\d*)$/);
+      if (!match) {
+        res.setHeader('Content-Range', `bytes */${totalSize}`);
+        return res.status(416).end();
+      }
+
+      if (match[1] === '' && match[2] !== '') {
+        // Suffix byte range: bytes=-500
+        const suffixLen = parseInt(match[2], 10);
+        if (Number.isNaN(suffixLen) || suffixLen <= 0) {
+          res.setHeader('Content-Range', `bytes */${totalSize}`);
+          return res.status(416).end();
+        }
+        start = Math.max(0, totalSize - suffixLen);
+        end = totalSize - 1;
+      } else {
         start = parseInt(match[1], 10);
-        end = match[2]
-          ? Math.min(parseInt(match[2], 10), start + CHUNK_SIZE - 1)
-          : start + CHUNK_SIZE - 1;
+        const requestedEnd = match[2] ? parseInt(match[2], 10) : totalSize - 1;
+
+        if (
+          Number.isNaN(start) ||
+          Number.isNaN(requestedEnd) ||
+          start < 0 ||
+          start >= totalSize ||
+          requestedEnd < start
+        ) {
+          res.setHeader('Content-Range', `bytes */${totalSize}`);
+          return res.status(416).end();
+        }
+
+        end = Math.min(requestedEnd, start + MAX_CHUNK_BYTES - 1, totalSize - 1);
       }
     }
 
-    const baseHeaders = {
+    const googleOAuthToken = (process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '').trim();
+    const googleApiKey = (process.env.GOOGLE_DRIVE_API_KEY || '').trim();
+
+    let upstreamUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
+      fileId
+    )}&export=download&confirm=t`;
+    const upstreamHeaders = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       Range: `bytes=${start}-${end}`
     };
 
-    const upstream = await fetch(downloadUrl, {
-      headers: baseHeaders,
-      redirect: 'follow'
+    if (googleOAuthToken) {
+      upstreamUrl = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
+        fileId
+      )}?alt=media&supportsAllDrives=true`;
+      upstreamHeaders.Authorization = `Bearer ${googleOAuthToken}`;
+    } else if (googleApiKey) {
+      upstreamUrl = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(
+        fileId
+      )}?alt=media&supportsAllDrives=true&key=${encodeURIComponent(googleApiKey)}`;
+    }
+
+    console.log(`[Stream] fileId=${fileId} range=${start}-${end}/${totalSize} source=${meta.source}`);
+
+    const upstream = await fetch(upstreamUrl, {
+      headers: upstreamHeaders,
+      redirect: 'follow',
+      signal: abortController.signal
     });
 
     if (!upstream.ok && upstream.status !== 206) {
-      return res
-        .status(upstream.status)
-        .send('Não foi possível reproduzir o arquivo do Google Drive.');
+      console.error(`[Stream Upstream Error] fileId=${fileId} status=${upstream.status}`);
+      return res.status(upstream.status).json({
+        error: 'Falha ao obter fluxo de vídeo do Google Drive.'
+      });
     }
 
-    const contentRange = upstream.headers.get('content-range');
-    const disposition = upstream.headers.get('content-disposition') || '';
-    const buffer = Buffer.from(await upstream.arrayBuffer());
+    const upstreamType = upstream.headers.get('content-type') || '';
+    if (upstreamType.includes('text/html')) {
+      console.error(`[Stream HTML Blocked] fileId=${fileId} retornou text/html em vez de mídia.`);
+      return res.status(403).json({
+        error: 'O Google Drive retornou página de bloqueio em vez dos bytes do vídeo.'
+      });
+    }
 
+    const chunkLen = end - start + 1;
     res.status(206);
-    if (contentRange) {
-      res.setHeader('Content-Range', contentRange);
-    }
+    res.setHeader('Content-Type', meta.mimeType);
+    res.setHeader('Content-Range', `bytes ${start}-${end}/${totalSize}`);
+    res.setHeader('Content-Length', String(chunkLen));
     res.setHeader('Accept-Ranges', 'bytes');
-    res.setHeader('Content-Length', String(buffer.length));
-    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Cache-Control', 'private, max-age=3600');
 
-    if (/\.webm/i.test(disposition)) {
-      res.setHeader('Content-Type', 'video/webm');
-    } else {
-      res.setHeader('Content-Type', 'video/mp4');
+    if (!upstream.body) {
+      return res.status(502).end();
     }
 
-    return res.end(buffer);
+    // Streaming progressivo com backpressure nativo via Node Stream (sem carregar o arquivo na RAM)
+    upstreamNodeStream = Readable.fromWeb(upstream.body);
+    upstreamNodeStream.on('error', (streamErr) => {
+      if (streamErr.name !== 'AbortError') {
+        console.error(`[Stream Pipe Error] fileId=${fileId}: ${streamErr.message}`);
+      }
+      if (!res.headersSent) {
+        res.status(502).end();
+      } else {
+        res.end();
+      }
+    });
+    upstreamNodeStream.pipe(res);
   } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    console.error(`[Stream Fatal Error] fileId=${fileId}: ${err.message}`);
     if (!res.headersSent) {
-      res.status(500).send('Erro no streaming do Google Drive: ' + err.message);
+      res.status(500).json({ error: 'Erro interno no streaming: ' + err.message });
     }
   }
-});
+}
+
+app.get('/api/videos/:id/meta', handleVideoMetadataRequest);
+app.get('/api/gdrive/meta/:fileId', handleVideoMetadataRequest);
+app.get('/api/videos/:id/stream', handleVideoStreamRequest);
+app.get('/api/gdrive/stream/:fileId', handleVideoStreamRequest);
 
 // ==========================================
 // GERENCIAMENTO DE SALAS DE CINEMA (12 POLTRONAS + WEBSOCKETS)

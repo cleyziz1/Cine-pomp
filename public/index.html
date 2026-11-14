@@ -413,13 +413,19 @@
               id="nativeVideo"
               class="cinema-player"
               playsinline
-              crossorigin="anonymous"
+              preload="metadata"
             ></video>
 
-            <!-- Menu de Velocidade (Botão Engrenagem ⚙️) -->
-            <div id="nativeSourcesDrawer" class="native-sources-drawer hidden" style="width: 240px;">
+            <!-- Indicador discreto de Carregamento / Erro de Mídia -->
+            <div id="nativeLoadingBadge" class="hidden" style="position:absolute;top:14px;right:16px;z-index:25;background:rgba(10,12,22,0.86);color:#e2e8f0;padding:6px 12px;border-radius:999px;font-size:0.78rem;border:1px solid rgba(255,255,255,0.14);pointer-events:none;">
+              ⏳ Carregando vídeo...
+            </div>
+            <div id="nativeErrorBanner" class="hidden" style="position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(153,27,27,0.92);color:#fecaca;padding:10px 16px;border-radius:10px;font-size:0.82rem;max-width:85%;text-align:center;border:1px solid rgba(248,113,113,0.45);"></div>
+
+            <!-- Menu de Velocidade e Legendas (Botão Engrenagem ⚙️) -->
+            <div id="nativeSourcesDrawer" class="native-sources-drawer hidden" style="width: 260px;">
               <div class="drawer-header">
-                <strong>⚙️ Velocidade de Reprodução</strong>
+                <strong>⚙️ Velocidade &amp; Legendas</strong>
                 <button id="closeSourcesDrawerBtn" class="btn-icon">✕</button>
               </div>
               <div class="native-stremio-list">
@@ -427,6 +433,11 @@
                 <div class="stremio-stream-item speed-option" data-speed="1"><span class="stremio-stream-title">1.0x (Normal)</span><span class="stremio-pt-badge">PADRÃO</span></div>
                 <div class="stremio-stream-item speed-option" data-speed="1.25"><span class="stremio-stream-title">1.25x (Rápido)</span></div>
                 <div class="stremio-stream-item speed-option" data-speed="1.5"><span class="stremio-stream-title">1.5x (Super Rápido)</span></div>
+                <label class="stremio-stream-item" style="cursor:pointer; margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
+                  <span class="stremio-stream-title">💬 Carregar Legenda (.vtt / .srt)</span>
+                  <input type="file" id="subtitleFileInput" accept=".vtt,.srt" class="hidden" />
+                </label>
+                <div id="subtitleClearBtn" class="stremio-stream-item hidden"><span class="stremio-stream-title" style="color:#fca5a5;">✕ Remover Legenda</span></div>
               </div>
             </div>
 
