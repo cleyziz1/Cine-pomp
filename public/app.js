@@ -3,15 +3,37 @@
   let swReadyPromise = Promise.resolve();
   if ('serviceWorker' in navigator) {
     swReadyPromise = navigator.serviceWorker
-      .register('/sw.js')
-      .then(() => navigator.serviceWorker.ready)
+      .register('/sw.js', { scope: '/' })
       .then((reg) => {
-        if (!navigator.serviceWorker.controller && reg.active) {
-          return new Promise((resolve) => {
-            navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
-            setTimeout(resolve, 600);
-          });
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
+        return navigator.serviceWorker.ready;
+      })
+      .then((reg) => {
+        if (navigator.serviceWorker.controller) return;
+        return new Promise((resolve) => {
+          const onCtrl = () => resolve();
+          navigator.serviceWorker.addEventListener('controllerchange', onCtrl, { once: true });
+          setTimeout(() => {
+            navigator.serviceWorker.removeEventListener('controllerchange', onCtrl);
+            // Em hard-reload (Ctrl+F5) ou 1a visita, o navegador pode segurar controller=null até um reload normal.
+            // Faz no máximo 1 reload automático na sessão para ativar o motor de streaming do Player Nativo.
+            if (
+              !navigator.serviceWorker.controller &&
+              reg &&
+              reg.active &&
+              window.location.hostname !== 'localhost' &&
+              window.location.hostname !== '127.0.0.1' &&
+              !sessionStorage.getItem('cine_sw_reloaded')
+            ) {
+              sessionStorage.setItem('cine_sw_reloaded', '1');
+              window.location.reload();
+              return;
+            }
+            resolve();
+          }, 2500);
+        });
       })
       .catch(() => {});
   }
@@ -684,7 +706,20 @@
       navCinemaRoomBtn.classList.add('active');
       navCatalogBtn.classList.remove('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Ao voltar para a sala, re-sincroniza o player caso tenha sido parado ao sair
+      if (roomState && !lastLoadedMediaSignature) {
+        updatePlayerMedia(roomState.media, roomState.playback);
+      }
     } else {
+      // Ao sair da sala para o catálogo/página inicial, para imediatamente qualquer reprodução
+      try {
+        if (!nativeVideo.paused) nativeVideo.pause();
+      } catch (_) {}
+      if (drivePreviewIframe && drivePreviewIframe.src !== 'about:blank') {
+        drivePreviewIframe.src = 'about:blank';
+      }
+      lastLoadedMediaSignature = '';
+
       cinemaRoomView.classList.add('hidden');
       streamingHomeView.classList.remove('hidden');
       navCatalogBtn.classList.add('active');
@@ -709,7 +744,7 @@
     if (isP2PHost) {
       handleP2PActionAsHost(mySocketId, event, payload);
     } else if (guestConnToHost && guestConnToHost.open) {
-      guestConnToHost.send({ event, payload });
+      guestConnToHost.send({ senderId: mySocketId, event, payload });
     }
   }
 
@@ -749,10 +784,10 @@
         status: data.status,
         currentTime: data.currentTime,
         playbackRate: data.playbackRate,
-        serverTimestamp: Date.now()
+        serverTimestamp: data.serverTimestamp || Date.now()
       };
-      const drift = Math.abs(nativeVideo.currentTime - data.currentTime);
-      if (drift > 2.2) {
+      const drift = Math.abs((nativeVideo.currentTime || 0) - data.currentTime);
+      if (drift > 1.5 || (data.status === 'playing' && nativeVideo.paused)) {
         applyPlaybackToNativeVideo(roomState.playback);
       }
     } else if (event === 'clapperboard_countdown') {
@@ -923,9 +958,18 @@
     // Conecta via PeerJS (WebRTC) para sincronizar com outros amigos que entrarem no mesmo link da Vercel/GitHub Pages!
     if (typeof window.Peer !== 'function') return;
     const hostPeerId = `cine-pompeia-v2-${roomId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+    const peerOptions = {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+      }
+    };
 
     try {
-      const peer = new window.Peer(hostPeerId);
+      const peer = new window.Peer(hostPeerId, peerOptions);
       peerInstance = peer;
 
       peer.on('open', () => {
@@ -948,6 +992,16 @@
             roomState.seats[seatIdx] = guestPart;
             roomState.participantCount = roomState.seats.filter(Boolean).length;
             hostConnections.set(msg.guestId, conn);
+
+            // Atualiza o playback com o tempo exato atual do Host antes de enviar para o amigo
+            if (roomState.media && roomState.media.playerType !== 'drive_preview') {
+              roomState.playback = {
+                status: nativeVideo.paused ? 'paused' : 'playing',
+                currentTime: nativeVideo.currentTime || 0,
+                playbackRate: nativeVideo.playbackRate || 1,
+                serverTimestamp: Date.now()
+              };
+            }
 
             const seatLabel = seatIdx < 6 ? `A${seatIdx + 1}` : `B${seatIdx - 5}`;
             broadcastSystemChat(`${guestPart.avatar} ${guestPart.name} entrou e sentou na poltrona ${seatLabel}.`);
@@ -979,24 +1033,37 @@
       peer.on('error', (err) => {
         if (err && err.type === 'unavailable-id') {
           isP2PHost = false;
-          const guestPeer = new window.Peer();
+          const guestPeer = new window.Peer(peerOptions);
           peerInstance = guestPeer;
           guestPeer.on('open', () => {
-            const conn = guestPeer.connect(hostPeerId, { reliable: true });
-            guestConnToHost = conn;
-            conn.on('open', () => {
-              conn.send({
-                event: 'guest_hello',
-                guestId: mySocketId,
-                userName,
-                avatar
+            const connectToHost = () => {
+              const conn = guestPeer.connect(hostPeerId, { reliable: true });
+              guestConnToHost = conn;
+              let helloAcked = false;
+
+              conn.on('open', () => {
+                conn.send({
+                  event: 'guest_hello',
+                  guestId: mySocketId,
+                  userName,
+                  avatar
+                });
               });
-            });
-            conn.on('data', (packet) => {
-              if (packet && packet.event) {
-                handleIncomingRoomEvent(packet.event, packet.data);
-              }
-            });
+              conn.on('data', (packet) => {
+                helloAcked = true;
+                if (packet && packet.event) {
+                  handleIncomingRoomEvent(packet.event, packet.data);
+                }
+              });
+
+              setTimeout(() => {
+                if (!helloAcked && !conn.open) {
+                  connectToHost();
+                }
+              }, 3500);
+            };
+
+            connectToHost();
           });
         }
       });
@@ -1731,13 +1798,39 @@
     nativeTimeLabel.textContent = `${formatSeconds(cur)} / ${formatSeconds(dur)}`;
   }
 
+  function showUnmuteSyncBanner() {
+    let banner = document.getElementById('unmuteSyncBanner');
+    if (!banner) {
+      banner = document.createElement('button');
+      banner.id = 'unmuteSyncBanner';
+      banner.type = 'button';
+      banner.textContent = '🔇 Clique aqui para ativar o som (Sincronizado)';
+      banner.style.cssText =
+        'position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(229,9,20,0.94);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.6);';
+      banner.addEventListener('click', () => {
+        nativeVideo.muted = false;
+        nativeMuteBtn.textContent = '🔊';
+        nativeVideo.play().catch(() => {});
+        banner.remove();
+      });
+      screenWrapper.appendChild(banner);
+    }
+  }
+
   function applyPlaybackToNativeVideo(playback) {
     if (!playback) return;
     isApplyingRemoteSync = true;
 
-    const targetTime = Number(playback.currentTime) || 0;
-    if (Math.abs(nativeVideo.currentTime - targetTime) > 1.2) {
-      nativeVideo.currentTime = targetTime;
+    let targetTime = Number(playback.currentTime) || 0;
+    if (playback.status === 'playing' && playback.serverTimestamp) {
+      const lagSec = Math.max(0, (Date.now() - playback.serverTimestamp) / 1000);
+      if (lagSec < 10) targetTime += lagSec * (playback.playbackRate || 1);
+    }
+
+    if (Math.abs((nativeVideo.currentTime || 0) - targetTime) > 1.2) {
+      try {
+        nativeVideo.currentTime = targetTime;
+      } catch (_) {}
     }
 
     if (playback.playbackRate && nativeVideo.playbackRate !== playback.playbackRate) {
@@ -1745,7 +1838,12 @@
     }
 
     if (playback.status === 'playing') {
-      nativeVideo.play().catch(() => {});
+      nativeVideo.play().catch(() => {
+        // Se o navegador bloqueou autoplay com som, reproduz mutado e oferece botão de ativar áudio
+        nativeVideo.muted = true;
+        nativeMuteBtn.textContent = '🔇';
+        nativeVideo.play().then(showUnmuteSyncBanner).catch(() => {});
+      });
     } else {
       nativeVideo.pause();
     }
@@ -2090,11 +2188,12 @@
         broadcastFromP2PHost('playback_heartbeat', {
           currentTime: nativeVideo.currentTime,
           status: nativeVideo.paused ? 'paused' : 'playing',
-          playbackRate: nativeVideo.playbackRate
+          playbackRate: nativeVideo.playbackRate,
+          serverTimestamp: Date.now()
         });
       }
     }
-  }, 3000);
+  }, 2000);
 
   if (socket) {
     socket.on('room_state', (state) => handleIncomingRoomEvent('room_state', state));

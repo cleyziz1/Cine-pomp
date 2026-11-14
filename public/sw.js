@@ -41,6 +41,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 async function resolveFileMeta(fileId) {
   if (KNOWN_DRIVE_FILES[fileId]) {
     return KNOWN_DRIVE_FILES[fileId];
