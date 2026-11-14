@@ -86,14 +86,43 @@
     </div>
   </div>
 
-  <!-- MODAL DE GERENCIAMENTO DO GOOGLE DRIVE (SINCRONIZAR PASTA OU ADICIONAR FILME) -->
+  <!-- MODAL DE AUTENTICAÇÃO ADMINISTRATIVA (RBAC) -->
+  <div id="adminLoginModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width: 430px;">
+      <div class="modal-header">
+        <h3 style="color: var(--gold);">🔐 Acesso Administrativo</h3>
+        <button id="closeAdminLoginBtn" class="btn-icon" title="Fechar">✕</button>
+      </div>
+      <p class="modal-desc">
+        Apenas o Administrador pode adicionar, importar, editar ou remover filmes do catálogo do Google Drive.
+      </p>
+      <form id="adminLoginForm" class="lobby-form">
+        <div class="form-group">
+          <label for="adminPasswordInput">Senha do Administrador</label>
+          <input
+            type="password"
+            id="adminPasswordInput"
+            placeholder="Digite a senha de administrador"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <div id="adminLoginError" class="error-banner hidden"></div>
+        <button type="submit" id="adminLoginSubmitBtn" class="btn-gold btn-large">
+          🔓 Entrar como Administrador
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE GERENCIAMENTO DO GOOGLE DRIVE (EXCLUSIVO DO ADMINISTRADOR) -->
   <div id="driveManagerModal" class="modal-backdrop hidden">
     <div class="detail-modal-card" style="max-width: 960px;">
       <div class="modal-header" style="padding: 1.25rem 1.75rem 0.5rem;">
         <div>
-          <h2 style="color: var(--gold);">☁️ Central do Seu Google Drive (5TB)</h2>
+          <h2 style="color: var(--gold);">☁️ Central do Seu Google Drive (5TB) — Modo Administrador</h2>
           <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 2px;">
-            Sincronize uma pasta inteira cheia de filmes do seu Google Drive ou adicione vídeos individuais com capa automática
+            Sincronize uma pasta inteira do Google Drive, adicione/edite filmes ou reconcilie arquivos excluídos no Drive
           </p>
         </div>
         <button id="closeDriveManagerBtn" class="btn-icon" title="Fechar">✕</button>
@@ -110,7 +139,7 @@
                 <p>
                   1. Crie uma pasta no seu Google Drive e coloque seus filmes lá.<br/>
                   2. Clique com botão direito na pasta → <strong>Compartilhar</strong> → <strong>"Qualquer pessoa com o link"</strong>.<br/>
-                  3. Cole o link da pasta abaixo: o Cine Pompeia importa todos os vídeos e puxa os pôsteres sozinho!
+                  3. Cole o link da pasta abaixo: o Cine Pompeia importa os novos vídeos e remove os que foram excluídos!
                 </p>
               </div>
             </div>
@@ -137,16 +166,19 @@
               <button type="submit" id="syncFolderSubmitBtn" class="btn-blue-pill btn-large">
                 🔄 Escanear Pasta do Drive & Importar Filmes
               </button>
+              <button type="button" id="reconcileDriveBtn" class="btn-secondary btn-sm" style="width:100%;">
+                🧹 Verificar Integridade & Limpar Filmes Excluídos do Drive
+              </button>
               <div id="syncFolderStatus" class="status-msg hidden"></div>
             </form>
           </div>
 
-          <!-- OPÇÃO 2: ADICIONAR UM FILME INDIVIDUAL DO GOOGLE DRIVE -->
+          <!-- OPÇÃO 2: ADICIONAR OU EDITAR UM FILME INDIVIDUAL DO GOOGLE DRIVE -->
           <div class="action-option-card" style="border-color: rgba(245, 197, 24, 0.45);">
             <div class="option-header">
               <span class="option-icon">🎬</span>
               <div>
-                <h4>Adicionar Filme Individual do Google Drive</h4>
+                <h4 id="singleMovieFormHeading">Adicionar / Editar Filme do Google Drive</h4>
                 <p>
                   Cole o link de compartilhamento de um vídeo do seu Google Drive (com permissão "Qualquer pessoa com o link").
                   A capa, fundo widescreen e sinopse são preenchidos automaticamente!
@@ -155,6 +187,7 @@
             </div>
 
             <form id="addSingleMovieForm" class="option-controls">
+              <input type="hidden" id="singleMovieIdInput" value="" />
               <div style="display:flex; gap:0.45rem;">
                 <input
                   type="text"
@@ -209,9 +242,14 @@
                 placeholder="Sinopse (Deixe vazio para preencher sozinho)"
               ></textarea>
 
-              <button type="submit" class="btn-gold btn-large">
-                ➕ Salvar no Catálogo do Drive
-              </button>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="submit" id="saveSingleMovieBtn" class="btn-gold btn-large" style="flex:1;">
+                  ➕ Salvar no Catálogo do Drive
+                </button>
+                <button type="button" id="cancelEditMovieBtn" class="btn-secondary btn-sm hidden">
+                  Cancelar Edição
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -247,7 +285,10 @@
           <button id="playDriveMovieNowBtn" class="btn-blue-pill btn-large" style="flex:1;">
             ▶ Assistir Agora na Sala (Sincronizado com as 12 Poltronas)
           </button>
-          <button id="deleteDriveMovieBtn" class="btn-secondary btn-large" style="color:#fca5a5; border-color:rgba(239,68,68,0.35);">
+          <button id="editDriveMovieBtn" class="btn-secondary btn-large admin-only hidden" title="Editar informações do filme (Administrador)">
+            ✏️ Editar Filme
+          </button>
+          <button id="deleteDriveMovieBtn" class="btn-secondary btn-large admin-only hidden" style="color:#fca5a5; border-color:rgba(239,68,68,0.35);">
             🗑️ Remover do Catálogo
           </button>
         </div>
@@ -283,7 +324,7 @@
     </div>
 
     <div class="topbar-right">
-      <button id="openDriveManagerBtn" class="btn-gold btn-sm">
+      <button id="openDriveManagerBtn" class="btn-gold btn-sm admin-only hidden">
         ☁️ Adicionar Filmes / Sincronizar Pasta Drive
       </button>
       <div class="room-pill" title="Sala privada conectada em tempo real">
@@ -293,6 +334,9 @@
       </div>
       <button id="copyInviteBtn" class="btn-secondary btn-sm" title="Copiar link para convidar amigos">
         🔗 Convidar Amigos
+      </button>
+      <button id="adminAuthBtn" class="btn-secondary btn-sm" title="Acesso Administrativo">
+        🔐 Admin
       </button>
     </div>
   </header>
@@ -345,7 +389,7 @@
           <button id="heroWatchNowBtn" class="btn-hero-play">
             ▶ Assistir Agora na Sala
           </button>
-          <button id="heroManageDriveBtn" class="btn-hero-info">
+          <button id="heroManageDriveBtn" class="btn-hero-info admin-only hidden">
             ☁️ Adicionar Filmes / Sincronizar Pasta do Drive
           </button>
         </div>
@@ -374,10 +418,10 @@
       <div class="player-subtoolbar">
         <div class="toolbar-group">
           <button id="useNativeStreamBtn" class="shield-badge">⚡ Player Nativo (Auto-Sync)</button>
-          <button id="useDrivePreviewBtn" class="btn-secondary btn-sm" title="Use este modo caso seu arquivo no Drive seja .MKV ou o áudio não toque no navegador">
-            ☁️ Player Interno do Drive (.MKV / 4K)
+          <button id="useDrivePreviewBtn" class="btn-secondary btn-sm" title="Decodificador compatível para arquivos .MKV com áudio Dolby AC-3 5.1 / DTS ou 4K">
+            ☁️ Player Interno do Drive (.MKV / AC-3 5.1)
           </button>
-          <button id="openDriveFromRoomBtn" class="btn-gold btn-sm">
+          <button id="openDriveFromRoomBtn" class="btn-gold btn-sm admin-only hidden">
             🎞️ Trocar Filme do Drive
           </button>
         </div>
@@ -388,6 +432,15 @@
           </button>
           <button id="toggleLightsBtn" class="btn-secondary btn-sm">💡 Luzes</button>
           <button id="toggleControlModeBtn" class="btn-secondary btn-sm">👑 Só Anfitrião</button>
+          <button
+            id="toggleChatToolbarBtn"
+            class="btn-secondary btn-sm"
+            aria-expanded="true"
+            aria-controls="chatSidebar"
+            title="Ocultar ou Reabrir o Chat Lateral (Atalho: C)"
+          >
+            💬 Ocultar Chat
+          </button>
         </div>
       </div>
 
@@ -399,7 +452,20 @@
             ← Voltar ao Catálogo
           </button>
 
-          <!-- IFRAME OFICIAL DO GOOGLE DRIVE (PARA ARQUIVOS .MKV OU FALLBACK EM NUVEM) -->
+          <!-- Botão flutuante para reabrir o chat quando estiver recolhido -->
+          <button
+            id="floatingOpenChatBtn"
+            type="button"
+            class="floating-open-chat-btn hidden"
+            aria-expanded="false"
+            aria-controls="chatSidebar"
+            title="Reabrir Chat da Sessão"
+          >
+            💬 Abrir Chat
+            <span id="chatUnreadBadge" class="chat-unread-badge hidden">0</span>
+          </button>
+
+          <!-- IFRAME OFICIAL DO GOOGLE DRIVE (PARA ARQUIVOS .MKV COM ÁUDIO AC-3 5.1 OU FALLBACK EM NUVEM) -->
           <iframe
             id="drivePreviewIframe"
             class="cinema-player hidden"
@@ -414,18 +480,33 @@
               class="cinema-player"
               playsinline
               preload="metadata"
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              oncontextmenu="return false;"
             ></video>
 
-            <!-- Indicador discreto de Carregamento / Erro de Mídia -->
+            <!-- Indicador discreto de Carregamento / Erro de Mídia / Diagnóstico de Áudio -->
             <div id="nativeLoadingBadge" class="hidden" style="position:absolute;top:14px;right:16px;z-index:25;background:rgba(10,12,22,0.86);color:#e2e8f0;padding:6px 12px;border-radius:999px;font-size:0.78rem;border:1px solid rgba(255,255,255,0.14);pointer-events:none;">
               ⏳ Carregando vídeo...
             </div>
             <div id="nativeErrorBanner" class="hidden" style="position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(153,27,27,0.92);color:#fecaca;padding:10px 16px;border-radius:10px;font-size:0.82rem;max-width:85%;text-align:center;border:1px solid rgba(248,113,113,0.45);"></div>
+            <div id="nativeAudioDiagBanner" class="audio-diag-banner hidden">
+              <div class="audio-diag-text">
+                <strong id="nativeAudioDiagTitle">🔊 Diagnóstico de Áudio: Codec Dolby AC-3 5.1 detectado</strong>
+                <span id="nativeAudioDiagDesc">Este arquivo .MKV usa áudio Surround AC-3/DTS que navegadores não decodificam no modo bruto.</span>
+              </div>
+              <div class="audio-diag-actions">
+                <button type="button" id="switchCompatibleAudioBtn" class="btn-gold btn-xs">
+                  🔊 Ativar Áudio Compatível (AAC Estéreo)
+                </button>
+                <button type="button" id="dismissAudioDiagBtn" class="btn-icon" style="font-size:0.95rem;" title="Fechar aviso">✕</button>
+              </div>
+            </div>
 
-            <!-- Menu de Velocidade e Legendas (Botão Engrenagem ⚙️) -->
-            <div id="nativeSourcesDrawer" class="native-sources-drawer hidden" style="width: 260px;">
+            <!-- Menu de Velocidade, Faixas de Áudio e Legendas (Botão Engrenagem ⚙️) -->
+            <div id="nativeSourcesDrawer" class="native-sources-drawer hidden" style="width: 295px;">
               <div class="drawer-header">
-                <strong>⚙️ Velocidade &amp; Legendas</strong>
+                <strong>⚙️ Velocidade, Áudio &amp; Legendas</strong>
                 <button id="closeSourcesDrawerBtn" class="btn-icon">✕</button>
               </div>
               <div class="native-stremio-list">
@@ -433,6 +514,18 @@
                 <div class="stremio-stream-item speed-option" data-speed="1"><span class="stremio-stream-title">1.0x (Normal)</span><span class="stremio-pt-badge">PADRÃO</span></div>
                 <div class="stremio-stream-item speed-option" data-speed="1.25"><span class="stremio-stream-title">1.25x (Rápido)</span></div>
                 <div class="stremio-stream-item speed-option" data-speed="1.5"><span class="stremio-stream-title">1.5x (Super Rápido)</span></div>
+
+                <!-- Seção de Faixas de Áudio & Diagnóstico de Codec -->
+                <div id="audioTrackSection" style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
+                  <div style="font-size:0.72rem; color:var(--gold); font-weight:700; margin-bottom:4px;">
+                    🎧 FAIXA DE ÁUDIO &amp; CODEC
+                  </div>
+                  <div id="audioCodecBadgeInfo" style="font-size:0.72rem; color:var(--text-muted); margin-bottom:6px;">
+                    Verificando codec de áudio...
+                  </div>
+                  <div id="audioTracksListContainer" style="display:flex; flex-direction:column; gap:4px;"></div>
+                </div>
+
                 <label class="stremio-stream-item" style="cursor:pointer; margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
                   <span class="stremio-stream-title">💬 Carregar Legenda (.vtt / .srt)</span>
                   <input type="file" id="subtitleFileInput" accept=".vtt,.srt" class="hidden" />
@@ -446,7 +539,7 @@
               ▶
             </button>
 
-            <!-- Barra Inferior do Player Nativo: Scrubber azul + [▶] [-10] [+10] [🔊] [00:11 / 2:25:00] ... [⚙️] [📺] [⬇️] [⛶] -->
+            <!-- Barra Inferior do Player Nativo (Sem botão de download!) -->
             <div class="cine-custom-controls">
               <input
                 type="range"
@@ -470,9 +563,9 @@
                 </div>
 
                 <div class="cine-controls-right">
-                  <button id="nativeSettingsGearBtn" class="sony-ctrl-btn" title="Velocidade de Reprodução">⚙️</button>
+                  <button id="nativeSettingsGearBtn" class="sony-ctrl-btn" title="Velocidade, Áudio e Legendas">⚙️</button>
                   <button id="nativeCastSyncBtn" class="sony-ctrl-btn" title="Sincronizar Todos na Sala">📺</button>
-                  <a id="nativeDownloadBtn" href="#" download class="sony-ctrl-btn" title="Baixar Vídeo do Drive" style="text-decoration:none;">⬇️</a>
+                  <button id="playerChatToggleBtn" class="sony-ctrl-btn" title="Ocultar / Mostrar Chat Lateral">💬</button>
                   <button id="nativeFullscreenBtn" class="sony-ctrl-btn" title="Tela Cheia">⛶</button>
                 </div>
               </div>
@@ -533,8 +626,8 @@
       </div>
     </section>
 
-    <!-- COLUNA DIREITA: FICHA DO FILME EM CARTAZ + CHAT AO VIVO -->
-    <aside class="sidebar-section">
+    <!-- COLUNA DIREITA RETRÁTIL: FICHA DO FILME EM CARTAZ + CHAT AO VIVO -->
+    <aside id="chatSidebar" class="sidebar-section" aria-label="Chat da Sessão">
       <div class="movie-info-card">
         <img id="currentMoviePoster" src="https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg" alt="Pôster" class="movie-poster-mini" />
         <div class="movie-info-text">
@@ -550,8 +643,19 @@
 
       <div class="chat-container">
         <div class="chat-header">
-          <h3>💬 Chat da Sessão</h3>
-          <span id="onlineFriendsCount" class="online-tag">1 na sala</span>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <h3>💬 Chat da Sessão</h3>
+            <span id="onlineFriendsCount" class="online-tag">1 na sala</span>
+          </div>
+          <button
+            type="button"
+            id="collapseChatBtn"
+            class="btn-chat-collapse"
+            title="Ocultar Chat Lateral para expandir o vídeo"
+            aria-label="Ocultar Chat Lateral"
+          >
+            ✕ Ocultar
+          </button>
         </div>
 
         <div id="chatMessages" class="chat-messages"></div>

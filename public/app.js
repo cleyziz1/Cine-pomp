@@ -79,22 +79,6 @@
       addedAt: 1794176577505
     },
     {
-      id: 'drive_1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
-      title: 'Gigantes de Aço',
-      year: '2011',
-      rating: '7.2',
-      category: 'Ação & Aventura',
-      featured: false,
-      driveFileId: '1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
-      rawUrl: 'https://drive.google.com/file/d/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7/view',
-      streamUrl: '/api/gdrive/stream/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7',
-      poster: 'https://image.tmdb.org/t/p/w500/pp74uUjwQTknGPqNrerj4FvU0ce.jpg',
-      backdrop: 'https://image.tmdb.org/t/p/original/pjlxrd646cBYznHoPBWTzz6FujX.jpg',
-      overview:
-        'Em um futuro próximo, as máquinas substituem os seres humanos no ringue. Charlie, um ex-lutador frustrado, se une ao filho para construir um competidor imbatível.',
-      addedAt: 1794176577342
-    },
-    {
       id: 'drive_1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri',
       title: 'Carros',
       year: '2006',
@@ -125,22 +109,6 @@
       overview:
         'O astro das corridas, Relâmpago McQueen, e o carro-guincho, Mate, viajam para disputar o primeiro Grand Prix Mundial, que irá revelar o carro mais veloz do planeta.',
       addedAt: 1794176577100
-    },
-    {
-      id: 'drive_1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
-      title: 'Carros 3',
-      year: '2017',
-      rating: '6.9',
-      category: 'Animação & Família',
-      featured: false,
-      driveFileId: '1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
-      rawUrl: 'https://drive.google.com/file/d/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B/view',
-      streamUrl: '/api/gdrive/stream/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B',
-      poster: 'https://image.tmdb.org/t/p/w500/oEmdfjqQnAWe1t23WiiW0icFhGv.jpg',
-      backdrop: 'https://image.tmdb.org/t/p/original/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg',
-      overview:
-        'Durante mais uma disputa eletrizante nas pistas, o campeão Relâmpago McQueen sofre um grave acidente e precisa da ajuda da jovem treinadora Cruz Ramirez para voltar às pistas.',
-      addedAt: 1794176577000
     },
     {
       id: 'drive_134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH',
@@ -483,7 +451,15 @@
   const heroManageDriveBtn = document.getElementById('heroManageDriveBtn');
   const streamingRowsContainer = document.getElementById('streamingRowsContainer');
 
-  // Modal de Gerenciamento do Google Drive
+  // Autenticação e Controle de Acesso (RBAC: Admin vs Usuário Comum)
+  const adminAuthBtn = document.getElementById('adminAuthBtn');
+  const adminLoginModal = document.getElementById('adminLoginModal');
+  const closeAdminLoginBtn = document.getElementById('closeAdminLoginBtn');
+  const adminLoginForm = document.getElementById('adminLoginForm');
+  const adminPasswordInput = document.getElementById('adminPasswordInput');
+  const adminLoginError = document.getElementById('adminLoginError');
+
+  // Modal de Gerenciamento do Google Drive (Exclusivo Admin)
   const driveManagerModal = document.getElementById('driveManagerModal');
   const openDriveManagerBtn = document.getElementById('openDriveManagerBtn');
   const openDriveFromRoomBtn = document.getElementById('openDriveFromRoomBtn');
@@ -492,9 +468,12 @@
   const driveFolderUrlInput = document.getElementById('driveFolderUrlInput');
   const driveFolderCategorySelect = document.getElementById('driveFolderCategorySelect');
   const syncFolderSubmitBtn = document.getElementById('syncFolderSubmitBtn');
+  const reconcileDriveBtn = document.getElementById('reconcileDriveBtn');
   const syncFolderStatus = document.getElementById('syncFolderStatus');
 
   const addSingleMovieForm = document.getElementById('addSingleMovieForm');
+  const singleMovieIdInput = document.getElementById('singleMovieIdInput');
+  const singleMovieFormHeading = document.getElementById('singleMovieFormHeading');
   const singleMovieTitle = document.getElementById('singleMovieTitle');
   const autoFillMetaBtn = document.getElementById('autoFillMetaBtn');
   const singleMovieUrl = document.getElementById('singleMovieUrl');
@@ -503,6 +482,8 @@
   const singleMoviePoster = document.getElementById('singleMoviePoster');
   const singleMovieBackdrop = document.getElementById('singleMovieBackdrop');
   const singleMovieOverview = document.getElementById('singleMovieOverview');
+  const saveSingleMovieBtn = document.getElementById('saveSingleMovieBtn');
+  const cancelEditMovieBtn = document.getElementById('cancelEditMovieBtn');
   const managerMoviesCount = document.getElementById('managerMoviesCount');
   const managerMoviesList = document.getElementById('managerMoviesList');
 
@@ -516,6 +497,7 @@
   const detailTitle = document.getElementById('detailTitle');
   const detailOverview = document.getElementById('detailOverview');
   const playDriveMovieNowBtn = document.getElementById('playDriveMovieNowBtn');
+  const editDriveMovieBtn = document.getElementById('editDriveMovieBtn');
   const deleteDriveMovieBtn = document.getElementById('deleteDriveMovieBtn');
 
   // Sala de Cinema e Player Nativo Cine Pompeia
@@ -524,6 +506,13 @@
   const copyInviteBtn = document.getElementById('copyInviteBtn');
   const toggleLightsBtn = document.getElementById('toggleLightsBtn');
   const toggleControlModeBtn = document.getElementById('toggleControlModeBtn');
+  const toggleChatToolbarBtn = document.getElementById('toggleChatToolbarBtn');
+  const collapseChatBtn = document.getElementById('collapseChatBtn');
+  const floatingOpenChatBtn = document.getElementById('floatingOpenChatBtn');
+  const chatUnreadBadge = document.getElementById('chatUnreadBadge');
+  const playerChatToggleBtn = document.getElementById('playerChatToggleBtn');
+  const chatSidebar = document.getElementById('chatSidebar');
+
   const lightsOverlay = document.getElementById('lightsOverlay');
   const clapperSyncBtn = document.getElementById('clapperSyncBtn');
   const useNativeStreamBtn = document.getElementById('useNativeStreamBtn');
@@ -536,6 +525,14 @@
   const nativeVideo = document.getElementById('nativeVideo');
   const nativeLoadingBadge = document.getElementById('nativeLoadingBadge');
   const nativeErrorBanner = document.getElementById('nativeErrorBanner');
+  const nativeAudioDiagBanner = document.getElementById('nativeAudioDiagBanner');
+  const nativeAudioDiagTitle = document.getElementById('nativeAudioDiagTitle');
+  const nativeAudioDiagDesc = document.getElementById('nativeAudioDiagDesc');
+  const switchCompatibleAudioBtn = document.getElementById('switchCompatibleAudioBtn');
+  const dismissAudioDiagBtn = document.getElementById('dismissAudioDiagBtn');
+  const audioTrackSection = document.getElementById('audioTrackSection');
+  const audioCodecBadgeInfo = document.getElementById('audioCodecBadgeInfo');
+  const audioTracksListContainer = document.getElementById('audioTracksListContainer');
   const subtitleFileInput = document.getElementById('subtitleFileInput');
   const subtitleClearBtn = document.getElementById('subtitleClearBtn');
   const nativeSourcesDrawer = document.getElementById('nativeSourcesDrawer');
@@ -550,7 +547,6 @@
   const nativeTimeLabel = document.getElementById('nativeTimeLabel');
   const nativeSettingsGearBtn = document.getElementById('nativeSettingsGearBtn');
   const nativeCastSyncBtn = document.getElementById('nativeCastSyncBtn');
-  const nativeDownloadBtn = document.getElementById('nativeDownloadBtn');
   const nativeFullscreenBtn = document.getElementById('nativeFullscreenBtn');
   const screenReactionsLayer = document.getElementById('screenReactionsLayer');
 
@@ -574,6 +570,186 @@
   const clapperOverlay = document.getElementById('clapperOverlay');
   const clapperCount = document.getElementById('clapperCount');
   const clapperSub = document.getElementById('clapperSub');
+
+  // ==========================================
+  // FASE 1 — SISTEMA RBAC (ADMINISTRADOR vs USUÁRIO COMUM)
+  // ==========================================
+  let currentUserRole = 'user'; // Nunca confia em estado local sem validar no backend
+  let adminToken = localStorage.getItem('cine_pompeia_admin_token') || '';
+
+  function getAdminAuthHeaders(extraHeaders = {}) {
+    const headers = { ...extraHeaders };
+    if (adminToken) {
+      headers.Authorization = `Bearer ${adminToken}`;
+    }
+    return headers;
+  }
+
+  function isAdminUser() {
+    return currentUserRole === 'admin' && Boolean(adminToken);
+  }
+
+  function updateAdminUiVisibility() {
+    const adminActive = isAdminUser();
+    document.querySelectorAll('.admin-only').forEach((el) => {
+      el.classList.toggle('hidden', !adminActive);
+    });
+    if (!adminActive && driveManagerModal) {
+      driveManagerModal.classList.add('hidden');
+    }
+    if (adminAuthBtn) {
+      adminAuthBtn.textContent = adminActive ? '👑 Admin Ativo (Sair)' : '🔐 Admin';
+      adminAuthBtn.classList.toggle('btn-gold', adminActive);
+      adminAuthBtn.classList.toggle('btn-secondary', !adminActive);
+    }
+  }
+
+  async function verifyAdminSessionWithBackend() {
+    if (!adminToken) {
+      currentUserRole = 'user';
+      updateAdminUiVisibility();
+      return false;
+    }
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: getAdminAuthHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.authenticated && data.role === 'admin') {
+          currentUserRole = 'admin';
+          updateAdminUiVisibility();
+          return true;
+        }
+      }
+    } catch (_) {}
+    adminToken = '';
+    currentUserRole = 'user';
+    localStorage.removeItem('cine_pompeia_admin_token');
+    updateAdminUiVisibility();
+    return false;
+  }
+
+  if (adminAuthBtn) {
+    adminAuthBtn.addEventListener('click', async () => {
+      if (isAdminUser()) {
+        if (confirm('Deseja sair do modo Administrador e voltar para Usuário Comum?')) {
+          try {
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              headers: getAdminAuthHeaders()
+            });
+          } catch (_) {}
+          adminToken = '';
+          currentUserRole = 'user';
+          localStorage.removeItem('cine_pompeia_admin_token');
+          updateAdminUiVisibility();
+          renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
+        }
+      } else if (adminLoginModal) {
+        adminLoginError.classList.add('hidden');
+        adminPasswordInput.value = '';
+        adminLoginModal.classList.remove('hidden');
+        adminPasswordInput.focus();
+      }
+    });
+  }
+
+  if (closeAdminLoginBtn) {
+    closeAdminLoginBtn.addEventListener('click', () => adminLoginModal.classList.add('hidden'));
+  }
+
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      adminLoginError.classList.add('hidden');
+      const password = adminPasswordInput.value.trim();
+      if (!password) return;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.token) {
+          adminLoginError.textContent = (data && data.error) || 'Senha de administrador incorreta.';
+          adminLoginError.classList.remove('hidden');
+          return;
+        }
+        adminToken = data.token;
+        currentUserRole = 'admin';
+        localStorage.setItem('cine_pompeia_admin_token', adminToken);
+        adminLoginModal.classList.add('hidden');
+        adminPasswordInput.value = '';
+        updateAdminUiVisibility();
+        renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
+      } catch (err) {
+        adminLoginError.textContent = 'Erro ao validar credenciais no servidor: ' + err.message;
+        adminLoginError.classList.remove('hidden');
+      }
+    });
+  }
+
+  // ==========================================
+  // FASE 2 — CHAT LATERAL RETRÁTIL (PERSISTENTE E SEM REouvir/REINICIAR O PLAYER)
+  // ==========================================
+  let isChatCollapsed = localStorage.getItem('cine_pompeia_chat_collapsed') === 'true';
+  let unreadChatCount = 0;
+
+  function applyChatCollapsedState(collapsed) {
+    isChatCollapsed = Boolean(collapsed);
+    try {
+      localStorage.setItem('cine_pompeia_chat_collapsed', isChatCollapsed ? 'true' : 'false');
+    } catch (_) {}
+
+    if (cinemaRoomView) {
+      cinemaRoomView.classList.toggle('chat-collapsed', isChatCollapsed);
+    }
+    if (toggleChatToolbarBtn) {
+      toggleChatToolbarBtn.textContent = isChatCollapsed ? '💬 Mostrar Chat' : '💬 Ocultar Chat';
+      toggleChatToolbarBtn.setAttribute('aria-expanded', isChatCollapsed ? 'false' : 'true');
+    }
+    if (floatingOpenChatBtn) {
+      floatingOpenChatBtn.classList.toggle('hidden', !isChatCollapsed);
+      floatingOpenChatBtn.setAttribute('aria-expanded', isChatCollapsed ? 'false' : 'true');
+    }
+    if (playerChatToggleBtn) {
+      playerChatToggleBtn.title = isChatCollapsed ? 'Mostrar Chat Lateral' : 'Ocultar Chat Lateral';
+      playerChatToggleBtn.style.opacity = isChatCollapsed ? '0.55' : '1';
+    }
+    if (!isChatCollapsed) {
+      unreadChatCount = 0;
+      if (chatUnreadBadge) {
+        chatUnreadBadge.textContent = '0';
+        chatUnreadBadge.classList.add('hidden');
+      }
+    }
+  }
+
+  function toggleChatSidebar() {
+    applyChatCollapsedState(!isChatCollapsed);
+  }
+
+  if (toggleChatToolbarBtn) toggleChatToolbarBtn.addEventListener('click', toggleChatSidebar);
+  if (collapseChatBtn) collapseChatBtn.addEventListener('click', () => applyChatCollapsedState(true));
+  if (floatingOpenChatBtn) floatingOpenChatBtn.addEventListener('click', () => applyChatCollapsedState(false));
+  if (playerChatToggleBtn) playerChatToggleBtn.addEventListener('click', toggleChatSidebar);
+
+  // Atalho de teclado 'c' para recolher/abrir chat (quando não estiver digitando em um input)
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName ? e.target.tagName : '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'c' || e.key === 'C') {
+      if (cinemaRoomView && !cinemaRoomView.classList.contains('hidden')) {
+        toggleChatSidebar();
+      }
+    }
+  });
+
+  applyChatCollapsedState(isChatCollapsed);
+  verifyAdminSessionWithBackend();
 
   function escapeHtml(str) {
     return String(str || '')
@@ -772,7 +948,7 @@
     } else if (event === 'seat_reaction') {
       spawnFloatingReaction(data);
     } else if (event === 'catalog_synced') {
-      if (Array.isArray(data.movies) && data.movies.length > 0) {
+      if (Array.isArray(data.movies)) {
         allDriveMovies = data.movies;
         saveLocalMoviesBackup(allDriveMovies);
         renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
@@ -1119,39 +1295,53 @@
 
   async function loadDriveStreamingCatalog(category = 'all', query = '') {
     currentCategory = category;
-    const localSaved = loadLocalMoviesBackup();
+    let loadedFromServer = false;
     const mergedMap = new Map();
-    for (const m of localSaved) {
-      mergedMap.set(m.id, m);
-    }
 
     try {
       const params = new URLSearchParams({ category: 'all', query: '' });
-      const res = await fetch(`/api/drive/catalog?${params.toString()}`);
+      const res = await fetch(`/api/drive/catalog?${params.toString()}`, { cache: 'no-store' });
       if (res.ok) {
         const rawText = await res.text();
         if (rawText) {
           const data = JSON.parse(rawText);
-          for (const m of data.movies || []) {
-            if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2') {
-              mergedMap.set(m.id, m);
+          if (Array.isArray(data.movies)) {
+            loadedFromServer = true;
+            for (const m of data.movies) {
+              if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2' && m.status !== 'unavailable') {
+                mergedMap.set(m.id, m);
+              }
             }
           }
         }
       }
     } catch (_) {}
 
-    try {
-      const staticRes = await fetch('/drive_catalog.json');
-      if (staticRes.ok) {
-        const staticData = await staticRes.json();
-        for (const m of staticData.movies || []) {
-          if (m && m.id && !mergedMap.has(m.id)) {
-            mergedMap.set(m.id, m);
+    if (!loadedFromServer) {
+      try {
+        const staticRes = await fetch('/drive_catalog.json', { cache: 'no-store' });
+        if (staticRes.ok) {
+          const staticData = await staticRes.json();
+          if (Array.isArray(staticData.movies)) {
+            loadedFromServer = true;
+            for (const m of staticData.movies) {
+              if (m && m.id && m.status !== 'unavailable') {
+                mergedMap.set(m.id, m);
+              }
+            }
           }
         }
+      } catch (_) {}
+    }
+
+    if (!loadedFromServer) {
+      const localSaved = loadLocalMoviesBackup();
+      for (const m of localSaved) {
+        if (m && m.id && m.status !== 'unavailable') {
+          mergedMap.set(m.id, m);
+        }
       }
-    } catch (_) {}
+    }
 
     allDriveMovies = Array.from(mergedMap.values());
     saveLocalMoviesBackup(allDriveMovies);
@@ -1159,10 +1349,12 @@
   }
 
   function createPosterCardHtml(item) {
+    const fallbackPoster = `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(item.title || 'Filme')}`;
+    const posterSrc = item.poster || fallbackPoster;
     return `
       <div class="stream-card" data-id="${escapeHtml(item.id)}">
         <div class="stream-card-poster">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" loading="lazy" />
+          <img src="${escapeHtml(posterSrc)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallbackPoster)}';" />
           <span class="stream-card-rating">⭐ ${escapeHtml(item.rating || '8.5')}</span>
           <span class="stream-card-native-badge">☁️ DRIVE</span>
           <div class="stream-card-hover">
@@ -1288,10 +1480,49 @@
   });
 
   // ==========================================
-  // CENTRAL DE GERENCIAMENTO DO GOOGLE DRIVE
+  // CENTRAL DE GERENCIAMENTO DO GOOGLE DRIVE (SOMENTE ADMIN)
   // ==========================================
+  function resetSingleMovieForm() {
+    if (singleMovieIdInput) singleMovieIdInput.value = '';
+    if (singleMovieFormHeading) singleMovieFormHeading.textContent = '🎬 Ou Adicionar / Editar Filme Individual';
+    if (cancelEditMovieBtn) cancelEditMovieBtn.classList.add('hidden');
+    if (saveSingleMovieBtn) saveSingleMovieBtn.textContent = '➕ Salvar no Catálogo do Drive';
+    singleMovieTitle.value = '';
+    singleMovieUrl.value = '';
+    singleMovieYear.value = '';
+    singleMoviePoster.value = '';
+    singleMovieBackdrop.value = '';
+    singleMovieOverview.value = '';
+  }
+
+  function populateSingleMovieFormForEdit(movie) {
+    if (!isAdminUser()) return;
+    if (singleMovieIdInput) singleMovieIdInput.value = movie.id;
+    if (singleMovieFormHeading) singleMovieFormHeading.textContent = `✏️ Editando: ${movie.title}`;
+    if (cancelEditMovieBtn) cancelEditMovieBtn.classList.remove('hidden');
+    if (saveSingleMovieBtn) saveSingleMovieBtn.textContent = '💾 Salvar Alterações do Filme';
+    singleMovieTitle.value = movie.title || '';
+    singleMovieUrl.value = movie.rawUrl || (movie.driveFileId ? `https://drive.google.com/file/d/${movie.driveFileId}/view` : movie.streamUrl || '');
+    singleMovieCategory.value = movie.category || 'Auto';
+    singleMovieYear.value = movie.year || '';
+    singleMoviePoster.value = movie.poster || '';
+    singleMovieBackdrop.value = movie.backdrop || '';
+    singleMovieOverview.value = movie.overview || '';
+    driveManagerModal.classList.remove('hidden');
+    singleMovieTitle.focus();
+  }
+
+  if (cancelEditMovieBtn) {
+    cancelEditMovieBtn.addEventListener('click', resetSingleMovieForm);
+  }
+
   function openDriveManager() {
+    if (!isAdminUser()) {
+      if (adminLoginModal) adminLoginModal.classList.remove('hidden');
+      return;
+    }
     syncFolderStatus.classList.add('hidden');
+    resetSingleMovieForm();
     renderManagerMoviesList(allDriveMovies);
     driveManagerModal.classList.remove('hidden');
   }
@@ -1308,12 +1539,13 @@
       return;
     }
 
+    const adminControls = isAdminUser();
     managerMoviesList.innerHTML = movies
       .map(
         (m) => `
         <div class="addon-row-item">
           <div style="display:flex; align-items:center; gap:0.65rem;">
-            <img src="${escapeHtml(m.poster)}" alt="" style="width:32px; height:46px; object-fit:cover; border-radius:4px;" />
+            <img src="${escapeHtml(m.poster)}" alt="" style="width:32px; height:46px; object-fit:cover; border-radius:4px;" onerror="this.onerror=null;this.src='https://placehold.co/80x120/151828/f5c518?text=Filme';" />
             <div>
               <strong>${escapeHtml(m.title)} (${escapeHtml(m.year || 'HD')})</strong>
               <div style="font-size:0.72rem; color:var(--text-muted);">${escapeHtml(m.category)}</div>
@@ -1321,7 +1553,12 @@
           </div>
           <div style="display:flex; gap:0.4rem;">
             <button type="button" class="btn-blue-pill btn-xs play-mgr-btn" data-id="${escapeHtml(m.id)}">▶ Projetar</button>
-            <button type="button" class="btn-secondary btn-xs del-mgr-btn" data-id="${escapeHtml(m.id)}" style="color:#fca5a5;">🗑️</button>
+            ${
+              adminControls
+                ? `<button type="button" class="btn-secondary btn-xs edit-mgr-btn" data-id="${escapeHtml(m.id)}" title="Editar Filme">✏️</button>
+                   <button type="button" class="btn-secondary btn-xs del-mgr-btn" data-id="${escapeHtml(m.id)}" style="color:#fca5a5;" title="Excluir Filme">🗑️</button>`
+                : ''
+            }
           </div>
         </div>
       `
@@ -1338,15 +1575,37 @@
       });
     });
 
+    managerMoviesList.querySelectorAll('.edit-mgr-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!isAdminUser()) return;
+        const movie = allDriveMovies.find((x) => x.id === btn.dataset.id);
+        if (movie) populateSingleMovieFormForEdit(movie);
+      });
+    });
+
     managerMoviesList.querySelectorAll('.del-mgr-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
+        if (!isAdminUser()) {
+          alert('Acesso negado: apenas administradores podem excluir filmes.');
+          return;
+        }
         const idToRemove = btn.dataset.id;
-        allDriveMovies = allDriveMovies.filter((m) => m.id !== idToRemove);
-        saveLocalMoviesBackup(allDriveMovies);
-        renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
         try {
-          await fetch(`/api/drive/movies/${encodeURIComponent(idToRemove)}`, { method: 'DELETE' });
-        } catch (_) {}
+          const res = await fetch(`/api/drive/movies/${encodeURIComponent(idToRemove)}`, {
+            method: 'DELETE',
+            headers: getAdminAuthHeaders()
+          });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            alert(errData.error || 'Acesso negado ao excluir filme.');
+            return;
+          }
+          allDriveMovies = allDriveMovies.filter((m) => m.id !== idToRemove);
+          saveLocalMoviesBackup(allDriveMovies);
+          renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
+        } catch (err) {
+          alert('Erro ao excluir filme: ' + err.message);
+        }
       });
     });
   }
@@ -1407,7 +1666,7 @@
         featured: addedCount === 0,
         driveFileId: file.fileId,
         rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
-        streamUrl: `/api/gdrive/stream/${file.fileId}`,
+        streamUrl: `/api/videos/${file.fileId}/stream`,
         poster: `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
         backdrop: '',
         overview: `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
@@ -1428,33 +1687,45 @@
 
   syncFolderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!isAdminUser()) {
+      alert('Acesso negado: apenas administradores podem sincronizar pastas.');
+      return;
+    }
     const folderUrl = driveFolderUrlInput.value.trim();
     if (!folderUrl) return;
 
     syncFolderStatus.classList.remove('hidden');
     syncFolderStatus.style.background = 'rgba(82, 123, 255, 0.16)';
     syncFolderStatus.style.color = '#93b4ff';
-    syncFolderStatus.textContent = '⏳ Escaneando pasta do Google Drive e buscando capas...';
+    syncFolderStatus.textContent = '⏳ Escaneando pasta do Google Drive, reconciliando exclusões e buscando capas...';
     syncFolderSubmitBtn.disabled = true;
 
     try {
       let data = null;
+      let statusHttp = 0;
       try {
         const res = await fetch('/api/drive/sync-folder', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             folderUrl,
             defaultCategory: driveFolderCategorySelect.value
           })
         });
+        statusHttp = res.status;
         const rawText = await res.text();
         if (rawText && rawText.trim().startsWith('{')) {
           data = JSON.parse(rawText);
         }
       } catch (_) {}
 
-      // Se a rota Serverless deu timeout ou retornou resposta vazia, usa o Scanner Cliente!
+      if (statusHttp === 401 || statusHttp === 403) {
+        syncFolderStatus.style.background = 'rgba(239, 68, 68, 0.2)';
+        syncFolderStatus.style.color = '#fca5a5';
+        syncFolderStatus.textContent = (data && data.error) || 'Acesso negado: faça login como Administrador.';
+        return;
+      }
+
       if (!data || (!data.success && !data.error)) {
         data = await scanDriveFolderClientSide(folderUrl, driveFolderCategorySelect.value);
       }
@@ -1464,19 +1735,14 @@
         syncFolderStatus.style.color = '#fca5a5';
         syncFolderStatus.textContent = data.error;
       } else {
-        if (Array.isArray(data.movies) && data.movies.length > 0) {
-          const merged = new Map();
-          for (const m of [...allDriveMovies, ...data.movies]) {
-            if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2') {
-              merged.set(m.id, m);
-            }
-          }
-          allDriveMovies = Array.from(merged.values());
+        if (Array.isArray(data.movies)) {
+          allDriveMovies = data.movies.filter((m) => m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2');
           saveLocalMoviesBackup(allDriveMovies);
         }
+        const removedMsg = data.removedCount ? `, ${data.removedCount} removido(s)` : '';
         syncFolderStatus.style.background = 'rgba(16, 185, 129, 0.2)';
         syncFolderStatus.style.color = '#34d399';
-        syncFolderStatus.textContent = `✅ Pasta sincronizada! ${data.discoveredCount} vídeo(s) encontrado(s) na pasta (${data.addedCount} novo(s) importado(s))!`;
+        syncFolderStatus.textContent = `✅ Pasta sincronizada! ${data.discoveredCount} vídeo(s) na pasta (${data.addedCount || 0} novo(s)${removedMsg})!`;
         driveFolderUrlInput.value = '';
         renderCatalogFromMoviesList(allDriveMovies, 'all', '');
         if (isP2PHost) {
@@ -1491,6 +1757,51 @@
       syncFolderSubmitBtn.disabled = false;
     }
   });
+
+  if (reconcileDriveBtn) {
+    reconcileDriveBtn.addEventListener('click', async () => {
+      if (!isAdminUser()) {
+        alert('Acesso negado: apenas administradores podem reconciliar o catálogo.');
+        return;
+      }
+      syncFolderStatus.classList.remove('hidden');
+      syncFolderStatus.style.background = 'rgba(82, 123, 255, 0.16)';
+      syncFolderStatus.style.color = '#93b4ff';
+      syncFolderStatus.textContent = '🧹 Verificando arquivos excluídos ou sem permissão no Google Drive...';
+      reconcileDriveBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/drive/reconcile', {
+          method: 'POST',
+          headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            folderUrl: driveFolderUrlInput.value.trim() || undefined
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          syncFolderStatus.style.background = 'rgba(239, 68, 68, 0.2)';
+          syncFolderStatus.style.color = '#fca5a5';
+          syncFolderStatus.textContent = data.error || 'Falha temporária ao reconciliar com o Google Drive. Catálogo preservado.';
+        } else {
+          if (Array.isArray(data.movies)) {
+            allDriveMovies = data.movies;
+            saveLocalMoviesBackup(allDriveMovies);
+            renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
+          }
+          syncFolderStatus.style.background = 'rgba(16, 185, 129, 0.2)';
+          syncFolderStatus.style.color = '#34d399';
+          syncFolderStatus.textContent = `✅ Reconciliação concluída! ${data.removedCount || 0} filme(s) indisponível(is) removido(s), ${data.addedCount || 0} novo(s) adicionado(s). Total: ${allDriveMovies.length} filmes.`;
+        }
+      } catch (err) {
+        syncFolderStatus.style.background = 'rgba(239, 68, 68, 0.2)';
+        syncFolderStatus.style.color = '#fca5a5';
+        syncFolderStatus.textContent = 'Erro de rede ao reconciliar: ' + err.message;
+      } finally {
+        reconcileDriveBtn.disabled = false;
+      }
+    });
+  }
 
   // Busca de capa direto no cliente ou via backend
   async function fetchClientMovieMeta(title) {
@@ -1530,15 +1841,24 @@
 
   addSingleMovieForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!isAdminUser()) {
+      alert('Acesso negado: apenas administradores podem adicionar ou editar filmes.');
+      return;
+    }
+    const editingId = singleMovieIdInput ? singleMovieIdInput.value.trim() : '';
     const title = singleMovieTitle.value.trim();
     const rawUrl = singleMovieUrl.value.trim();
     if (!title || !rawUrl) return;
 
-    let savedMovie = null;
     try {
-      const res = await fetch('/api/drive/movies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const endpoint = editingId
+        ? `/api/drive/movies/${encodeURIComponent(editingId)}`
+        : '/api/drive/movies';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           title,
           rawUrl,
@@ -1547,57 +1867,40 @@
           poster: singleMoviePoster.value.trim(),
           backdrop: singleMovieBackdrop.value.trim(),
           overview: singleMovieOverview.value.trim(),
-          autoFetchCover: true
+          autoFetchCover: !editingId
         })
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.movie) savedMovie = data.movie;
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || 'Erro ao salvar filme no catálogo.');
+        return;
       }
-    } catch (_) {}
 
-    if (!savedMovie) {
-      const fileId = extractDriveFileId(rawUrl);
-      const posterUrl =
-        singleMoviePoster.value.trim() ||
-        `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(title)}`;
-      savedMovie = {
-        id: `drive_${Date.now()}`,
-        title,
-        year: singleMovieYear.value.trim() || '2026',
-        rating: '8.5',
-        category:
-          singleMovieCategory.value === 'Auto' ? 'Lançamentos & Destaques' : singleMovieCategory.value,
-        featured: true,
-        driveFileId: fileId,
-        rawUrl,
-        streamUrl: fileId ? `/api/gdrive/stream/${fileId}` : rawUrl,
-        poster: posterUrl,
-        backdrop: singleMovieBackdrop.value.trim() || posterUrl,
-        overview:
-          singleMovieOverview.value.trim() ||
-          'Filme armazenado no seu Google Drive pronto para assistir com amigos.',
-        addedAt: Date.now()
-      };
+      const savedMovie = data.movie;
+      if (savedMovie) {
+        const existingIdx = allDriveMovies.findIndex((m) => m.id === savedMovie.id);
+        if (existingIdx >= 0) {
+          allDriveMovies[existingIdx] = savedMovie;
+        } else {
+          allDriveMovies.unshift(savedMovie);
+        }
+        saveLocalMoviesBackup(allDriveMovies);
+        renderCatalogFromMoviesList(allDriveMovies, 'all', '');
+
+        if (isP2PHost) {
+          broadcastFromP2PHost('catalog_synced', { movies: allDriveMovies });
+        }
+
+        resetSingleMovieForm();
+        driveManagerModal.classList.add('hidden');
+        if (!editingId) {
+          projectDriveMovieToRoom(savedMovie);
+        }
+      }
+    } catch (err) {
+      alert('Erro ao salvar filme: ' + err.message);
     }
-
-    allDriveMovies.unshift(savedMovie);
-    saveLocalMoviesBackup(allDriveMovies);
-    renderCatalogFromMoviesList(allDriveMovies, 'all', '');
-
-    if (isP2PHost) {
-      broadcastFromP2PHost('catalog_synced', { movies: allDriveMovies });
-    }
-
-    singleMovieTitle.value = '';
-    singleMovieUrl.value = '';
-    singleMovieYear.value = '';
-    singleMoviePoster.value = '';
-    singleMovieBackdrop.value = '';
-    singleMovieOverview.value = '';
-
-    driveManagerModal.classList.add('hidden');
-    projectDriveMovieToRoom(savedMovie);
   });
 
   // ==========================================
@@ -1612,6 +1915,7 @@
     detailYearBadge.textContent = movie.year || 'HD';
     detailTitle.textContent = movie.title;
     detailOverview.textContent = movie.overview || '';
+    updateAdminUiVisibility();
     movieDetailModal.classList.remove('hidden');
   }
 
@@ -1648,22 +1952,203 @@
     projectDriveMovieToRoom(selectedDetailMovie);
   });
 
+  if (editDriveMovieBtn) {
+    editDriveMovieBtn.addEventListener('click', () => {
+      if (!selectedDetailMovie || !isAdminUser()) return;
+      movieDetailModal.classList.add('hidden');
+      populateSingleMovieFormForEdit(selectedDetailMovie);
+    });
+  }
+
   deleteDriveMovieBtn.addEventListener('click', async () => {
     if (!selectedDetailMovie) return;
+    if (!isAdminUser()) {
+      alert('Acesso negado: apenas administradores podem excluir filmes.');
+      return;
+    }
     if (!confirm(`Remover "${selectedDetailMovie.title}" do catálogo?`)) return;
     const idToRemove = selectedDetailMovie.id;
-    allDriveMovies = allDriveMovies.filter((m) => m.id !== idToRemove);
-    saveLocalMoviesBackup(allDriveMovies);
-    renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
-    movieDetailModal.classList.add('hidden');
     try {
-      await fetch(`/api/drive/movies/${encodeURIComponent(idToRemove)}`, { method: 'DELETE' });
-    } catch (_) {}
+      const res = await fetch(`/api/drive/movies/${encodeURIComponent(idToRemove)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Não foi possível excluir o filme.');
+        return;
+      }
+      allDriveMovies = allDriveMovies.filter((m) => m.id !== idToRemove);
+      saveLocalMoviesBackup(allDriveMovies);
+      renderCatalogFromMoviesList(allDriveMovies, currentCategory, '');
+      movieDetailModal.classList.add('hidden');
+    } catch (err) {
+      alert('Erro ao excluir filme: ' + err.message);
+    }
   });
 
   // ==========================================
-  // PLAYER NATIVO CINE POMPEIA + FALLBACK PLAYER INTERNO DO DRIVE (.MKV / 4K)
+  // PLAYER NATIVO CINE POMPEIA + DIAGNÓSTICO DE ÁUDIO (FASE 5)
   // ==========================================
+  let currentDiagnostics = null;
+  let audioDecodeCheckTimer = null;
+
+  function hideAudioDiagBanner() {
+    if (nativeAudioDiagBanner) nativeAudioDiagBanner.classList.add('hidden');
+  }
+
+  function showAudioDiagBanner(messageHtml, showFallbackBtn = true) {
+    if (!nativeAudioDiagBanner || !nativeAudioDiagDesc) return;
+    nativeAudioDiagDesc.innerHTML = messageHtml;
+    if (switchCompatibleAudioBtn) {
+      switchCompatibleAudioBtn.classList.toggle('hidden', !showFallbackBtn);
+    }
+    nativeAudioDiagBanner.classList.remove('hidden');
+  }
+
+  if (dismissAudioDiagBtn) {
+    dismissAudioDiagBtn.addEventListener('click', hideAudioDiagBanner);
+  }
+
+  if (switchCompatibleAudioBtn) {
+    switchCompatibleAudioBtn.addEventListener('click', async () => {
+      if (!roomState || !roomState.media) return;
+      const fileId =
+        roomState.media.driveFileId ||
+        extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl);
+      if (!fileId) return;
+
+      // Se for admin e ffmpeg estiver disponível no servidor local, tenta preparar AAC compatível;
+      // caso contrário, alterna imediatamente para o Player Oficial do Drive que decodifica AC-3/DTS/AVI com som estéreo!
+      if (isAdminUser() && currentDiagnostics && currentDiagnostics.ffmpegAvailable && !currentDiagnostics.hasPreparedCompatibleAudio) {
+        switchCompatibleAudioBtn.disabled = true;
+        switchCompatibleAudioBtn.textContent = '⏳ Convertendo áudio para AAC Estéreo...';
+        try {
+          const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/prepare-audio`, {
+            method: 'POST',
+            headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ trackIndex: 0 })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.success) {
+            hideAudioDiagBanner();
+            const curTime = nativeVideo.currentTime || 0;
+            nativeVideo.src = `/api/videos/${encodeURIComponent(fileId)}/stream?prepared=1&t=${Date.now()}`;
+            nativeVideo.load();
+            nativeVideo.addEventListener('loadedmetadata', () => {
+              nativeVideo.currentTime = curTime;
+              nativeVideo.play().catch(() => {});
+            }, { once: true });
+            return;
+          }
+        } catch (_) {
+        } finally {
+          switchCompatibleAudioBtn.disabled = false;
+          switchCompatibleAudioBtn.textContent = '🔊 Ativar Áudio Compatível';
+        }
+      }
+
+      hideAudioDiagBanner();
+      if (iCanControl()) {
+        sendRoomAction('change_media', { playerType: 'drive_preview' });
+      } else {
+        switchPlayerRenderer('drive_preview');
+      }
+    });
+  }
+
+  function renderAudioTrackOptions(diag, fileId) {
+    if (!audioTrackSection || !audioTracksListContainer) return;
+    if (audioCodecBadgeInfo && diag) {
+      const containerStr = (diag.container || 'mp4').toUpperCase();
+      const audioStr = (diag.audioCodecs || []).join(', ') || 'Estéreo';
+      audioCodecBadgeInfo.textContent = `${containerStr} • Áudio: ${audioStr}`;
+    }
+    const tracks = [];
+    const htmlAudioTracks = nativeVideo.audioTracks;
+
+    if (htmlAudioTracks && htmlAudioTracks.length > 0) {
+      for (let i = 0; i < htmlAudioTracks.length; i += 1) {
+        const t = htmlAudioTracks[i];
+        tracks.push({
+          index: i,
+          label: t.label || t.language || `Faixa ${i + 1}`,
+          enabled: Boolean(t.enabled),
+          mode: 'native'
+        });
+      }
+    } else if (diag && Array.isArray(diag.languages) && diag.languages.length > 0) {
+      diag.languages.forEach((lang, idx) => {
+        const langCode = typeof lang === 'string' ? lang : lang.code || lang.language || 'und';
+        const labelMap = {
+          'pt-BR': '🇧🇷 Português (Dublado)',
+          en: '🇺🇸 Inglês (Original)',
+          und: `Faixa de Áudio ${idx + 1}`
+        };
+        const displayLabel = labelMap[langCode] || (typeof lang === 'object' && lang.label) || langCode;
+        tracks.push({
+          index: idx,
+          label: `${displayLabel} • ${(diag.audioCodecs && diag.audioCodecs[0]) || 'Estéreo'}`,
+          enabled: idx === 0,
+          mode: 'diagnostic'
+        });
+      });
+    }
+
+    if (tracks.length === 0) {
+      audioTrackSection.classList.add('hidden');
+      return;
+    }
+
+    audioTrackSection.classList.remove('hidden');
+    audioTracksListContainer.innerHTML = tracks
+      .map(
+        (t) => `
+        <button type="button" class="stremio-stream-item ${t.enabled ? 'active' : ''}" data-track-idx="${t.index}" data-track-mode="${t.mode}" style="text-align:left; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 10px; background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;">
+          <span class="stremio-stream-title">${escapeHtml(t.label)}</span>
+        </button>
+      `
+      )
+      .join('');
+
+    audioTracksListContainer.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.trackIdx) || 0;
+        const mode = btn.dataset.trackMode;
+        if (mode === 'native' && nativeVideo.audioTracks) {
+          for (let i = 0; i < nativeVideo.audioTracks.length; i += 1) {
+            nativeVideo.audioTracks[i].enabled = i === idx;
+          }
+        }
+        audioTracksListContainer.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (nativeSourcesDrawer) nativeSourcesDrawer.classList.add('hidden');
+      });
+    });
+  }
+
+  async function probeAndApplyAudioDiagnostics(fileId) {
+    hideAudioDiagBanner();
+    currentDiagnostics = null;
+    if (!fileId) return;
+
+    try {
+      const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/diagnostics`);
+      if (!res.ok) return;
+      const diag = await res.json();
+      currentDiagnostics = diag;
+      renderAudioTrackOptions(diag, fileId);
+
+      if (diag.requiresAudioFallbackOrRemux && !diag.hasPreparedCompatibleAudio) {
+        const codecLabel = (diag.audioCodecs || []).join(', ') || diag.container.toUpperCase();
+        showAudioDiagBanner(
+          `⚠️ <strong>Diagnóstico de Áudio:</strong> Este arquivo (${escapeHtml(diag.container.toUpperCase())}) utiliza áudio <strong>${escapeHtml(codecLabel)}</strong>, que o navegador pode reproduzir sem som no Player HTML5. Clique ao lado para ativar o <strong>Áudio Estéreo Compatível</strong>.`,
+          true
+        );
+      }
+    } catch (_) {}
+  }
+
   function switchPlayerRenderer(type) {
     if (!roomState) return;
     const fileId =
@@ -1674,10 +2159,11 @@
       try {
         nativeVideo.pause();
       } catch (_) {}
+      hideAudioDiagBanner();
       cineNativePlayerContainer.classList.add('hidden');
       drivePreviewIframe.classList.remove('hidden');
       drivePreviewIframe.src = `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`;
-      syncModeIndicator.textContent = '☁️ Player Oficial do Drive Ativo (Use a Claquete 3-2-1 para sincronizar)';
+      syncModeIndicator.textContent = '☁️ Player Oficial do Drive Ativo (Áudio Estéreo AAC Transcodificado • Use a Claquete 3-2-1)';
     } else {
       drivePreviewIframe.src = 'about:blank';
       drivePreviewIframe.classList.add('hidden');
@@ -1782,6 +2268,13 @@
     lastLoadedMediaSignature = signature;
 
     setNativeError('');
+    hideAudioDiagBanner();
+    if (audioDecodeCheckTimer) {
+      clearTimeout(audioDecodeCheckTimer);
+      audioDecodeCheckTimer = null;
+    }
+
+    const fileId = media.driveFileId || extractDriveFileId(media.rawUrl || media.streamUrl);
 
     if (media.playerType === 'drive_preview') {
       setNativeLoading(false);
@@ -1792,7 +2285,10 @@
     switchPlayerRenderer('native');
     const url = media.streamUrl;
     if (!url) return;
-    nativeDownloadBtn.href = url;
+
+    if (fileId) {
+      probeAndApplyAudioDiagnostics(fileId);
+    }
 
     if (hlsInstance) {
       hlsInstance.destroy();
@@ -1827,6 +2323,11 @@
         'loadedmetadata',
         () => {
           setNativeLoading(false);
+          // Garante que o player nunca inicie mudo acidentalmente
+          if (nativeVideo.volume === 0) {
+            nativeVideo.volume = 1;
+            nativeVolumeBar.value = '1';
+          }
           const effectivePlayback = { ...(playback || {}) };
           if ((!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) && roomState && roomState.participantCount <= 1) {
             const savedPos = getResumePosition(media.id);
@@ -2031,6 +2532,26 @@
   nativeVideo.addEventListener('playing', () => {
     setNativeLoading(false);
     setNativeError('');
+
+    // FASE 5: Detecção em tempo real de vídeo reproduzindo sem decodificar bytes de áudio (ex: AC-3 / DTS / E-AC-3)
+    if (audioDecodeCheckTimer) clearTimeout(audioDecodeCheckTimer);
+    audioDecodeCheckTimer = setTimeout(() => {
+      if (nativeVideo.paused || nativeVideo.currentTime < 1) return;
+      const hasWebkitCounter = typeof nativeVideo.webkitAudioDecodedByteCount === 'number';
+      const decodedAudioBytes = hasWebkitCounter ? nativeVideo.webkitAudioDecodedByteCount : -1;
+      const mozNoAudio = typeof nativeVideo.mozHasAudio === 'boolean' && !nativeVideo.mozHasAudio;
+
+      if ((hasWebkitCounter && decodedAudioBytes === 0) || mozNoAudio) {
+        const codecInfo =
+          currentDiagnostics && Array.isArray(currentDiagnostics.audioCodecs) && currentDiagnostics.audioCodecs.length > 0
+            ? currentDiagnostics.audioCodecs.join(', ')
+            : 'AC-3 / DTS Surround';
+        showAudioDiagBanner(
+          `🔇 <strong>Filme sem som detectado:</strong> O vídeo está reproduzindo, mas o navegador não suporta decodificar a trilha de áudio original (<strong>${escapeHtml(codecInfo)}</strong>). Clique ao lado para ativar o <strong>Áudio Estéreo Compatível</strong>.`,
+          true
+        );
+      }
+    }, 1800);
   });
   nativeVideo.addEventListener('volumechange', () => {
     nativeMuteBtn.textContent = nativeVideo.muted || nativeVideo.volume === 0 ? '🔇' : '🔊';
@@ -2261,8 +2782,12 @@
     onlineFriendsCount.textContent = `${state.participantCount} na sala`;
 
     navMovieShort.textContent = state.media.title;
-    currentMoviePoster.src =
-      state.media.poster || 'https://placehold.co/500x750/14141f/e50914?text=Cine+Pompeia';
+    const fallbackRoomPoster = 'https://placehold.co/500x750/14141f/e50914?text=Cine+Pompeia';
+    currentMoviePoster.onerror = () => {
+      currentMoviePoster.onerror = null;
+      currentMoviePoster.src = fallbackRoomPoster;
+    };
+    currentMoviePoster.src = state.media.poster || fallbackRoomPoster;
     currentMovieIds.textContent = `☁️ ${state.media.category || 'GOOGLE DRIVE HD'}`;
     currentMovieHeading.textContent = state.media.title;
     currentMovieOverview.textContent = state.media.overview || '';
@@ -2436,6 +2961,14 @@
     }
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    if (isChatCollapsed && msg.type !== 'system') {
+      unreadChatCount += 1;
+      if (chatUnreadBadge) {
+        chatUnreadBadge.textContent = String(unreadChatCount);
+        chatUnreadBadge.classList.remove('hidden');
+      }
+    }
   }
 
   chatForm.addEventListener('submit', (e) => {

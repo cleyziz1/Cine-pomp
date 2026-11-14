@@ -6,6 +6,24 @@
       "syncedAt": "08/11/2026, 17:24:18"
     }
   ],
+  "removedMovies": [
+    {
+      "id": "drive_1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
+      "driveFileId": "1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
+      "title": "Gigantes de Aço",
+      "reason": "file_deleted_404",
+      "removedAt": "2026-11-14T19:04:54.089Z"
+    },
+    {
+      "id": "drive_1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B",
+      "driveFileId": "1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B",
+      "title": "Carros 3",
+      "reason": "file_deleted_404",
+      "removedAt": "2026-11-14T19:04:54.090Z"
+    }
+  ],
+  "driveChangesPageToken": null,
+  "lastReconciledAt": "2026-11-14T19:10:11.877Z",
   "movies": [
     {
       "id": "drive_1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU",
@@ -19,8 +37,9 @@
       "streamUrl": "/api/gdrive/stream/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU",
       "poster": "https://image.tmdb.org/t/p/w500/x0nvYzQpyJc5pdT9lMnkMuYAg0O.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/subj7knTn4DeS6KS7qI66EQKe9i.jpg",
-      "overview": "É um novo dia para Peter Parker. Combatendo o crime em tempo integral como Homem-Aranha em um mundo que não se lembra mais dele e lidando com a pressão de ver seus antigos amigos seguirem em frente sem sua presença, Peter passa por uma mudança que talvez nem ele tenha o poder de controlar.",
-      "addedAt": 1794176579000
+      "overview": "É um novo dia para Peter Parker. Combatendo o crime em tempo integral como Homem-Aranha em um mundo que não se lembra mais dele e lidando com a pressão de ver seus antigos amigos seguirem em frente sem sua presença.",
+      "addedAt": 1794176579000,
+      "fileName": "Homem-Aranha - Um Novo Dia 2026 WEB-DL 1080p x264 DUAL 5.1.mkv"
     },
     {
       "id": "drive_1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
@@ -34,23 +53,9 @@
       "streamUrl": "/api/gdrive/stream/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
       "poster": "https://image.tmdb.org/t/p/w500/hMLxNLCXRDd62acfCBn6mIyW1HU.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/rW2xRFlJRbTnBJlQTSjQmjevIwb.jpg",
-      "overview": "Ao desembarcar na Normandia, no dia 6 de junho de 1944, o capitão Miller recebe a missão de comandar um grupo do segundo batalhão para o resgate do soldado James Ryan, caçula de quatro irmãos, dentre os quais três morreram em combate.",
-      "addedAt": 1794176577505
-    },
-    {
-      "id": "drive_1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
-      "title": "Gigantes de Aço",
-      "year": "2011",
-      "rating": "7.2",
-      "category": "Ação & Aventura",
-      "featured": false,
-      "driveFileId": "1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
-      "rawUrl": "https://drive.google.com/file/d/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7/view",
-      "streamUrl": "/api/gdrive/stream/1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
-      "poster": "https://image.tmdb.org/t/p/w500/pp74uUjwQTknGPqNrerj4FvU0ce.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/pjlxrd646cBYznHoPBWTzz6FujX.jpg",
-      "overview": "Em um futuro próximo, as máquinas substituem os seres humanos no ringue. As lutas de boxe acontecem entre robôs de alta tecnologia e Charlie, um ex-lutador frustrado, se une ao filho para construir um competidor imbatível.",
-      "addedAt": 1794176577342
+      "overview": "Ao desembarcar na Normandia, no dia 6 de junho de 1944, o capitão Miller recebe a missão de comandar um grupo do segundo batalhão para o resgate do soldado James Ryan.",
+      "addedAt": 1794176577505,
+      "fileName": "O.Resgate.do.Soldado.Ryan.1998.BluRay.1080p.x264.DUAL.5.1-STARCKFILMES.mkv"
     },
     {
       "id": "drive_1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
@@ -64,8 +69,9 @@
       "streamUrl": "/api/gdrive/stream/1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
       "poster": "https://image.tmdb.org/t/p/w500/A7nssMRIPauZhEVf2dzwsf4EALO.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/sd4xN5xi8tKRPrJOWwNiZEile7f.jpg",
-      "overview": "Ao viajar para a Califórnia para a disputa da corrida final da Copa Pistão contra O Rei e Chick Hicks, o famoso Relâmpago McQueen acidentalmente estraga a estrada da pequena cidade Radiator Springs e é condenado a consertá-la.",
-      "addedAt": 1794176577200
+      "overview": "Ao viajar para a Califórnia para a disputa da corrida final da Copa Pistão, o famoso Relâmpago McQueen acaba preso em Radiator Springs e descobre o verdadeiro significado de amizade.",
+      "addedAt": 1794176577200,
+      "fileName": "Carros.2006.OPEN.MATTE.IMAX.1080p.WEB-DL.H264.AC3.5.1.DUAL-MLD.mkv"
     },
     {
       "id": "drive_1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi",
@@ -80,22 +86,8 @@
       "poster": "https://image.tmdb.org/t/p/w500/fIKaabvE40T39nOIngcZPcPJeYe.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/robYRZk9LxJTwD7GlZCginji5k.jpg",
       "overview": "O astro das corridas, Relâmpago McQueen, e o carro-guincho, Mate, viajam para disputar o primeiro Grand Prix Mundial, que irá revelar o carro mais veloz do planeta.",
-      "addedAt": 1794176577100
-    },
-    {
-      "id": "drive_1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B",
-      "title": "Carros 3",
-      "year": "2017",
-      "rating": "6.9",
-      "category": "Animação & Família",
-      "featured": false,
-      "driveFileId": "1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B",
-      "rawUrl": "https://drive.google.com/file/d/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B/view",
-      "streamUrl": "/api/gdrive/stream/1O8YWLCL3qy33YI3FTHKnAp7GAJrOAV3B",
-      "poster": "https://image.tmdb.org/t/p/w500/oEmdfjqQnAWe1t23WiiW0icFhGv.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/4mlS1MitcOqdPLhxEFyk9Qwf5rr.jpg",
-      "overview": "Durante mais uma disputa eletrizante nas pistas, o campeão Relâmpago McQueen acelerou demais e acabou perdendo o controle. Agora ele precisará da ajuda da jovem técnica Cruz Ramirez para voltar ao topo.",
-      "addedAt": 1794176577000
+      "addedAt": 1794176577100,
+      "fileName": "Carros.2.2011.1080p.BluRay.H264.AC3.5.1.DUAL-MLD.mkv"
     },
     {
       "id": "drive_134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH",
@@ -110,7 +102,8 @@
       "poster": "https://image.tmdb.org/t/p/w500/jTN1hdfP88Km63waezqIN1uUqT3.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/qjTqY5coNiz6sVtPng40IzltsoN.jpg",
       "overview": "O trabalho de Buzz, Woody, Jessie e do resto da gangue fica exponencialmente mais difícil quando eles enfrentam uma nova ameaça à diversão: a tecnologia.",
-      "addedAt": 1794174767601
+      "addedAt": 1794174767601,
+      "fileName": "Toy.Story.5.2026.WEB-DL.1080p.x264.DUAL.5.1-STARCKFILMES.mkv"
     },
     {
       "id": "drive_17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq",
@@ -124,8 +117,9 @@
       "streamUrl": "/api/gdrive/stream/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq",
       "poster": "https://image.tmdb.org/t/p/w500/1HdMUghqlgOIvbsU9ZtO40IPRzl.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/htmYEfH7TQgzsXHCnNXxmoYKQtL.jpg",
-      "overview": "É o início do terceiro ano na escola de magia e bruxaria de Hogwarts. Harry, Ron e Hermione têm muito o que aprender. Mas uma ameaça ronda a escola e ela se chama Sirius Black.",
-      "addedAt": 1794174767433
+      "overview": "É o início do terceiro ano na escola de magia e bruxaria de Hogwarts. Harry, Ron e Hermione têm muito o que aprender, mas Sirius Black escapou de Azkaban.",
+      "addedAt": 1794174767433,
+      "fileName": "Harry.Potter.e.o.Prisioneiro.de.Azkaban.2004.1080p-WOLVERDONFILMES.COM.mkv"
     },
     {
       "id": "drive_1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z",
@@ -139,8 +133,9 @@
       "streamUrl": "/api/gdrive/stream/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z",
       "poster": "https://image.tmdb.org/t/p/w500/djbivExXSZb0sTO8uYaaQC5vMRM.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/eCynaAOgYYiw5yN5lBwz3IxqvaW.jpg",
-      "overview": "Nemo, um jovem peixe-palhaço aventureiro, é inesperadamente levado de sua casa na Grande Barreira de Corais para o aquário do consultório de um dentista. Cabe ao seu pai Marlin e à simpática Dory trazer Nemo para casa.",
-      "addedAt": 1794173573099
+      "overview": "Nemo, um jovem peixe-palhaço aventureiro, é levado da Grande Barreira de Corais para um aquário. Cabe ao seu pai Marlin e à simpática Dory atravessar o oceano para resgatá-lo.",
+      "addedAt": 1794173573099,
+      "fileName": "Procurando.Nemo.2003.Dublado.720p.BRrip.x264.mkv"
     },
     {
       "id": "drive_1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e",
@@ -154,8 +149,9 @@
       "streamUrl": "/api/gdrive/stream/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e",
       "poster": "https://image.tmdb.org/t/p/w500/3k9YHHlENlcIT8g2BqeXsaDI2Hh.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/18KSsDgcGQds7yOMC6MVRTbVJwt.jpg",
-      "overview": "O Distrito 21 do Departamento de Polícia de Chicago é composto pelos policiais uniformizados que lidam com o crime nas ruas e pela Unidade de Inteligência.",
-      "addedAt": 1794173572919
+      "overview": "O Distrito 21 do Departamento de Polícia de Chicago é composto pelos policiais uniformizados e pela Unidade de Inteligência que combate o crime organizado.",
+      "addedAt": 1794173572919,
+      "fileName": "P.D.mp4"
     },
     {
       "id": "drive_1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm",
@@ -169,8 +165,9 @@
       "streamUrl": "/api/gdrive/stream/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm",
       "poster": "https://image.tmdb.org/t/p/w500/ottRXMCQ9jPB318syTcfIdtJWIE.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/AcxbOWUbwtIEDisfuhNGHQNfnMK.jpg",
-      "overview": "Stitch, um alienígena, chega ao planeta Terra após fugir de sua prisão e tenta se passar por um cachorro para se camuflar. As coisas mudam quando Lilo, uma travessa menina, o adota de um abrigo de animais.",
-      "addedAt": 1794173572650
+      "overview": "Stitch, um experimento alienígena, cai no Havaí e é adotado pela jovem Lilo, aprendendo o significado de Ohana (família).",
+      "addedAt": 1794173572650,
+      "fileName": "Lilo & Stitch - Dublado (SeriesZoiudo).mp4"
     },
     {
       "id": "drive_1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn",
@@ -184,8 +181,9 @@
       "streamUrl": "/api/gdrive/stream/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn",
       "poster": "https://image.tmdb.org/t/p/w500/z21DCxiT2h0AnZsqp8VjFdHJw0N.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w500/z21DCxiT2h0AnZsqp8VjFdHJw0N.jpg",
-      "overview": "Trabalhadora e ambiciosa, Tiana sonha um dia abrir o seu próprio restaurante em Nova Orleans. Seus planos mudam radicalmente quando ela conhece o príncipe Naveen, que foi transformado em sapo pelo maligno Dr. Facilier.",
-      "addedAt": 1794173572491
+      "overview": "Trabalhadora e ambiciosa, Tiana sonha em abrir seu próprio restaurante em Nova Orleans, mas tudo muda quando ela conhece o príncipe Naveen transformado em sapo.",
+      "addedAt": 1794173572491,
+      "fileName": "A Princesa E O Sapo [2009] - Dublado (SeriesZoiudo).mp4"
     },
     {
       "id": "drive_19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN",
@@ -199,8 +197,9 @@
       "streamUrl": "/api/gdrive/stream/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN",
       "poster": "https://image.tmdb.org/t/p/w500/dMxSConpq47TFVTV6tcBTNIVvZp.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/kCQKdkfNc7Smox53QRalBO3Doe0.jpg",
-      "overview": "Nesta aventura musical, Barbie estrela como Tori, a bondosa princesa de Meribella que preferia cantar e dançar a realizar seus deveres reais. Quando sua pop star favorita Keira visita o reino, as meninas descobrem que têm muito em comum e decidem trocar de lugar!",
-      "addedAt": 1794173572331
+      "overview": "A princesa Tori e sua pop star favorita Keira descobrem que têm muito em comum e usam sua magia para trocar de lugar!",
+      "addedAt": 1794173572331,
+      "fileName": "25 - Barbie a Princesa e a Pop Star.avi"
     },
     {
       "id": "drive_1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2",
@@ -214,8 +213,9 @@
       "streamUrl": "/api/gdrive/stream/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2",
       "poster": "https://image.tmdb.org/t/p/w500/3jNK0WP5qDewsdJQl88qFy3Xu8v.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/jXD8EoKLyiQzfjWc125hrAzcJ07.jpg",
-      "overview": "Barbie interpreta Blair Willows, uma garota bondosa que é sorteada para frequentar a exclusiva Escola de Princesas, um lugar incrível onde as meninas aprendem dança de salão, etiqueta para o chá da tarde e boas maneiras de princesa.",
-      "addedAt": 1794173572169
+      "overview": "Blair Willows é sorteada para frequentar a exclusiva Escola de Princesas e descobre um segredo real que pode mudar todo o reino.",
+      "addedAt": 1794173572169,
+      "fileName": "22 - Barbie Escola de Princesas.mp4"
     },
     {
       "id": "drive_1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
@@ -229,8 +229,9 @@
       "streamUrl": "/api/gdrive/stream/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
       "poster": "https://image.tmdb.org/t/p/w500/zAeOSpIY5FfaF4RhuZgUWyWF0VH.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/yQy9Y3p5INwkfTuHSnzYnz4MCV3.jpg",
-      "overview": "A história continua anos depois de Tess e Anna passarem por uma crise de identidade. Agora, Anna é mãe e tem uma futura enteada, enfrentando os desafios de unir duas famílias.",
-      "addedAt": 1794173249678
+      "overview": "Anos depois de Tess e Anna passarem por uma crise de identidade, um novo feitiço faz a família inteira trocar de corpo novamente.",
+      "addedAt": 1794173249678,
+      "fileName": "Uma.Sexta-Feira.Mais.Louca.Ainda.2025.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv"
     },
     {
       "id": "drive_1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT",
@@ -245,7 +246,8 @@
       "poster": "https://image.tmdb.org/t/p/w500/48h40o6Q97hZaqH0g7bOiXOrImX.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/6yeVcxFR0j08vlv2OlL6zbewm4D.jpg",
       "overview": "Em sua última missão de treinamento, um engenheiro de combate precisa liderar sua equipe de elite em uma luta pela sobrevivência contra uma máquina mortal.",
-      "addedAt": 1794173249512
+      "addedAt": 1794173249512,
+      "fileName": "MÃ¡quina.de.Guerra.2026.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv"
     },
     {
       "id": "drive_11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
@@ -259,8 +261,9 @@
       "streamUrl": "/api/gdrive/stream/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
       "poster": "https://image.tmdb.org/t/p/w500/spydMyyD81HjGJVwZvjajkrWW1h.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/ehzI1mVcnHqB58NqPyQwpMqcVoz.jpg",
-      "overview": "Deckard Shaw busca vingança contra Dominic Toretto e sua família por deixarem seu irmão em coma. Dom, Brian e toda a equipe se reúnem para mais uma corrida eletrizante.",
-      "addedAt": 1794172838591
+      "overview": "Deckard Shaw busca vingança contra Dominic Toretto e sua família. Dom, Brian e toda a equipe se reúnem para mais uma missão impossível.",
+      "addedAt": 1794172838591,
+      "fileName": "Velozes & Furiosos 7 (2015) 1080p Dublado BRSHARES.mkv"
     },
     {
       "id": "drive_1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk",
@@ -274,8 +277,9 @@
       "streamUrl": "/api/gdrive/stream/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk",
       "poster": "https://image.tmdb.org/t/p/w500/kTHDVXVTT62gJY9WfZnaXdmtvZE.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/pDKFL1zcHzEpmz4MJA5JJnRbJeD.jpg",
-      "overview": "Uma misteriosa presença dizima grande parte da sociedade. Cinco anos depois, uma sobrevivente e seus dois filhos saem em busca de um abrigo seguro.",
-      "addedAt": 1794172838434
+      "overview": "Uma misteriosa presença dizima grande parte da sociedade. Cinco anos depois, Malorie e seus dois filhos saem de olhos vendados pelo rio em busca de um abrigo seguro.",
+      "addedAt": 1794172838434,
+      "fileName": "Bird Box.mp4"
     },
     {
       "id": "drive_10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ",
@@ -289,8 +293,9 @@
       "streamUrl": "/api/gdrive/stream/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ",
       "poster": "https://image.tmdb.org/t/p/w500/w6ODQ3TOsBtI1gDRYfQ4nucA1Qj.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/7xQk3HdCvkNmk3gblDGn9fVnbsT.jpg",
-      "overview": "Roddy St. James, o mimado ratinho de estimação, acha que já chegou lá... até que entra literalmente pelo cano e vai parar num submundo de rãs ninjas, ratos-capangas e lesmas cantoras.",
-      "addedAt": 1794171659286
+      "overview": "Roddy St. James, um mimado ratinho de estimação, entra literalmente pelo cano e vai parar em uma agitada cidade subterrânea.",
+      "addedAt": 1794171659286,
+      "fileName": "Por.Ãgua.Abaixo.2006.1080p.WEB-DL.x264.DUAL.5.1.mkv"
     },
     {
       "id": "drive_1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN",
@@ -304,8 +309,9 @@
       "streamUrl": "/api/gdrive/stream/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN",
       "poster": "https://image.tmdb.org/t/p/w500/dsvUR5aEVSkB1Sro7nT6Khqik71.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/7FWlcZq3r6525LWOcvO9kNWurN1.jpg",
-      "overview": "Depois do ataque de Ultron, os políticos decidem controlar os Vingadores, já que suas ações afetam toda a humanidade. A decisão coloca o Capitão América em rota de colisão com o Homem de Ferro.",
-      "addedAt": 1794171659115
+      "overview": "Depois do ataque de Ultron, os governos mundiais decidem controlar os Vingadores, colocando o Capitão América em rota de colisão com o Homem de Ferro.",
+      "addedAt": 1794171659115,
+      "fileName": "CapitÃ£o.AmÃ©rica.Guerra.Civil.2016.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv"
     },
     {
       "id": "drive_1UPS01K81aZYh6sofmAUkwBjFYN7D09RH",
@@ -319,8 +325,9 @@
       "streamUrl": "/api/gdrive/stream/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH",
       "poster": "https://image.tmdb.org/t/p/w500/n4PJa4xVo4SjIsBvTA0yGMKjTBh.jpg",
       "backdrop": "https://image.tmdb.org/t/p/original/kpqsljPQtWqPKJBTAEtoXtQZ9Ko.jpg",
-      "overview": "Um ex-soldado ferido e seu cão de guerra aposentado lutam para sobreviver na região do Alasca e encontrar o caminho de volta para casa após um acidente aéreo na mata.",
-      "addedAt": 1794170087996
+      "overview": "Um ex-soldado ferido e seu cão de guerra aposentado lutam para sobreviver na região selvagem do Alasca após um acidente aéreo.",
+      "addedAt": 1794170087996,
+      "fileName": "CoraÃ§Ã£o.Selvagem.2026.1080p.WEB-DL.5.1.H.264.DUAL-XFILME.ORG.mkv"
     },
     {
       "id": "drive_1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV",
@@ -334,8 +341,9 @@
       "streamUrl": "/api/gdrive/stream/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV",
       "poster": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
-      "overview": "O Dr. Tezla descobre que os Racing Drones tomaram a Roda do Poder e convoca os melhores pilotos das equipes Teku e Metal Maniacs para encarar os Reinos de Corrida em 4K Remastered.",
-      "addedAt": 1794169458458
+      "overview": "O Dr. Tezla convoca os melhores pilotos das equipes Teku e Metal Maniacs para encarar os Reinos de Corrida contra os Racing Drones (4K Remastered).",
+      "addedAt": 1794169458458,
+      "fileName": "[4K REMASTERED] ACCELERACERS 1.0 - IGNIÃÃO DUBLADO PT-BR.webm"
     },
     {
       "id": "drive_1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6",
@@ -349,8 +357,9 @@
       "streamUrl": "/api/gdrive/stream/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6",
       "poster": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
-      "overview": "Os pilotos Teku e Metal Maniacs enfrentam novos Reinos de Corrida como o Reino da Água e o Reino da Metrópole, enquanto misteriosos carros prateados (Silencerz) entram na disputa.",
-      "addedAt": 1794169458321
+      "overview": "Os pilotos Teku e Metal Maniacs enfrentam o Reino da Água e o Reino da Metrópole enquanto os misteriosos Silencerz entram na disputa (4K Remastered).",
+      "addedAt": 1794169458321,
+      "fileName": "[4K REMASTERED] ACCELERACERS 2.0 A VELOCIDADE DO SILENCIO DUBLADO PT-BR.webm"
     },
     {
       "id": "drive_1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP",
@@ -364,8 +373,9 @@
       "streamUrl": "/api/gdrive/stream/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP",
       "poster": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
-      "overview": "A disputa pelos AcceleChargers se intensifica entre os humanos, os Racing Drones e os Silencerz em corridas de tirar o fôlego em 4K Remastered.",
-      "addedAt": 1794169458183
+      "overview": "A disputa pelos AcceleChargers se intensifica entre os humanos, os Racing Drones e os Silencerz (4K Remastered).",
+      "addedAt": 1794169458183,
+      "fileName": "[4K REMASTERED] ACCELERACERS 3.0 PONTO DE RUPTURA DUBLADO PT-BR.webm"
     },
     {
       "id": "drive_1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr",
@@ -379,8 +389,9 @@
       "streamUrl": "/api/gdrive/stream/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr",
       "poster": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg",
-      "overview": "Vert Wheeler enfrenta Gelorum na Corrida Cósmica definitiva enquanto os Teku e Metal Maniacs invadem o quartel-general dos Drones para resgatar Wylde.",
-      "addedAt": 1794169458037
+      "overview": "Vert Wheeler enfrenta Gelorum na Corrida Cósmica definitiva enquanto os Teku e Metal Maniacs invadem o quartel-general dos Drones (4K Remastered).",
+      "addedAt": 1794169458037,
+      "fileName": "ACCELERACERS 4.0 A CORRIDA FINAL DUBLADO PT-BR.webm"
     }
   ]
 }
