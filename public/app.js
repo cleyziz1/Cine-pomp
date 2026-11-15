@@ -2804,6 +2804,10 @@
         videoCodecs: media.videoCodecs || [],
         audioCodecs: media.audioCodecs || [],
         browserAudioSupported: !preRequiresCompat,
+        hasSidecarAudio0: Boolean(media.hasSidecarAudio0),
+        sidecarAudioUrl: media.sidecarAudioUrl || null,
+        isEbmlRemappableDual: Boolean(media.isEbmlRemappableDual),
+        requiresSidecarAudio: Boolean(media.requiresSidecarAudio),
         requiresAudioFallbackOrRemux: preRequiresCompat,
         recommendedCustomPlayerUrl: preResolvedUrl
       };

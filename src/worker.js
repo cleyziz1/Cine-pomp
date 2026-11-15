@@ -490,7 +490,7 @@ async function getDriveFileMetadata(fileId, env, options = {}) {
     if (requestUrl && env) {
       const reg = await getMediaRegistry(env, requestUrl);
       const regEntry = reg && reg.files && reg.files[fileId];
-      if (regEntry && regEntry.size > 0) {
+      if (regEntry && regEntry.size > 10485760) {
         const meta = {
           id: fileId,
           name: regEntry.fileName || `${fileId}.${regEntry.container || 'mp4'}`,
@@ -626,7 +626,7 @@ async function probeMediaCodecsWorker(fileId, env, requestUrl) {
       subtitleTracks: regEntry.subtitleTracks || [],
       browserVideoSupported: regEntry.container !== 'avi',
       browserAudioSupported: primaryCompat || isEbmlDual || hasSidecar || hasCompatMp4,
-      primaryTrackCompat,
+      primaryTrackCompat: primaryCompat,
       isEbmlRemappableDual: isEbmlDual,
       hasSidecarAudio0: hasSidecar,
       sidecarAudioUrl: regEntry.sidecarAudioUrl || (hasSidecar ? `/media_cache/${fileId}/audio_0.m4a` : null),
