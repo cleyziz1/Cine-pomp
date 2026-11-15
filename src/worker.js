@@ -900,28 +900,43 @@ async function handleStream(request, env, fileId) {
 
     const transformedStream = new ReadableStream({
       async pull(controller) {
-        const { done, value } = await reader.read();
-        if (done) {
-          if (!headerAdjusted && accum.byteLength > 0) {
-            headerAdjusted = true;
-            controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
-            accum = new Uint8Array(0);
+        if (!headerAdjusted) {
+          while (!headerAdjusted) {
+            const { done, value } = await reader.read();
+            if (done) {
+              headerAdjusted = true;
+              if (accum.byteLength > 0) {
+                controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
+                accum = new Uint8Array(0);
+              }
+              controller.close();
+              return;
+            }
+            if (value && value.byteLength > 0) {
+              const merged = new Uint8Array(accum.byteLength + value.byteLength);
+              merged.set(accum, 0);
+              merged.set(value, accum.byteLength);
+              accum = merged;
+            }
+            if (accum.byteLength >= 32768) {
+              headerAdjusted = true;
+              controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
+              accum = new Uint8Array(0);
+              return;
+            }
           }
-          controller.close();
           return;
         }
-        if (!headerAdjusted) {
-          const merged = new Uint8Array(accum.byteLength + value.byteLength);
-          merged.set(accum, 0);
-          merged.set(value, accum.byteLength);
-          accum = merged;
-          if (accum.byteLength >= 16384) {
-            headerAdjusted = true;
-            controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
-            accum = new Uint8Array(0);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            controller.close();
+            return;
           }
-        } else {
-          controller.enqueue(value);
+          if (value && value.byteLength > 0) {
+            controller.enqueue(value);
+            return;
+          }
         }
       },
       cancel() {
