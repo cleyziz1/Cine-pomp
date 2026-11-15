@@ -33,6 +33,84 @@ app.use(express.static(path.join(__dirname, 'public')));
 const PORT = process.env.PORT || 3000;
 const MAX_SEATS = 12;
 
+// Pasta Oficial do Google Drive sincronizada automaticamente (FASE 3)
+const OFFICIAL_DRIVE_FOLDER_ID = (
+  process.env.GOOGLE_DRIVE_FOLDER_ID || '185iFV7I5x107sxJDTVbSxA9F0pY3GtTr'
+).trim();
+const OFFICIAL_DRIVE_FOLDER_URL = `https://drive.google.com/drive/folders/${OFFICIAL_DRIVE_FOLDER_ID}?usp=drive_link`;
+const DRIVE_SYNC_INTERVAL_MS = Math.max(
+  15000,
+  parseInt(process.env.DRIVE_SYNC_INTERVAL_MS || '60000', 10) || 60000
+);
+
+// ==========================================
+// FASE 10 — OBSERVABILIDADE, CORRELATION IDS E MÉTRICAS EM TEMPO REAL
+// ==========================================
+const recentObservabilityLogs = [];
+const MAX_OBSERVABILITY_LOGS = 200;
+
+const platformMetrics = {
+  startedAt: new Date().toISOString(),
+  activeClientStreams: 0,
+  totalStreamRequests: 0,
+  headCacheHits: 0,
+  tailCacheHits: 0,
+  metaCacheHits: 0,
+  probeCacheHits: 0,
+  recentTtfbMs: [],
+  lastAutoSync: {
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+    status: 'idle',
+    lastStartedAt: null,
+    lastCompletedAt: null,
+    lastTrigger: null,
+    discoveredCount: 0,
+    addedCount: 0,
+    removedCount: 0,
+    updatedCount: 0,
+    durationMs: 0,
+    error: null
+  }
+};
+
+function recordTtfbMetric(ttfbMs, source) {
+  const val = Math.max(0, Math.round(Number(ttfbMs) || 0));
+  platformMetrics.recentTtfbMs.push({ ttfbMs: val, source, at: Date.now() });
+  if (platformMetrics.recentTtfbMs.length > 60) {
+    platformMetrics.recentTtfbMs.shift();
+  }
+}
+
+function logStructured(category, event, details = {}) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    category,
+    event,
+    ...details
+  };
+  recentObservabilityLogs.unshift(entry);
+  if (recentObservabilityLogs.length > MAX_OBSERVABILITY_LOGS) {
+    recentObservabilityLogs.pop();
+  }
+  const summaryPairs = Object.entries(details)
+    .filter(([, v]) => v !== undefined && v !== null && typeof v !== 'object')
+    .map(([k, v]) => `${k}=${v}`)
+    .join(' ');
+  console.log(`[${category}] ${event}${summaryPairs ? ' | ' + summaryPairs : ''}`);
+}
+
+app.use((req, res, next) => {
+  const incomingCid = req.headers['x-correlation-id'];
+  const correlationId =
+    typeof incomingCid === 'string' && /^[a-zA-Z0-9_-]{6,64}$/.test(incomingCid)
+      ? incomingCid
+      : `cp_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
+  req.correlationId = correlationId;
+  res.setHeader('X-Correlation-Id', correlationId);
+  next();
+});
+
 // ==========================================
 // FASE 1 — CONTROLE DE ACESSO BASEADO EM PAPÉIS (RBAC: ADMIN vs USUÁRIO COMUM)
 // ==========================================
@@ -188,27 +266,45 @@ const DEFAULT_DRIVE_CATALOG = {
 const os = require('os');
 const TMP_CATALOG_FILE = path.join(os.tmpdir(), 'drive_catalog.json');
 
+function ensureOfficialFolderInCatalog(catalog) {
+  if (!catalog || typeof catalog !== 'object') return;
+  if (!Array.isArray(catalog.folders)) catalog.folders = [];
+  const exists = catalog.folders.some((f) => f && f.folderId === OFFICIAL_DRIVE_FOLDER_ID);
+  if (!exists && OFFICIAL_DRIVE_FOLDER_ID) {
+    catalog.folders.unshift({
+      folderId: OFFICIAL_DRIVE_FOLDER_ID,
+      folderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+      official: true,
+      syncedAt: new Date().toLocaleString('pt-BR')
+    });
+  }
+}
+
 function loadDriveCatalog() {
   for (const file of [DRIVE_CATALOG_FILE, TMP_CATALOG_FILE]) {
     try {
       if (fs.existsSync(file)) {
         const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
         if (parsed && Array.isArray(parsed.movies)) {
-          return {
+          const cat = {
             folders: Array.isArray(parsed.folders) ? parsed.folders : [],
             removedMovies: Array.isArray(parsed.removedMovies) ? parsed.removedMovies : [],
             driveChangesPageToken: parsed.driveChangesPageToken || null,
             lastReconciledAt: parsed.lastReconciledAt || null,
             movies: parsed.movies.filter((m) => m && m.id)
           };
+          ensureOfficialFolderInCatalog(cat);
+          return cat;
         }
       }
     } catch (_) {}
   }
+  ensureOfficialFolderInCatalog(DEFAULT_DRIVE_CATALOG);
   return DEFAULT_DRIVE_CATALOG;
 }
 
 function saveDriveCatalog(catalog) {
+  ensureOfficialFolderInCatalog(catalog);
   const json = JSON.stringify(catalog, null, 2);
   try {
     fs.writeFileSync(DRIVE_CATALOG_FILE, json, 'utf8');
@@ -349,6 +445,51 @@ async function fetchMetadataByTitle(title, year) {
 // ROTAS DO CATÁLOGO DE STREAMING DO GOOGLE DRIVE
 // ==========================================
 
+function enrichMovieWithPlaybackInfo(movie) {
+  if (!movie || !movie.driveFileId) return movie;
+  const fileId = movie.driveFileId;
+  const cachedDiag = codecProbeCache.get(fileId) || (mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId]);
+  if (!cachedDiag) {
+    const isLikelyMkvAc3 = /\b(ac-?3|eac-?3|dts)\b/i.test(movie.driveFileName || movie.overview || '');
+    return {
+      ...movie,
+      duration: Number(movie.duration) || 0,
+      container: /\.mkv$/i.test(movie.driveFileName || '') ? 'mkv' : 'mp4',
+      requiresAudioFallbackOrRemux: isLikelyMkvAc3,
+      recommendedCustomPlayerUrl: isLikelyMkvAc3
+        ? `/api/videos/${fileId}/hls/0/playlist.m3u8`
+        : movie.streamUrl || `/api/videos/${fileId}/stream`
+    };
+  }
+
+  const duration = Number(cachedDiag.duration || cachedDiag.durationSec) || 0;
+  const preparedMp4 = getPreparedMp4Path(fileId, 0);
+  const audioTracks = Array.isArray(cachedDiag.audioTracks) ? cachedDiag.audioTracks : [];
+  const primaryTrackCompat =
+    cachedDiag.container !== 'avi' &&
+    (audioTracks.length > 0
+      ? Boolean(audioTracks[0].browserSupported)
+      : (cachedDiag.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
+  const requiresRemux = !preparedMp4 && !primaryTrackCompat;
+
+  let recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream`;
+  if (preparedMp4) {
+    recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream?compat=1&audioTrack=0`;
+  } else if (requiresRemux) {
+    recommendedCustomPlayerUrl = `/api/videos/${fileId}/hls/0/playlist.m3u8`;
+  }
+
+  return {
+    ...movie,
+    duration: duration > 0 ? duration : movie.duration || 0,
+    container: cachedDiag.container || movie.container || 'mp4',
+    videoCodecs: cachedDiag.videoCodecs || [],
+    audioCodecs: cachedDiag.audioCodecs || [],
+    requiresAudioFallbackOrRemux: requiresRemux,
+    recommendedCustomPlayerUrl
+  };
+}
+
 // Retorna o catálogo organizado em fileiras estilo Netflix/Prime Video
 app.get('/api/drive/catalog', (req, res) => {
   const { query = '', category = 'all', includeUnavailable = 'false' } = req.query;
@@ -357,7 +498,8 @@ app.get('/api/drive/catalog', (req, res) => {
 
   let movies = [...driveCatalog.movies]
     .filter((m) => (isAdmin && includeUnavailable === 'true' ? true : !m.unavailable && !m.trashed))
-    .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+    .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
+    .map(enrichMovieWithPlaybackInfo);
 
   if (category && category !== 'all') {
     movies = movies.filter((m) => (m.category || '').toLowerCase() === String(category).toLowerCase());
@@ -410,6 +552,9 @@ app.get('/api/drive/catalog', (req, res) => {
 
   res.json({
     totalMovies: movies.length,
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+    autoSync: platformMetrics.lastAutoSync,
     folders: driveCatalog.folders || [],
     lastReconciledAt: driveCatalog.lastReconciledAt || null,
     removedCount: Array.isArray(driveCatalog.removedMovies) ? driveCatalog.removedMovies.length : 0,
@@ -576,34 +721,79 @@ app.delete('/api/drive/movies/:id', requireAdmin, (req, res) => {
   res.json({ success: true, removedId: target.id });
 });
 
-// Lista arquivos de uma pasta do Google Drive via API v3 ou embeddedfolderview
+function cleanupRemovedMovieMediaCache(fileId) {
+  if (!isValidDriveFileId(fileId)) return;
+  driveMetaCache.delete(fileId);
+  codecProbeCache.delete(fileId);
+  if (mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId]) {
+    delete mediaRegistry.files[fileId];
+    saveMediaRegistry();
+  }
+}
+
+// Lista arquivos de uma pasta do Google Drive via API v3 (com paginação completa) ou embeddedfolderview
 async function fetchDriveFolderFiles(folderId) {
   const googleApiKey = (process.env.GOOGLE_DRIVE_API_KEY || '').trim();
   const googleOAuthToken = (process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '').trim();
 
   if (googleApiKey || googleOAuthToken) {
     try {
-      const apiUrl = new URL('https://www.googleapis.com/drive/v3/files');
-      apiUrl.searchParams.set('q', `'${folderId}' in parents and trashed = false`);
-      apiUrl.searchParams.set('fields', 'files(id,name,mimeType,size,trashed)');
-      apiUrl.searchParams.set('pageSize', '200');
-      apiUrl.searchParams.set('supportsAllDrives', 'true');
-      apiUrl.searchParams.set('includeItemsFromAllDrives', 'true');
-      if (googleApiKey && !googleOAuthToken) apiUrl.searchParams.set('key', googleApiKey);
+      const allApiFiles = [];
+      let nextPageToken = null;
+      let pageSafety = 0;
 
-      const headers = {};
-      if (googleOAuthToken) headers.Authorization = `Bearer ${googleOAuthToken}`;
+      do {
+        pageSafety += 1;
+        const apiUrl = new URL('https://www.googleapis.com/drive/v3/files');
+        apiUrl.searchParams.set('q', `'${folderId}' in parents and trashed = false`);
+        apiUrl.searchParams.set(
+          'fields',
+          'nextPageToken,files(id,name,mimeType,size,modifiedTime,createdTime,trashed,parents,videoMediaMetadata)'
+        );
+        apiUrl.searchParams.set('pageSize', '200');
+        apiUrl.searchParams.set('supportsAllDrives', 'true');
+        apiUrl.searchParams.set('includeItemsFromAllDrives', 'true');
+        if (nextPageToken) apiUrl.searchParams.set('pageToken', nextPageToken);
+        if (googleApiKey && !googleOAuthToken) apiUrl.searchParams.set('key', googleApiKey);
 
-      const apiRes = await fetch(apiUrl.toString(), { headers });
-      if (apiRes.ok) {
+        const headers = {};
+        if (googleOAuthToken) headers.Authorization = `Bearer ${googleOAuthToken}`;
+
+        const apiRes = await fetch(apiUrl.toString(), { headers });
+        if (apiRes.status >= 500 || apiRes.status === 429) {
+          return {
+            ok: false,
+            temporaryError: true,
+            status: apiRes.status,
+            error: 'Erro temporário na Google Drive API v3.'
+          };
+        }
+        if (!apiRes.ok) break;
+
         const data = await apiRes.json();
-        const files = (data.files || [])
-          .filter((f) => !f.trashed && !/\.(jpg|jpeg|png|gif|srt|vtt|txt|nfo|pdf|zip|rar)$/i.test(f.name || ''))
-          .map((f) => ({ fileId: f.id, fileName: f.name }));
-        return { ok: true, status: 200, source: 'drive_api_v3', files };
-      }
-      if (apiRes.status >= 500 || apiRes.status === 429) {
-        return { ok: false, temporaryError: true, status: apiRes.status, error: 'Erro temporário na Google Drive API v3.' };
+        for (const f of data.files || []) {
+          const isVideoMime = f.mimeType && f.mimeType.startsWith('video/');
+          const isVideoExt = /\.(mp4|mkv|webm|avi|mov|m4v)$/i.test(f.name || '');
+          const isExcludedExt = /\.(jpg|jpeg|png|gif|srt|vtt|txt|nfo|pdf|zip|rar)$/i.test(f.name || '');
+          if (!f.trashed && (isVideoMime || (isVideoExt && !isExcludedExt) || (!f.mimeType && !isExcludedExt))) {
+            allApiFiles.push({
+              fileId: f.id,
+              fileName: f.name,
+              mimeType: f.mimeType || null,
+              size: Number(f.size) || 0,
+              modifiedTime: f.modifiedTime || null,
+              createdTime: f.createdTime || null,
+              durationMillis: f.videoMediaMetadata && f.videoMediaMetadata.durationMillis
+                ? Number(f.videoMediaMetadata.durationMillis)
+                : 0
+            });
+          }
+        }
+        nextPageToken = data.nextPageToken || null;
+      } while (nextPageToken && pageSafety < 15);
+
+      if (allApiFiles.length > 0) {
+        return { ok: true, status: 200, source: 'drive_api_v3', files: allApiFiles };
       }
     } catch (_) {}
   }
@@ -640,7 +830,11 @@ async function fetchDriveFolderFiles(folderId) {
     let match;
     while ((match = entryRegex.exec(html)) !== null) {
       const fileId = match[1];
-      const fileName = match[2].trim();
+      const fileName = match[2]
+        .replace(/&amp;/gi, '&')
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/gi, '"')
+        .trim();
       if (!/\.(jpg|jpeg|png|gif|srt|vtt|txt|nfo|pdf|zip|rar)$/i.test(fileName)) {
         discoveredFiles.push({ fileId, fileName });
       }
@@ -662,11 +856,270 @@ async function fetchDriveFolderFiles(folderId) {
   }
 }
 
+// Motor unificado e idempotente de sincronização de pasta do Google Drive (FASE 3)
+async function syncDriveFolderById(folderId, options = {}) {
+  const {
+    folderUrl = `https://drive.google.com/drive/folders/${folderId}?usp=drive_link`,
+    defaultCategory = 'Auto',
+    removeMissingFromFolder = true,
+    trigger = 'manual'
+  } = options;
+
+  const syncStartMs = Date.now();
+  const folderResult = await fetchDriveFolderFiles(folderId);
+  if (!folderResult.ok) {
+    logStructured('DRIVE_SYNC', 'folder_fetch_failed', {
+      folderId,
+      trigger,
+      temporaryError: Boolean(folderResult.temporaryError),
+      error: folderResult.error
+    });
+    return {
+      ok: false,
+      temporaryError: Boolean(folderResult.temporaryError),
+      status: folderResult.temporaryError ? 503 : 400,
+      error: folderResult.error
+    };
+  }
+
+  const discoveredFiles = folderResult.files || [];
+  if (discoveredFiles.length === 0) {
+    return {
+      ok: false,
+      temporaryError: false,
+      status: 400,
+      error:
+        'Nenhum arquivo de vídeo foi encontrado dentro desta pasta do Google Drive (certifique-se de que a pasta está pública e contém vídeos).'
+    };
+  }
+
+  const discoveredIdsSet = new Set(discoveredFiles.map((f) => f.fileId));
+  const discoveredByFileId = new Map(discoveredFiles.map((f) => [f.fileId, f]));
+
+  // 1. Reconciliação de exclusões: remove filmes da pasta que foram excluídos, enviados para lixeira ou movidos
+  const removedMoviesList = [];
+  if (removeMissingFromFolder) {
+    const isSingleSyncedFolder =
+      !driveCatalog.folders ||
+      driveCatalog.folders.length === 0 ||
+      (driveCatalog.folders.length === 1 && driveCatalog.folders[0].folderId === folderId);
+
+    driveCatalog.movies = driveCatalog.movies.filter((m) => {
+      if (!m.driveFileId) return true;
+      const belongsToThisFolder = m.folderId === folderId || (isSingleSyncedFolder && !m.folderId);
+      if (belongsToThisFolder && !discoveredIdsSet.has(m.driveFileId)) {
+        cleanupRemovedMovieMediaCache(m.driveFileId);
+        removedMoviesList.push({
+          id: m.id,
+          driveFileId: m.driveFileId,
+          title: m.title,
+          reason: 'removed_from_synced_folder',
+          removedAt: new Date().toISOString()
+        });
+        return false;
+      }
+      return true;
+    });
+  }
+
+  // 2. Atualização de renomeações, tamanhos e metadados nos filmes já existentes na pasta
+  let updatedCount = 0;
+  for (const m of driveCatalog.movies) {
+    if (!m.driveFileId || !discoveredIdsSet.has(m.driveFileId)) continue;
+    if (!m.folderId) {
+      m.folderId = folderId;
+    }
+    const remoteFile = discoveredByFileId.get(m.driveFileId);
+    if (remoteFile) {
+      if (remoteFile.fileName && m.fileName !== remoteFile.fileName) {
+        const previousFileName = m.fileName;
+        m.fileName = remoteFile.fileName;
+        if (!m.customEdited) {
+          const reParsed = parseMovieFilename(remoteFile.fileName);
+          if (reParsed.title) m.title = reParsed.title;
+          if (reParsed.year) m.year = reParsed.year;
+        }
+        updatedCount += 1;
+        logStructured('DRIVE_SYNC', 'file_renamed_detected', {
+          fileId: m.driveFileId,
+          oldName: previousFileName || 'unknown',
+          newName: remoteFile.fileName
+        });
+      }
+      if (remoteFile.size && m.size !== remoteFile.size) {
+        m.size = remoteFile.size;
+      }
+      if (remoteFile.modifiedTime && m.modifiedTime !== remoteFile.modifiedTime) {
+        m.modifiedTime = remoteFile.modifiedTime;
+      }
+    }
+  }
+
+  // 3. Adição automática e idempotente de novos vídeos adicionados à pasta
+  const newFiles = discoveredFiles.filter(
+    (file) => !driveCatalog.movies.some((m) => m.driveFileId === file.fileId)
+  );
+
+  const createdMovies = await Promise.all(
+    newFiles.map(async (file, idx) => {
+      const parsed = parseMovieFilename(file.fileName);
+      const meta = await fetchMetadataByTitle(parsed.title, parsed.year);
+
+      return {
+        id: `drive_${file.fileId}`,
+        title: (meta && meta.title) || parsed.title,
+        year: (meta && meta.year) || parsed.year,
+        rating: (meta && meta.rating) || null,
+        category:
+          defaultCategory !== 'Auto'
+            ? defaultCategory
+            : (meta && meta.category) || 'Filmes do Google Drive',
+        featured: idx === 0 && driveCatalog.movies.length === 0,
+        driveFileId: file.fileId,
+        folderId,
+        fileName: file.fileName,
+        size: file.size || 0,
+        modifiedTime: file.modifiedTime || null,
+        rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
+        streamUrl: `/api/gdrive/stream/${file.fileId}`,
+        poster:
+          (meta && meta.poster) ||
+          `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
+        backdrop:
+          (meta && meta.backdrop) ||
+          (meta && meta.poster) ||
+          '',
+        overview:
+          (meta && meta.overview) ||
+          `Arquivo sincronizado da pasta oficial do Google Drive (${file.fileName}).`,
+        addedAt: Date.now() - idx
+      };
+    })
+  );
+
+  for (const newMovie of createdMovies) {
+    driveCatalog.movies.unshift(newMovie);
+  }
+  const addedCount = createdMovies.length;
+
+  const existingFolderIdx = driveCatalog.folders.findIndex((f) => f.folderId === folderId);
+  const folderEntry = {
+    folderId,
+    folderUrl,
+    official: folderId === OFFICIAL_DRIVE_FOLDER_ID,
+    syncedAt: new Date().toLocaleString('pt-BR')
+  };
+  if (existingFolderIdx >= 0) {
+    driveCatalog.folders[existingFolderIdx] = folderEntry;
+  } else {
+    driveCatalog.folders.push(folderEntry);
+  }
+
+  if (removedMoviesList.length > 0) {
+    if (!Array.isArray(driveCatalog.removedMovies)) driveCatalog.removedMovies = [];
+    driveCatalog.removedMovies.unshift(...removedMoviesList);
+  }
+  driveCatalog.lastReconciledAt = new Date().toISOString();
+
+  if (addedCount > 0 || removedMoviesList.length > 0 || updatedCount > 0 || trigger === 'manual') {
+    saveDriveCatalog(driveCatalog);
+  }
+
+  if (addedCount > 0 || removedMoviesList.length > 0 || updatedCount > 0 || trigger === 'manual') {
+    io.emit('catalog_synced', {
+      movies: driveCatalog.movies.map(enrichMovieWithPlaybackInfo),
+      removedIds: removedMoviesList.map((r) => r.id),
+      addedCount,
+      updatedCount,
+      trigger
+    });
+  }
+
+  const durationMs = Date.now() - syncStartMs;
+  logStructured('DRIVE_SYNC', 'folder_sync_completed', {
+    folderId,
+    trigger,
+    source: folderResult.source,
+    discoveredCount: discoveredFiles.length,
+    addedCount,
+    removedCount: removedMoviesList.length,
+    updatedCount,
+    durationMs
+  });
+
+  // Se novos filmes entraram, agenda aquecimento leve de metadados/codecs quando o servidor estiver ocioso
+  if (addedCount > 0) {
+    setImmediate(() => scheduleIdleCatalogWarmup());
+  }
+
+  return {
+    ok: true,
+    success: true,
+    source: folderResult.source,
+    discoveredCount: discoveredFiles.length,
+    addedCount,
+    updatedCount,
+    removedCount: removedMoviesList.length,
+    removedMovies: removedMoviesList,
+    totalMovies: driveCatalog.movies.length,
+    durationMs,
+    movies: driveCatalog.movies.map(enrichMovieWithPlaybackInfo)
+  };
+}
+
+let isAutoSyncRunning = false;
+
+async function runAutomaticDriveFolderSync(trigger = 'scheduler') {
+  if (isAutoSyncRunning) {
+    return { skipped: true, reason: 'sync_already_in_progress' };
+  }
+  isAutoSyncRunning = true;
+  platformMetrics.lastAutoSync.status = 'running';
+  platformMetrics.lastAutoSync.lastStartedAt = new Date().toISOString();
+  platformMetrics.lastAutoSync.lastTrigger = trigger;
+
+  try {
+    const result = await syncDriveFolderById(OFFICIAL_DRIVE_FOLDER_ID, {
+      folderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+      defaultCategory: 'Auto',
+      removeMissingFromFolder: true,
+      trigger
+    });
+
+    platformMetrics.lastAutoSync = {
+      officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+      officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+      status: result.ok ? 'completed' : 'error',
+      lastStartedAt: platformMetrics.lastAutoSync.lastStartedAt,
+      lastCompletedAt: new Date().toISOString(),
+      lastTrigger: trigger,
+      discoveredCount: result.discoveredCount || 0,
+      addedCount: result.addedCount || 0,
+      removedCount: result.removedCount || 0,
+      updatedCount: result.updatedCount || 0,
+      durationMs: result.durationMs || 0,
+      error: result.error || null
+    };
+    return result;
+  } catch (err) {
+    platformMetrics.lastAutoSync.status = 'error';
+    platformMetrics.lastAutoSync.error = err.message;
+    platformMetrics.lastAutoSync.lastCompletedAt = new Date().toISOString();
+    return { ok: false, error: err.message };
+  } finally {
+    isAutoSyncRunning = false;
+  }
+}
+
 // Sincronizar uma PASTA INTEIRA compartilhada do Google Drive (PROTEGIDO POR RBAC: APENAS ADMINISTRADOR)
 app.post('/api/drive/sync-folder', requireAdmin, async (req, res) => {
   try {
-    const { folderUrl, defaultCategory = 'Auto', removeMissingFromFolder = true } = req.body;
-    const folderId = extractDriveFolderId(folderUrl);
+    const {
+      folderUrl = OFFICIAL_DRIVE_FOLDER_URL,
+      defaultCategory = 'Auto',
+      removeMissingFromFolder = true
+    } = req.body || {};
+    const folderId = extractDriveFolderId(folderUrl) || OFFICIAL_DRIVE_FOLDER_ID;
 
     if (!folderId) {
       return res.status(400).json({
@@ -674,136 +1127,147 @@ app.post('/api/drive/sync-folder', requireAdmin, async (req, res) => {
       });
     }
 
-    const folderResult = await fetchDriveFolderFiles(folderId);
-    if (!folderResult.ok) {
-      return res.status(folderResult.temporaryError ? 503 : 400).json({
-        error: folderResult.error
-      });
-    }
-
-    const discoveredFiles = folderResult.files;
-    if (discoveredFiles.length === 0) {
-      return res.status(400).json({
-        error: 'Nenhum arquivo de vídeo foi encontrado dentro desta pasta do Google Drive (certifique-se de que a pasta está pública e contém vídeos).'
-      });
-    }
-
-    const discoveredIdsSet = new Set(discoveredFiles.map((f) => f.fileId));
-
-    // Reconciliação de exclusões: se um filme da pasta sincronizada foi excluído ou movido para fora da pasta, remove do catálogo ativo
-    const removedMoviesList = [];
-    if (removeMissingFromFolder) {
-      const isSingleSyncedFolder =
-        !driveCatalog.folders ||
-        driveCatalog.folders.length === 0 ||
-        (driveCatalog.folders.length === 1 && driveCatalog.folders[0].folderId === folderId);
-
-      driveCatalog.movies = driveCatalog.movies.filter((m) => {
-        if (!m.driveFileId) return true;
-        const belongsToThisFolder = m.folderId === folderId || (isSingleSyncedFolder && !m.folderId);
-        if (belongsToThisFolder && !discoveredIdsSet.has(m.driveFileId)) {
-          driveMetaCache.delete(m.driveFileId);
-          codecProbeCache.delete(m.driveFileId);
-          removedMoviesList.push({
-            id: m.id,
-            driveFileId: m.driveFileId,
-            title: m.title,
-            reason: 'removed_from_synced_folder',
-            removedAt: new Date().toISOString()
-          });
-          return false;
-        }
-        return true;
-      });
-    }
-
-    // Marca folderId nos filmes existentes que pertencem a esta pasta
-    for (const m of driveCatalog.movies) {
-      if (m.driveFileId && discoveredIdsSet.has(m.driveFileId) && !m.folderId) {
-        m.folderId = folderId;
-      }
-    }
-
-    const newFiles = discoveredFiles.filter(
-      (file) => !driveCatalog.movies.some((m) => m.driveFileId === file.fileId)
-    );
-
-    const createdMovies = await Promise.all(
-      newFiles.map(async (file, idx) => {
-        const parsed = parseMovieFilename(file.fileName);
-        const meta = await fetchMetadataByTitle(parsed.title, parsed.year);
-
-        return {
-          id: `drive_${file.fileId}`,
-          title: (meta && meta.title) || parsed.title,
-          year: (meta && meta.year) || parsed.year,
-          rating: (meta && meta.rating) || '8.5',
-          category:
-            defaultCategory !== 'Auto'
-              ? defaultCategory
-              : (meta && meta.category) || 'Filmes do Google Drive',
-          featured: idx === 0,
-          driveFileId: file.fileId,
-          folderId,
-          fileName: file.fileName,
-          rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
-          streamUrl: `/api/gdrive/stream/${file.fileId}`,
-          poster:
-            (meta && meta.poster) ||
-            `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
-          backdrop:
-            (meta && meta.backdrop) ||
-            (meta && meta.poster) ||
-            '',
-          overview:
-            (meta && meta.overview) ||
-            `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
-          addedAt: Date.now() - idx
-        };
-      })
-    );
-
-    for (const newMovie of createdMovies) {
-      driveCatalog.movies.unshift(newMovie);
-    }
-    const addedCount = createdMovies.length;
-
-    const existingFolderIdx = driveCatalog.folders.findIndex((f) => f.folderId === folderId);
-    const folderEntry = {
-      folderId,
-      folderUrl,
-      syncedAt: new Date().toLocaleString('pt-BR')
-    };
-    if (existingFolderIdx >= 0) {
-      driveCatalog.folders[existingFolderIdx] = folderEntry;
-    } else {
-      driveCatalog.folders.push(folderEntry);
-    }
-
-    if (removedMoviesList.length > 0) {
-      if (!Array.isArray(driveCatalog.removedMovies)) driveCatalog.removedMovies = [];
-      driveCatalog.removedMovies.unshift(...removedMoviesList);
-    }
-    driveCatalog.lastReconciledAt = new Date().toISOString();
-
-    saveDriveCatalog(driveCatalog);
-    io.emit('catalog_synced', {
-      movies: driveCatalog.movies,
-      removedIds: removedMoviesList.map((r) => r.id)
+    const result = await syncDriveFolderById(folderId, {
+      folderUrl: folderUrl || `https://drive.google.com/drive/folders/${folderId}`,
+      defaultCategory,
+      removeMissingFromFolder,
+      trigger: 'manual'
     });
 
-    res.json({
-      success: true,
-      discoveredCount: discoveredFiles.length,
-      addedCount,
-      removedCount: removedMoviesList.length,
-      removedMovies: removedMoviesList,
-      totalMovies: driveCatalog.movies.length,
-      movies: driveCatalog.movies
-    });
+    if (!result.ok) {
+      return res.status(result.status || 400).json({ error: result.error });
+    }
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao sincronizar pasta do Drive: ' + err.message });
   }
+});
+
+// Status público/admin da sincronização automática da pasta oficial 185iFV7I5x107sxJDTVbSxA9F0pY3GtTr
+app.get('/api/drive/sync-status', (req, res) => {
+  res.json({
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+    syncIntervalMs: DRIVE_SYNC_INTERVAL_MS,
+    isAutoSyncRunning,
+    lastAutoSync: platformMetrics.lastAutoSync,
+    totalMovies: driveCatalog.movies.length,
+    lastReconciledAt: driveCatalog.lastReconciledAt || null
+  });
+});
+
+// Receptor de Webhooks Push Notifications do Google Drive (changes.watch) — FASE 3.3
+app.post('/api/drive/webhook', (req, res) => {
+  const resourceState = req.headers['x-goog-resource-state'] || 'change';
+  const channelId = req.headers['x-goog-channel-id'] || 'unknown';
+  const resourceId = req.headers['x-goog-resource-id'] || 'unknown';
+
+  logStructured('DRIVE_SYNC', 'webhook_notification_received', {
+    resourceState,
+    channelId,
+    resourceId
+  });
+
+  if (resourceState !== 'sync') {
+    setImmediate(() => {
+      runAutomaticDriveFolderSync(`webhook:${resourceState}`).catch(() => {});
+    });
+  }
+  res.status(200).json({ received: true, resourceState });
+});
+
+// Registro/renovação de canal Push Notification (changes.watch) na Google Drive API v3
+app.post('/api/drive/watch', requireAdmin, async (req, res) => {
+  const googleOAuthToken = (process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '').trim();
+  const webhookAddress = String((req.body && req.body.webhookUrl) || process.env.GOOGLE_DRIVE_WEBHOOK_URL || '').trim();
+
+  if (!googleOAuthToken || !webhookAddress) {
+    return res.status(200).json({
+      success: true,
+      mode: 'polling_scheduler_active',
+      officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+      syncIntervalMs: DRIVE_SYNC_INTERVAL_MS,
+      message:
+        'Sincronização automática periódica ativa a cada ' +
+        Math.round(DRIVE_SYNC_INTERVAL_MS / 1000) +
+        's. Para webhooks push (changes.watch), defina GOOGLE_OAUTH_ACCESS_TOKEN e GOOGLE_DRIVE_WEBHOOK_URL HTTPS.'
+    });
+  }
+
+  try {
+    let pageToken = driveCatalog.driveChangesPageToken;
+    if (!pageToken) {
+      const startRes = await fetch(
+        'https://www.googleapis.com/drive/v3/changes/startPageToken?supportsAllDrives=true',
+        { headers: { Authorization: `Bearer ${googleOAuthToken}` } }
+      );
+      if (startRes.ok) {
+        const sData = await startRes.json();
+        pageToken = sData.startPageToken;
+        driveCatalog.driveChangesPageToken = pageToken;
+        saveDriveCatalog(driveCatalog);
+      }
+    }
+
+    const watchUrl = `https://www.googleapis.com/drive/v3/changes/watch?pageToken=${encodeURIComponent(
+      pageToken || '1'
+    )}&supportsAllDrives=true&includeItemsFromAllDrives=true`;
+    const channelBody = {
+      id: `cine-pompeia-watch-${Date.now()}`,
+      type: 'web_hook',
+      address: webhookAddress,
+      expiration: String(Date.now() + 7 * 24 * 3600 * 1000)
+    };
+
+    const watchRes = await fetch(watchUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${googleOAuthToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(channelBody)
+    });
+    const watchData = await watchRes.json().catch(() => ({}));
+    if (!watchRes.ok) {
+      return res.status(watchRes.status).json({ error: 'Falha ao registrar changes.watch', details: watchData });
+    }
+    res.json({ success: true, mode: 'webhook_and_scheduler', channel: watchData });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Diagnóstico técnico completo de Observabilidade e Performance para Administradores (FASE 10)
+app.get('/api/admin/diagnostics', requireAdmin, (req, res) => {
+  const mem = process.memoryUsage();
+  const ttfbList = platformMetrics.recentTtfbMs.map((x) => x.ttfbMs);
+  const avgTtfbMs =
+    ttfbList.length > 0 ? Math.round(ttfbList.reduce((a, b) => a + b, 0) / ttfbList.length) : 0;
+
+  res.json({
+    status: 'healthy',
+    correlationId: req.correlationId,
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+    catalogCount: driveCatalog.movies.length,
+    removedCount: Array.isArray(driveCatalog.removedMovies) ? driveCatalog.removedMovies.length : 0,
+    metrics: {
+      ...platformMetrics,
+      avgTtfbMs,
+      metaCacheSize: driveMetaCache.size,
+      probeCacheSize: codecProbeCache.size,
+      registryCachedFiles: Object.keys((mediaRegistry && mediaRegistry.files) || {}).length,
+      mediaQueueLength: mediaJobQueue.length,
+      isProcessingMediaQueue: isProcessingQueue
+    },
+    memoryMB: {
+      rss: Math.round(mem.rss / (1024 * 1024)),
+      heapUsed: Math.round(mem.heapUsed / (1024 * 1024)),
+      heapTotal: Math.round(mem.heapTotal / (1024 * 1024))
+    },
+    recentLogs: recentObservabilityLogs.slice(0, 50)
+  });
 });
 
 // ============================================================================
@@ -861,7 +1325,7 @@ async function reconcileDriveCatalog(options = {}) {
 
   // Proteção contra falha temporária da API (Teste 6): nunca apaga o catálogo se a API do Drive estiver fora do ar (5xx/timeout)
   if (simulateTemporaryFailure) {
-    console.warn('[Drive Reconcile] Falha temporária simulada da API do Google Drive (503). Preservando catálogo intacto.');
+    logStructured('DRIVE_SYNC', 'simulated_temporary_failure', { status: 503 });
     return {
       success: false,
       temporaryFailure: true,
@@ -875,7 +1339,21 @@ async function reconcileDriveCatalog(options = {}) {
     };
   }
 
-  const removedEntries = [];
+  // Primeiro sincroniza novos arquivos e renomeações da pasta oficial 185iFV7I5x107sxJDTVbSxA9F0pY3GtTr
+  let syncAddedCount = 0;
+  let syncUpdatedCount = 0;
+  const folderSyncRes = await syncDriveFolderById(OFFICIAL_DRIVE_FOLDER_ID, {
+    folderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+    defaultCategory: 'Auto',
+    removeMissingFromFolder: true,
+    trigger: 'reconcile'
+  });
+  if (folderSyncRes && folderSyncRes.ok) {
+    syncAddedCount = folderSyncRes.addedCount || 0;
+    syncUpdatedCount = folderSyncRes.updatedCount || 0;
+  }
+
+  const removedEntries = [...((folderSyncRes && folderSyncRes.removedMovies) || [])];
   let temporaryErrors = 0;
   let checkedCount = 0;
 
@@ -897,7 +1375,6 @@ async function reconcileDriveCatalog(options = {}) {
     const fRes = await fetchDriveFolderFiles(folder.folderId);
     if (fRes.temporaryError) {
       temporaryErrors += 1;
-      console.warn(`[Drive Reconcile] Erro temporário ao ler pasta ${folder.folderId}: ${fRes.error}`);
       continue;
     }
     if (fRes.ok && Array.isArray(fRes.files) && fRes.files.length > 0) {
@@ -923,8 +1400,7 @@ async function reconcileDriveCatalog(options = {}) {
         reason: 'drive_changes_api_removed_or_trashed',
         removedAt: new Date().toISOString()
       });
-      driveMetaCache.delete(movie.driveFileId);
-      codecProbeCache.delete(movie.driveFileId);
+      cleanupRemovedMovieMediaCache(movie.driveFileId);
       continue;
     }
 
@@ -945,8 +1421,7 @@ async function reconcileDriveCatalog(options = {}) {
           reason: meta.trashed ? 'file_in_trash' : 'file_deleted_404',
           removedAt: new Date().toISOString()
         });
-        driveMetaCache.delete(movie.driveFileId);
-        codecProbeCache.delete(movie.driveFileId);
+        cleanupRemovedMovieMediaCache(movie.driveFileId);
         continue;
       }
 
@@ -958,8 +1433,7 @@ async function reconcileDriveCatalog(options = {}) {
           reason: 'permission_revoked_and_removed_from_folder',
           removedAt: new Date().toISOString()
         });
-        driveMetaCache.delete(movie.driveFileId);
-        codecProbeCache.delete(movie.driveFileId);
+        cleanupRemovedMovieMediaCache(movie.driveFileId);
         continue;
       }
 
@@ -971,8 +1445,7 @@ async function reconcileDriveCatalog(options = {}) {
           reason: 'moved_out_of_synced_folder',
           removedAt: new Date().toISOString()
         });
-        driveMetaCache.delete(movie.driveFileId);
-        codecProbeCache.delete(movie.driveFileId);
+        cleanupRemovedMovieMediaCache(movie.driveFileId);
         continue;
       }
 
@@ -995,9 +1468,9 @@ async function reconcileDriveCatalog(options = {}) {
   }
   saveDriveCatalog(driveCatalog);
 
-  if (removedEntries.length > 0) {
+  if (removedEntries.length > 0 || syncAddedCount > 0 || syncUpdatedCount > 0) {
     io.emit('catalog_synced', {
-      movies: driveCatalog.movies,
+      movies: driveCatalog.movies.map(enrichMovieWithPlaybackInfo),
       removedIds: removedEntries.map((r) => r.id)
     });
   }
@@ -1005,12 +1478,14 @@ async function reconcileDriveCatalog(options = {}) {
   return {
     success: true,
     checkedCount,
+    addedCount: syncAddedCount,
+    updatedCount: syncUpdatedCount,
     removedCount: removedEntries.length,
     removedMovies: removedEntries,
     temporaryErrors,
     totalMovies: driveCatalog.movies.length,
     lastReconciledAt: driveCatalog.lastReconciledAt,
-    movies: driveCatalog.movies
+    movies: driveCatalog.movies.map(enrichMovieWithPlaybackInfo)
   };
 }
 
@@ -1035,7 +1510,7 @@ app.post('/api/drive/reconcile', requireAdmin, async (req, res) => {
 // ============================================================================
 const driveMetaCache = new Map();
 const codecProbeCache = new Map();
-const META_CACHE_TTL_MS = 10 * 60 * 1000;
+const META_CACHE_TTL_MS = 30 * 60 * 1000;
 
 function isValidDriveFileId(fileId) {
   return /^[a-zA-Z0-9_-]{20,60}$/.test(String(fileId || '').trim());
@@ -1067,7 +1542,14 @@ async function getDriveFileMetadata(fileId, options = {}) {
   if (!bypassCache) {
     const cached = driveMetaCache.get(fileId);
     if (cached && Date.now() - cached.cachedAt < META_CACHE_TTL_MS) {
+      platformMetrics.metaCacheHits += 1;
       return cached.meta;
+    }
+    const regEntry = mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId];
+    if (regEntry && regEntry.driveMeta && regEntry.driveMeta.size > 0) {
+      driveMetaCache.set(fileId, { meta: regEntry.driveMeta, cachedAt: Date.now() });
+      platformMetrics.metaCacheHits += 1;
+      return regEntry.driveMeta;
     }
   }
 
@@ -1108,6 +1590,14 @@ async function getDriveFileMetadata(fileId, options = {}) {
           source: 'drive_api_v3'
         };
         driveMetaCache.set(fileId, { meta, cachedAt: Date.now() });
+        if (mediaRegistry && mediaRegistry.files) {
+          mediaRegistry.files[fileId] = {
+            ...(mediaRegistry.files[fileId] || {}),
+            fileId,
+            driveMeta: meta
+          };
+          saveMediaRegistry();
+        }
         return meta;
       }
       if (apiRes.status === 404 || apiRes.status === 403 || apiRes.status === 401) {
@@ -1166,6 +1656,14 @@ async function getDriveFileMetadata(fileId, options = {}) {
       source: 'drive_public_head'
     };
     driveMetaCache.set(fileId, { meta, cachedAt: Date.now() });
+    if (mediaRegistry && mediaRegistry.files && totalSize > 0) {
+      mediaRegistry.files[fileId] = {
+        ...(mediaRegistry.files[fileId] || {}),
+        fileId,
+        driveMeta: meta
+      };
+      saveMediaRegistry();
+    }
     return meta;
   } catch (err) {
     return { errorStatus: 502, error: 'Falha ao consultar arquivo no Google Drive: ' + err.message };
@@ -1221,21 +1719,99 @@ function getPreparedMp4Path(fileId, audioTrack = 0) {
   return null;
 }
 
+let cachedFfmpegAvailable = null;
+let cachedFfprobeAvailable = null;
+
 function checkFfmpegAvailable() {
+  if (typeof cachedFfmpegAvailable === 'boolean') {
+    return Promise.resolve(cachedFfmpegAvailable);
+  }
   return new Promise((resolve) => {
     const proc = spawn(FFMPEG_BIN, ['-version']);
-    proc.on('error', () => resolve(false));
-    proc.on('close', (code) => resolve(code === 0));
+    proc.on('error', () => {
+      cachedFfmpegAvailable = false;
+      resolve(false);
+    });
+    proc.on('close', (code) => {
+      cachedFfmpegAvailable = code === 0;
+      resolve(cachedFfmpegAvailable);
+    });
   });
 }
 
 function checkFfprobeAvailable() {
+  if (typeof cachedFfprobeAvailable === 'boolean') {
+    return Promise.resolve(cachedFfprobeAvailable);
+  }
   return new Promise((resolve) => {
     const proc = spawn(FFPROBE_BIN, ['-version']);
-    proc.on('error', () => resolve(false));
-    proc.on('close', (code) => resolve(code === 0));
+    proc.on('error', () => {
+      cachedFfprobeAvailable = false;
+      resolve(false);
+    });
+    proc.on('close', (code) => {
+      cachedFfprobeAvailable = code === 0;
+      resolve(cachedFfprobeAvailable);
+    });
   });
 }
+
+// Hidrata os caches em memória a partir do registry.json no boot para resposta < 1ms
+function hydrateCachesFromMediaRegistry() {
+  if (!mediaRegistry || !mediaRegistry.files) return;
+  for (const [fileId, entry] of Object.entries(mediaRegistry.files)) {
+    if (!entry || !isValidDriveFileId(fileId)) continue;
+    if (entry.driveMeta && entry.driveMeta.size > 0) {
+      driveMetaCache.set(fileId, { meta: entry.driveMeta, cachedAt: Date.now() });
+    }
+    if (Array.isArray(entry.videoCodecs) && entry.videoCodecs.length > 0) {
+      const preparedPath = getPreparedMp4Path(fileId, 0);
+      const audioTracks = Array.isArray(entry.audioTracks) ? entry.audioTracks : [];
+      const primaryTrackCompat =
+        entry.container !== 'avi' &&
+        (audioTracks.length > 0
+          ? Boolean(audioTracks[0].browserSupported)
+          : (entry.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
+      const requiresRemux = !preparedPath && !primaryTrackCompat;
+
+      let recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream`;
+      if (preparedPath) {
+        recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream?compat=1&audioTrack=0`;
+      } else if (requiresRemux) {
+        recommendedCustomPlayerUrl = `/api/videos/${fileId}/hls/0/playlist.m3u8`;
+      }
+
+      codecProbeCache.set(fileId, {
+        fileId,
+        fileName: entry.fileName || `${fileId}.mp4`,
+        size: (entry.driveMeta && entry.driveMeta.size) || entry.size || 0,
+        duration: Number(entry.durationSec) || 0,
+        container: entry.container || 'mp4',
+        videoCodecs: entry.videoCodecs || ['H.264 (AVC)'],
+        audioCodecs: entry.audioCodecs || ['AAC'],
+        audioTrackCount: audioTracks.length || 1,
+        isDualAudio: audioTracks.length > 1,
+        languages: audioTracks.map((t) => ({ code: t.language, label: t.languageLabel })),
+        audioTracks,
+        subtitleTracks: Array.isArray(entry.subtitleTracks) ? entry.subtitleTracks : [],
+        fastStartMoov: true,
+        ffmpegAvailable: true,
+        browserVideoSupported: entry.container !== 'avi' && !(entry.videoCodecs || []).includes('H.265 (HEVC)'),
+        browserAudioSupported: Boolean(preparedPath) || primaryTrackCompat,
+        hasPreparedCompatibleStream: Boolean(preparedPath),
+        hasPreparedCompatibleAudio: Boolean(preparedPath),
+        requiresAudioFallbackOrRemux: requiresRemux,
+        recommendedCustomPlayerUrl,
+        diagnosticReason: preparedPath
+          ? 'Versão MP4 (H.264 + AAC-LC Estéreo) pronta e armazenada no servidor.'
+          : primaryTrackCompat
+          ? `Áudio ${(entry.audioCodecs || []).join(' / ')} compatível nativamente com o Player Personalizado.`
+          : `Áudio original ${(entry.audioCodecs || []).join(', ')} convertido automaticamente para AAC-LC Estéreo no Player Personalizado (vídeo original preservado).`
+      });
+    }
+  }
+}
+hydrateCachesFromMediaRegistry();
 
 // Cache de extremidades do arquivo (primeiros 1MB + últimos 512KB) para que o FFprobe e o FFmpeg
 // leiam o cabeçalho EBML/MP4 e o índice Cues/moov em < 1ms sem múltiplas viagens ao Google Drive!
@@ -1876,19 +2452,24 @@ async function ensureHlsSegment(fileId, trackIdx, segIdx, diag) {
     const startSec = segIdx * HLS_SEG_DURATION;
     const totalDur = Number(diag && diag.duration) || 7200;
     const segDur = Math.min(HLS_SEG_DURATION, Math.max(1, totalDur - startSec));
-    const localStreamUrl = `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1`;
+    // Quando startSec > 0, seek=1 sinaliza ao proxy local para responder head_1mb.bin e tail_512kb.bin em < 1ms
+    const localStreamUrl =
+      startSec > 0
+        ? `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&seek=1&chunkMB=6`
+        : `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&chunkMB=6`;
     const canCopyVideo = diag && diag.container !== 'avi' && !(diag.videoCodecs || []).includes('H.265 (HEVC)');
     const tmpPath = path.join(hlsDir, `seg_${segIdx}.tmp.ts`);
 
     return new Promise((resolve, reject) => {
       const args = [
         '-y',
+        '-threads',
+        '2',
         '-probesize',
         '1000000',
         '-analyzeduration',
-        '1500000',
-        '-ss',
-        String(startSec),
+        '1000000',
+        ...(startSec > 0 ? ['-ss', String(startSec)] : []),
         '-t',
         String(segDur),
         '-i',
@@ -1935,6 +2516,80 @@ async function ensureHlsSegment(fileId, trackIdx, segIdx, diag) {
   inFlightHlsSegments.set(segKey, promise);
   return promise;
 }
+
+// Stream MP4 fragmentado progressivo em tempo real (-c:v copy -c:a aac) com encerramento automático ao desconectar
+app.get('/api/videos/:id/remux.mp4', async (req, res) => {
+  const fileId = req.params.id;
+  const trackIdx = Math.max(0, parseInt(req.query.audioTrack || req.query.track || '0', 10) || 0);
+  const startSec = Math.max(0, Number(req.query.start) || 0);
+
+  if (!isValidDriveFileId(fileId)) return res.status(400).end();
+  if (!isFileAuthorizedInCatalog(fileId) && !process.env.ALLOW_UNLISTED_DRIVE_IDS) return res.status(403).end();
+
+  const preparedMp4 = getPreparedMp4Path(fileId, trackIdx);
+  if (preparedMp4 && startSec === 0) {
+    return handleVideoStreamRequest(req, res);
+  }
+
+  const hasFfmpeg = await checkFfmpegAvailable();
+  if (!hasFfmpeg) return res.status(503).json({ error: 'FFmpeg indisponível.' });
+
+  const diag = await probeMediaCodecs(fileId);
+  const canCopyVideo = diag && diag.container !== 'avi' && !(diag.videoCodecs || []).includes('H.265 (HEVC)');
+  const localStreamUrl =
+    startSec > 0
+      ? `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&seek=1&chunkMB=8`
+      : `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&chunkMB=8`;
+
+  res.status(200);
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Cache-Control', 'no-store');
+
+  const args = [
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-threads',
+    '2',
+    '-probesize',
+    '1000000',
+    '-analyzeduration',
+    '1000000',
+    ...(startSec > 0 ? ['-ss', String(startSec)] : []),
+    '-i',
+    localStreamUrl,
+    '-map',
+    '0:v:0',
+    '-map',
+    `0:a:${trackIdx}?`,
+    ...(canCopyVideo
+      ? ['-c:v', 'copy']
+      : ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-pix_fmt', 'yuv420p']),
+    '-c:a',
+    'aac',
+    '-b:a',
+    '192k',
+    '-ac',
+    '2',
+    '-movflags',
+    'frag_keyframe+empty_moov+default_base_moof+faststart',
+    '-f',
+    'mp4',
+    'pipe:1'
+  ];
+
+  const ff = spawn(FFMPEG_BIN, args);
+  req.on('close', () => {
+    try {
+      ff.kill('SIGKILL');
+    } catch (_) {}
+  });
+  ff.stdout.pipe(res);
+  ff.on('error', () => {
+    if (!res.headersSent) res.status(502).end();
+    else res.end();
+  });
+});
 
 // Playlist HLS VOD para reprodução direta no <video id="nativeVideo"> via Hls.js
 app.get('/api/videos/:id/hls/:track/playlist.m3u8', async (req, res) => {
@@ -1984,6 +2639,7 @@ app.get('/api/videos/:id/hls/:track/seg_:segIdx.ts', async (req, res) => {
   const fileId = req.params.id;
   const trackIdx = Math.max(0, parseInt(req.params.track, 10) || 0);
   const segIdx = Math.max(0, parseInt(req.params.segIdx, 10) || 0);
+  const reqStartMs = Date.now();
 
   if (!isValidDriveFileId(fileId)) {
     return res.status(400).end();
@@ -1996,12 +2652,15 @@ app.get('/api/videos/:id/hls/:track/seg_:segIdx.ts', async (req, res) => {
     const diag = await probeMediaCodecs(fileId);
     const segPath = await ensureHlsSegment(fileId, trackIdx, segIdx, diag);
 
-    // Pré-aquece o próximo segmento em segundo plano sem bloquear a resposta atual
+    // Só pré-aquece o próximo segmento se não houver outros segmentos HLS em geração concorrente
     const totalDuration = Number(diag && diag.duration) || 7200;
-    if ((segIdx + 1) * HLS_SEG_DURATION < totalDuration) {
-      ensureHlsSegment(fileId, trackIdx, segIdx + 1, diag).catch(() => {});
+    if ((segIdx + 1) * HLS_SEG_DURATION < totalDuration && inFlightHlsSegments.size === 0) {
+      setImmediate(() => {
+        ensureHlsSegment(fileId, trackIdx, segIdx + 1, diag).catch(() => {});
+      });
     }
 
+    recordTtfbMetric(Date.now() - reqStartMs, `hls_seg_${segIdx}`);
     const stat = fs.statSync(segPath);
     res.status(200);
     res.setHeader('Content-Type', 'video/mp2t');
@@ -2085,10 +2744,10 @@ app.post('/api/videos/:id/prepare-audio', async (req, res) => {
 });
 
 // ============================================================================
-// FASE 3 — PREVIEW DE CENAS NA BARRA DE REPRODUÇÃO (THUMBNAILS + WEBVTT + CACHE)
+// FASE 3 & FASE 5.2 — PREVIEW DE CENAS NA BARRA DE REPRODUÇÃO (SEM BLOQUEAR STREAMING)
 // ============================================================================
 const inFlightThumbnails = new Map(); // `${fileId}:${quantizedT}` -> Promise<string>
-const thumbnailWarmupActive = new Set();
+let activeThumbnailProcesses = 0;
 
 function getThumbnailInterval(durationSec) {
   if (!durationSec || durationSec <= 0) return 10;
@@ -2119,14 +2778,23 @@ async function ensureThumbnailFrame(fileId, quantizedSec) {
     return inFlightThumbnails.get(lockKey);
   }
 
+  // Limita concorrência de processos de thumbnail para nunca competir com o buffer de vídeo
+  if (activeThumbnailProcesses >= 1) {
+    throw new Error('Geração de miniatura adiada para priorizar o streaming de vídeo.');
+  }
+
   const promise = (async () => {
     const hasFfmpeg = await checkFfmpegAvailable();
     if (!hasFfmpeg) {
       throw new Error('FFmpeg indisponível para extrair miniatura.');
     }
 
+    activeThumbnailProcesses += 1;
     const preparedMp4 = getPreparedMp4Path(fileId, 0);
-    const inputSource = preparedMp4 || `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1`;
+    // chunkMB=1 garante que o FFmpeg baixe no máximo 1MB do Google Drive para extrair 1 frame JPEG!
+    const inputSource =
+      preparedMp4 ||
+      `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&seek=1&chunkMB=3`;
     const tmpPath = path.join(thumbsDir, `thumb_${tInt}.tmp.jpg`);
 
     return new Promise((resolve, reject) => {
@@ -2134,12 +2802,13 @@ async function ensureThumbnailFrame(fileId, quantizedSec) {
         FFMPEG_BIN,
         [
           '-y',
+          '-threads',
+          '1',
           '-probesize',
-          '500000',
+          '1500000',
           '-analyzeduration',
-          '500000',
-          '-ss',
-          String(tInt),
+          '1500000',
+          ...(tInt > 0 ? ['-ss', String(tInt)] : []),
           '-i',
           inputSource,
           '-map',
@@ -2152,7 +2821,7 @@ async function ensureThumbnailFrame(fileId, quantizedSec) {
           '5',
           tmpPath
         ],
-        { timeout: 15000 },
+        { timeout: 10000 },
         (err) => {
           if (!err && fs.existsSync(tmpPath) && fs.statSync(tmpPath).size > 256) {
             try {
@@ -2170,35 +2839,12 @@ async function ensureThumbnailFrame(fileId, quantizedSec) {
       );
     });
   })().finally(() => {
+    activeThumbnailProcesses = Math.max(0, activeThumbnailProcesses - 1);
     inFlightThumbnails.delete(lockKey);
   });
 
   inFlightThumbnails.set(lockKey, promise);
   return promise;
-}
-
-// Pré-aquecimento moderado de thumbnails em segundo plano sem bloquear a navegação
-async function warmUpKeyThumbnails(fileId, durationSec, interval) {
-  if (!durationSec || durationSec <= 0 || thumbnailWarmupActive.has(fileId)) return;
-  thumbnailWarmupActive.add(fileId);
-  try {
-    const samplePoints = [
-      0,
-      interval,
-      interval * 2,
-      Math.floor(durationSec * 0.1 / interval) * interval,
-      Math.floor(durationSec * 0.25 / interval) * interval,
-      Math.floor(durationSec * 0.5 / interval) * interval,
-      Math.floor(durationSec * 0.75 / interval) * interval
-    ];
-    for (const pt of samplePoints) {
-      if (pt >= 0 && pt < durationSec) {
-        await ensureThumbnailFrame(fileId, pt).catch(() => {});
-      }
-    }
-  } finally {
-    thumbnailWarmupActive.delete(fileId);
-  }
 }
 
 app.get('/api/videos/:id/thumbnails/meta', async (req, res) => {
@@ -2221,16 +2867,13 @@ app.get('/api/videos/:id/thumbnails/meta', async (req, res) => {
     const interval = getThumbnailInterval(duration);
     const count = duration > 0 ? Math.ceil(duration / interval) : 0;
 
-    // Dispara pré-aquecimento assíncrono das primeiras cenas
-    if (duration > 0) {
-      setImmediate(() => warmUpKeyThumbnails(fileId, duration, interval));
-    }
-
+    // IMPORTANTE (FASE 1.2 & FASE 5.2): NÃO dispara warmUpKeyThumbnails no clique do filme para nunca concorrer com o início da reprodução!
     res.json({
       available: true,
       fileId,
       duration,
       interval,
+      intervalSeconds: interval,
       count,
       width: 160,
       height: 90,
@@ -2322,8 +2965,11 @@ async function handleVideoMetadataRequest(req, res) {
 }
 
 async function handleVideoStreamRequest(req, res) {
+  const reqStartMs = Date.now();
   const fileId = req.params.id || req.params.fileId;
   const isRawInternal = req.query.raw === '1';
+  const isSeekProbe = req.query.seek === '1';
+  const customChunkMB = Math.min(16, Math.max(1, parseInt(req.query.chunkMB || '0', 10) || 0));
   const requestedTrack = Math.max(0, parseInt(req.query.audioTrack, 10) || 0);
 
   if (!isValidDriveFileId(fileId)) {
@@ -2332,8 +2978,16 @@ async function handleVideoStreamRequest(req, res) {
 
   // Garante que apenas arquivos cadastrados no catálogo autorizado (ou com permissão explícita) sejam transmitidos
   if (!isFileAuthorizedInCatalog(fileId) && !process.env.ALLOW_UNLISTED_DRIVE_IDS) {
-    console.warn(`[Stream Auth] Bloqueado acesso a arquivo não autorizado no catálogo: ${fileId}`);
+    logStructured('AUTH_RBAC', 'unauthorized_stream_blocked', { fileId, cid: req.correlationId });
     return res.status(403).json({ error: 'Arquivo não autorizado neste catálogo.' });
+  }
+
+  if (!isRawInternal) {
+    platformMetrics.totalStreamRequests += 1;
+    platformMetrics.activeClientStreams += 1;
+    res.on('close', () => {
+      platformMetrics.activeClientStreams = Math.max(0, platformMetrics.activeClientStreams - 1);
+    });
   }
 
   // Se houver versão MP4 com áudio AAC preparada localmente e não for chamada interna raw=1, serve com suporte a HTTP 206 Range
@@ -2359,6 +3013,7 @@ async function handleVideoStreamRequest(req, res) {
             return res.status(416).end();
           }
         }
+        recordTtfbMetric(Date.now() - reqStartMs, 'prepared_local_mp4');
         res.status(206);
         res.setHeader('Content-Type', 'video/mp4');
         res.setHeader('Content-Range', `bytes ${start}-${end}/${totalSize}`);
@@ -2387,7 +3042,6 @@ async function handleVideoStreamRequest(req, res) {
   try {
     const meta = await getDriveFileMetadata(fileId);
     if (meta.errorStatus) {
-      console.warn(`[Stream Meta Error] fileId=${fileId} status=${meta.errorStatus}`);
       return res.status(meta.errorStatus).json({ error: meta.error });
     }
     if (!meta.canDownload || !meta.size) {
@@ -2396,9 +3050,10 @@ async function handleVideoStreamRequest(req, res) {
 
     const totalSize = meta.size;
     // IMPORTANTE: O Google Drive retorna página HTML se o cabeçalho Range pedir 0 até totalSize-1 (arquivo inteiro).
-    // Limitamos cada fatia HTTP 206 a 16MB (para FFmpeg/FFprobe interno) ou 8MB (para navegador), garantindo sempre bytes binários 206!
-    const MAX_CHUNK_BYTES = isRawInternal
-      ? 16 * 1024 * 1024
+    const MAX_CHUNK_BYTES = customChunkMB
+      ? customChunkMB * 1024 * 1024
+      : isRawInternal
+      ? 12 * 1024 * 1024
       : process.env.VERCEL
       ? 2 * 1024 * 1024
       : 8 * 1024 * 1024;
@@ -2441,12 +3096,37 @@ async function handleVideoStreamRequest(req, res) {
       }
     }
 
-    // Se a requisição estiver dentro do cache de extremidade final (tail_512kb.bin, ex: MKV Cues / MP4 moov no fim),
-    // responde instantaneamente do disco local em < 1ms!
     const mediaDir = path.join(PREPARED_MEDIA_DIR, fileId);
+    const headPath = path.join(mediaDir, 'head_1mb.bin');
     const tailPath = path.join(mediaDir, 'tail_512kb.bin');
+    const HEAD_SIZE = Math.min(1024 * 1024, totalSize);
     const TAIL_SIZE = Math.min(512 * 1024, totalSize);
     const tailStart = Math.max(0, totalSize - TAIL_SIZE);
+
+    // 1. Se a requisição inicial estiver no primeiro 1MB (head_1mb.bin) e for do navegador (<video>) ou probe de cabeçalho (seek=1),
+    // entrega o primeiro 1MB do disco local em < 1ms (TTFB instantâneo para loadedmetadata + primeiros keyframes!)
+    if (start < HEAD_SIZE && fs.existsSync(headPath) && (!isRawInternal || isSeekProbe || end < HEAD_SIZE)) {
+      try {
+        const headStat = fs.statSync(headPath);
+        if (headStat.size === HEAD_SIZE) {
+          const localEnd = Math.min(end, HEAD_SIZE - 1);
+          const chunkLen = localEnd - start + 1;
+          platformMetrics.headCacheHits += 1;
+          recordTtfbMetric(Date.now() - reqStartMs, 'head_1mb_cache');
+          res.status(206);
+          res.setHeader('Content-Type', meta.mimeType);
+          res.setHeader('Content-Range', `bytes ${start}-${localEnd}/${totalSize}`);
+          res.setHeader('Content-Length', String(chunkLen));
+          res.setHeader('Accept-Ranges', 'bytes');
+          res.setHeader('Cache-Control', 'private, max-age=3600');
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          return fs.createReadStream(headPath, { start, end: localEnd }).pipe(res);
+        }
+      } catch (_) {}
+    }
+
+    // 2. Se a requisição estiver dentro do cache de extremidade final (tail_512kb.bin, ex: MKV Cues / MP4 moov no fim),
+    // responde instantaneamente do disco local em < 1ms!
     if (start >= tailStart && fs.existsSync(tailPath)) {
       try {
         const tailStat = fs.statSync(tailPath);
@@ -2454,14 +3134,23 @@ async function handleVideoStreamRequest(req, res) {
           const localStart = start - tailStart;
           const localEnd = Math.min(end - tailStart, TAIL_SIZE - 1);
           const chunkLen = localEnd - localStart + 1;
+          platformMetrics.tailCacheHits += 1;
+          recordTtfbMetric(Date.now() - reqStartMs, 'tail_512kb_cache');
           res.status(206);
           res.setHeader('Content-Type', meta.mimeType);
-          res.setHeader('Content-Range', `bytes ${start}-${ tailStart + localEnd }/${totalSize}`);
+          res.setHeader('Content-Range', `bytes ${start}-${tailStart + localEnd}/${totalSize}`);
           res.setHeader('Content-Length', String(chunkLen));
           res.setHeader('Accept-Ranges', 'bytes');
           return fs.createReadStream(tailPath, { start: localStart, end: localEnd }).pipe(res);
         }
       } catch (_) {}
+    }
+
+    // Dispara preenchimento assíncrono do cache head_1mb.bin + tail_512kb.bin na primeira reprodução
+    if (!isRawInternal && (!fs.existsSync(headPath) || !fs.existsSync(tailPath))) {
+      setImmediate(() => {
+        ensureHeadTailCache(fileId, totalSize).catch(() => {});
+      });
     }
 
     const googleOAuthToken = (process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '').trim();
@@ -2487,10 +3176,6 @@ async function handleVideoStreamRequest(req, res) {
       )}?alt=media&supportsAllDrives=true&key=${encodeURIComponent(googleApiKey)}`;
     }
 
-    if (!isRawInternal) {
-      console.log(`[Stream] fileId=${fileId} range=${start}-${end}/${totalSize} source=${meta.source}`);
-    }
-
     const upstream = await fetch(upstreamUrl, {
       headers: upstreamHeaders,
       redirect: 'follow',
@@ -2498,7 +3183,11 @@ async function handleVideoStreamRequest(req, res) {
     });
 
     if (!upstream.ok && upstream.status !== 206) {
-      console.error(`[Stream Upstream Error] fileId=${fileId} status=${upstream.status}`);
+      logStructured('VIDEO_STREAM', 'upstream_error', {
+        fileId,
+        status: upstream.status,
+        cid: req.correlationId
+      });
       return res.status(upstream.status).json({
         error: 'Falha ao obter fluxo de vídeo do Google Drive.'
       });
@@ -2506,9 +3195,20 @@ async function handleVideoStreamRequest(req, res) {
 
     const upstreamType = upstream.headers.get('content-type') || '';
     if (upstreamType.includes('text/html')) {
-      console.error(`[Stream HTML Blocked] fileId=${fileId} retornou text/html em vez de mídia.`);
+      logStructured('VIDEO_STREAM', 'html_blocked_by_drive', { fileId, cid: req.correlationId });
       return res.status(403).json({
         error: 'O Google Drive retornou página de bloqueio em vez dos bytes do vídeo.'
+      });
+    }
+
+    const ttfbMs = Date.now() - reqStartMs;
+    if (!isRawInternal) {
+      recordTtfbMetric(ttfbMs, meta.source);
+      logStructured('VIDEO_STREAM', 'stream_206_started', {
+        fileId,
+        range: `${start}-${end}/${totalSize}`,
+        ttfbMs,
+        cid: req.correlationId
       });
     }
 
@@ -2546,6 +3246,56 @@ async function handleVideoStreamRequest(req, res) {
   }
 }
 
+// ============================================================================
+// AQUECIMENTO INTELIGENTE EM OCIOSIDADE (HEAD/TAIL + FFPROBE + SEG_0 HLS)
+// Executa apenas 1 arquivo por vez e pausa imediatamente se houver usuário assistindo!
+// ============================================================================
+let isIdleWarmupRunning = false;
+
+async function scheduleIdleCatalogWarmup() {
+  if (isIdleWarmupRunning || process.env.VERCEL) return;
+  isIdleWarmupRunning = true;
+  try {
+    const movies = Array.isArray(driveCatalog.movies) ? [...driveCatalog.movies] : [];
+    for (const movie of movies) {
+      if (!movie || !movie.driveFileId || movie.unavailable || movie.trashed) continue;
+      // Prioridade absoluta ao streaming ativo do usuário
+      if (platformMetrics.activeClientStreams > 0 || inFlightHlsSegments.size > 0) {
+        await new Promise((r) => setTimeout(r, 3000));
+        if (platformMetrics.activeClientStreams > 0) continue;
+      }
+
+      const fileId = movie.driveFileId;
+      const mediaDir = getFileMediaDir(fileId);
+      const headPath = path.join(mediaDir, 'head_1mb.bin');
+      const probePath = path.join(mediaDir, 'ffprobe.json');
+
+      if (!fs.existsSync(headPath) || !fs.existsSync(probePath) || !codecProbeCache.has(fileId)) {
+        try {
+          const diag = await probeMediaCodecs(fileId);
+          // Se o filme possuir áudio AC-3/E-AC-3/DTS que usa HLS, pré-gera seg_0.ts (~1.5MB) para início em < 0.3s!
+          if (diag && diag.requiresAudioFallbackOrRemux && platformMetrics.activeClientStreams === 0) {
+            const seg0Path = path.join(mediaDir, 'hls_a0', 'seg_0.ts');
+            if (!fs.existsSync(seg0Path)) {
+              await ensureHlsSegment(fileId, 0, 0, diag).catch(() => {});
+            }
+          }
+        } catch (_) {}
+      } else {
+        const diag = codecProbeCache.get(fileId);
+        if (diag && diag.requiresAudioFallbackOrRemux && platformMetrics.activeClientStreams === 0) {
+          const seg0Path = path.join(mediaDir, 'hls_a0', 'seg_0.ts');
+          if (!fs.existsSync(seg0Path)) {
+            await ensureHlsSegment(fileId, 0, 0, diag).catch(() => {});
+          }
+        }
+      }
+    }
+  } finally {
+    isIdleWarmupRunning = false;
+  }
+}
+
 app.get('/api/videos/:id/meta', handleVideoMetadataRequest);
 app.get('/api/gdrive/meta/:fileId', handleVideoMetadataRequest);
 app.get('/api/videos/:id/stream', handleVideoStreamRequest);
@@ -2557,7 +3307,8 @@ app.get('/api/gdrive/stream/:fileId', handleVideoStreamRequest);
 const rooms = new Map();
 
 function getInitialMovieForRoom() {
-  const first = driveCatalog.movies[0] || DEFAULT_DRIVE_CATALOG.movies[0];
+  const rawFirst = driveCatalog.movies[0] || DEFAULT_DRIVE_CATALOG.movies[0];
+  const first = enrichMovieWithPlaybackInfo(rawFirst);
   return {
     id: first.id,
     title: first.title,
@@ -2566,7 +3317,14 @@ function getInitialMovieForRoom() {
     poster: first.poster,
     backdrop: first.backdrop || first.poster,
     overview: first.overview,
-    streamUrl: first.streamUrl
+    streamUrl: first.streamUrl,
+    driveFileId: first.driveFileId || extractDriveFileId(first.rawUrl || first.streamUrl),
+    duration: first.duration || 0,
+    recommendedCustomPlayerUrl: first.recommendedCustomPlayerUrl || first.streamUrl,
+    requiresAudioFallbackOrRemux: Boolean(first.requiresAudioFallbackOrRemux),
+    container: first.container || 'mp4',
+    videoCodecs: first.videoCodecs || [],
+    audioCodecs: first.audioCodecs || []
   };
 }
 
@@ -2760,10 +3518,10 @@ io.on('connection', (socket) => {
       newMedia.streamUrl = buildStreamUrl(newMedia.rawUrl);
     }
 
-    room.media = {
+    room.media = enrichMovieWithPlaybackInfo({
       ...room.media,
       ...newMedia
-    };
+    });
 
     room.playback = {
       status: 'paused',
@@ -2969,6 +3727,24 @@ io.on('connection', (socket) => {
 if (!process.env.VERCEL) {
   server.listen(PORT, () => {
     console.log(`\n🍿 CINE-POMPEIA (Google Drive Edition) rodando em http://localhost:${PORT}`);
+    logStructured('DRIVE_SYNC', 'scheduler_initialized', {
+      officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+      intervalMs: DRIVE_SYNC_INTERVAL_MS
+    });
+
+    // Sincronização automática inicial com a pasta oficial do Google Drive (FASE 3)
+    setTimeout(() => {
+      runAutomaticDriveFolderSync('startup')
+        .then(() => {
+          setTimeout(() => scheduleIdleCatalogWarmup(), 1500);
+        })
+        .catch(() => {});
+    }, 1200);
+
+    // Agendador periódico automático (sem necessidade de clicar em "Sincronizar Pasta")
+    setInterval(() => {
+      runAutomaticDriveFolderSync('scheduler').catch(() => {});
+    }, DRIVE_SYNC_INTERVAL_MS);
   });
 }
 

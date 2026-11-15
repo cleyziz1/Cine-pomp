@@ -144,12 +144,18 @@
               </div>
             </div>
 
+            <div id="autoSyncStatusBadge" style="margin-bottom:0.65rem; padding:0.5rem 0.75rem; border-radius:8px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.35); color:#6ee7b7; font-size:0.76rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
+              <span>⚡ <strong>Sincronização Automática Ativa</strong> com a pasta oficial do Google Drive</span>
+              <code style="font-size:0.7rem; background:rgba(0,0,0,0.35); padding:2px 6px; border-radius:4px; color:#a7f3d0;">185iFV7I5x107sxJDTVbSxA9F0pY3GtTr</code>
+            </div>
+
             <form id="syncFolderForm" class="option-controls">
               <input
                 type="url"
                 id="driveFolderUrlInput"
                 class="detail-input"
-                placeholder="https://drive.google.com/drive/folders/1A2B3C4D5E6F..."
+                value="https://drive.google.com/drive/folders/185iFV7I5x107sxJDTVbSxA9F0pY3GtTr?usp=drive_link"
+                placeholder="https://drive.google.com/drive/folders/185iFV7I5x107sxJDTVbSxA9F0pY3GtTr?usp=drive_link"
                 required
               />
               <select id="driveFolderCategorySelect" class="toolbar-select">
@@ -476,7 +482,7 @@
             allowfullscreen
           ></iframe>
 
-          <div id="cineNativePlayerContainer" class="cine-native-container">
+          <div id="cineNativePlayerContainer" class="cine-native-container" data-player-state="idle">
             <video
               id="nativeVideo"
               class="cinema-player"
@@ -487,11 +493,24 @@
               oncontextmenu="return false;"
             ></video>
 
+            <!-- FASE 2: Placeholder Visual (Backdrop/Pôster) durante o carregamento inicial para evitar tela preta -->
+            <div id="playerPosterOverlay" class="player-poster-overlay hidden">
+              <div id="playerPosterBackdrop" class="player-poster-backdrop"></div>
+              <div class="player-poster-content">
+                <div class="player-poster-spinner"></div>
+                <div id="playerPosterTitle" class="player-poster-title">Preparando sessão...</div>
+                <div id="playerPosterSubtitle" class="player-poster-subtitle">Carregando stream progressivo HTTP 206...</div>
+              </div>
+            </div>
+
             <!-- Indicador discreto de Carregamento / Erro de Mídia / Diagnóstico de Áudio -->
             <div id="nativeLoadingBadge" class="hidden" style="position:absolute;top:14px;right:16px;z-index:25;background:rgba(10,12,22,0.86);color:#e2e8f0;padding:6px 12px;border-radius:999px;font-size:0.78rem;border:1px solid rgba(255,255,255,0.14);pointer-events:none;">
               ⏳ Carregando vídeo...
             </div>
-            <div id="nativeErrorBanner" class="hidden" style="position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(153,27,27,0.92);color:#fecaca;padding:10px 16px;border-radius:10px;font-size:0.82rem;max-width:85%;text-align:center;border:1px solid rgba(248,113,113,0.45);"></div>
+            <div id="nativeErrorBanner" class="hidden" style="position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(153,27,27,0.94);color:#fecaca;padding:12px 18px;border-radius:10px;font-size:0.82rem;max-width:85%;text-align:center;border:1px solid rgba(248,113,113,0.45);display:flex;flex-direction:column;align-items:center;gap:8px;">
+              <span id="nativeErrorText"></span>
+              <button type="button" id="nativeErrorRetryBtn" class="btn-gold btn-xs" style="pointer-events:auto;">🔄 Tentar Novamente</button>
+            </div>
             <div id="nativeAudioDiagBanner" class="audio-diag-banner hidden">
               <div class="audio-diag-text">
                 <strong id="nativeAudioDiagTitle">🔊 Diagnóstico de Áudio: Codec Dolby AC-3 5.1 detectado</strong>
