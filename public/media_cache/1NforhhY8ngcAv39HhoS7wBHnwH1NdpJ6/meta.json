@@ -1,0 +1,55 @@
+{
+  "available": true,
+  "fileId": "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+  "duration": 6432.802,
+  "interval": 10,
+  "intervalSeconds": 10,
+  "count": 644,
+  "width": 160,
+  "height": 90,
+  "cols": 2,
+  "rows": 2,
+  "spriteUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/sprite.jpg",
+  "thumb0Url": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/thumb_0.jpg",
+  "posterFallbackUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/poster_fallback.jpg",
+  "vttUrl": "/api/videos/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/thumbnails.vtt",
+  "frameEndpoint": "/api/videos/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/thumbnails/frame",
+  "tiles": [
+    {
+      "tileIndex": 0,
+      "ratio": 0.01,
+      "t": 64,
+      "x": 0,
+      "y": 0,
+      "w": 160,
+      "h": 90
+    },
+    {
+      "tileIndex": 1,
+      "ratio": 0.28,
+      "t": 1801,
+      "x": 160,
+      "y": 0,
+      "w": 160,
+      "h": 90
+    },
+    {
+      "tileIndex": 2,
+      "ratio": 0.55,
+      "t": 3538,
+      "x": 0,
+      "y": 90,
+      "w": 160,
+      "h": 90
+    },
+    {
+      "tileIndex": 3,
+      "ratio": 0.8,
+      "t": 5146,
+      "x": 160,
+      "y": 90,
+      "w": 160,
+      "h": 90
+    }
+  ]
+}

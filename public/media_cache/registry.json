@@ -1,0 +1,2190 @@
+{
+  "updatedAt": "2026-11-15T15:08:28.141Z",
+  "files": {
+    "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j": {
+      "fileId": "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "fileName": "O Espetacular Homem-Aranha - ToTTi9.mp4",
+      "size": 2438411852,
+      "container": "mp4",
+      "durationSec": 8177.168333,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 44100,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AC-3 (Dolby Digital 5.1))",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/audio_0.m4a",
+          "streamUrl": "/api/videos/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/hls/0/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.884Z"
+    },
+    "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6": {
+      "fileId": "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+      "fileName": "Moana.Um.Mar.de.Aventuras.2017.1080p.BluRay.DD5.1.x264.DUAL-TDF.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 6432.802,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 0,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "TDF",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/audio_0.m4a",
+          "streamUrl": "/api/videos/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "TDF",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": true,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.885Z"
+    },
+    "1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4": {
+      "fileId": "1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4",
+      "fileName": "Homem-Aranha 2 (2004) 1080p - 210GJI.mp4",
+      "size": 2290496386,
+      "container": "mp4",
+      "durationSec": 7648.233333,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/stream"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "mov_text",
+          "language": "pt-BR",
+          "label": "🇧🇷 Português (Brasil)",
+          "vttUrl": "/api/videos/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "mov_text",
+          "language": "en",
+          "label": "🇺🇸 Inglês (Original)",
+          "vttUrl": "/api/videos/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/subtitles/1.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.886Z"
+    },
+    "1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ": {
+      "fileId": "1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ",
+      "fileName": "O Espetacular Homem Aranha 2 (2014) BRrip 1080p Dublado - AndreTPF.mp4",
+      "size": 2256410963,
+      "container": "mp4",
+      "durationSec": 8495.573333,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.887Z"
+    },
+    "1vWwsFm3vDakms27RVGkbasAqW2rH7vUa": {
+      "fileId": "1vWwsFm3vDakms27RVGkbasAqW2rH7vUa",
+      "fileName": "Homem-Aranha 3 (2007) 1080p - 210GJI.mp4",
+      "size": 2499998949,
+      "container": "mp4",
+      "durationSec": 8351.508333,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/stream"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "mov_text",
+          "language": "pt-BR",
+          "label": "🇧🇷 Português (Brasil)",
+          "vttUrl": "/api/videos/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "mov_text",
+          "language": "en",
+          "label": "🇺🇸 Inglês (Original)",
+          "vttUrl": "/api/videos/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/subtitles/1.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.888Z"
+    },
+    "13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_": {
+      "fileId": "13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+      "fileName": "Homem-Aranha.Longe.de.Casa.2019.1080p.BluRay.6CH.x264.DUAL-COMANDOTORRENTS.COM.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 7763.785,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AC-3 (Dolby Digital 5.1))",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/audio_0.m4a",
+          "streamUrl": "/api/videos/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": true,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.890Z"
+    },
+    "1RVUVf05FlyvnRHW9YiowePQrJfw5IFod": {
+      "fileId": "1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
+      "fileName": "Homem-Aranha - Sem Volta Para Casa 2022 1080p FULL HD BluRay DUAL 5.1.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 8889.966,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "PT-BR 5.1",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/audio_0.m4a",
+          "streamUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "INGLÊS 5.1",
+          "label": "🇺🇸 Inglês (Original) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/hls/1/playlist.m3u8"
+        },
+        {
+          "trackIndex": 2,
+          "streamIndex": 3,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Surround",
+          "label": "🇺🇸 Inglês (Original) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/hls/2/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "COMPLETA PT-BR",
+          "vttUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 5,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English",
+          "vttUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/subtitles/1.vtt"
+        },
+        {
+          "subIndex": 2,
+          "streamIndex": 6,
+          "codec": "subrip",
+          "language": "en",
+          "label": "SDH",
+          "vttUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/subtitles/2.vtt"
+        },
+        {
+          "subIndex": 3,
+          "streamIndex": 7,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "FORÇADA PT-BR",
+          "vttUrl": "/api/videos/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/subtitles/3.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.891Z"
+    },
+    "1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU": {
+      "fileId": "1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU",
+      "fileName": "Homem-Aranha - Um Novo Dia 2026 WEB-DL 1080p x264 DUAL 5.1.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 8700.714,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Portuguese (Brazil)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/stream"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portuguese (Brazil)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portuguese (Brazil) [Forced]",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/1.vtt"
+        },
+        {
+          "subIndex": 2,
+          "streamIndex": 5,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portuguese (Portugal)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/2.vtt"
+        },
+        {
+          "subIndex": 3,
+          "streamIndex": 6,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English (United Kingdom)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/3.vtt"
+        },
+        {
+          "subIndex": 4,
+          "streamIndex": 7,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English (United Kingdom) [SDH]",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/4.vtt"
+        },
+        {
+          "subIndex": 5,
+          "streamIndex": 8,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English (India)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/5.vtt"
+        },
+        {
+          "subIndex": 6,
+          "streamIndex": 9,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English (United States) [SDH]",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/6.vtt"
+        },
+        {
+          "subIndex": 7,
+          "streamIndex": 10,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Bulgarian (Bulgaria)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/7.vtt"
+        },
+        {
+          "subIndex": 8,
+          "streamIndex": 11,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Czech (Czechia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/8.vtt"
+        },
+        {
+          "subIndex": 9,
+          "streamIndex": 12,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Danish (Denmark)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/9.vtt"
+        },
+        {
+          "subIndex": 10,
+          "streamIndex": 13,
+          "codec": "subrip",
+          "language": "en",
+          "label": "German (Germany)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/10.vtt"
+        },
+        {
+          "subIndex": 11,
+          "streamIndex": 14,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Greek (Greece)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/11.vtt"
+        },
+        {
+          "subIndex": 12,
+          "streamIndex": 15,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Spanish (Latin America)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/12.vtt"
+        },
+        {
+          "subIndex": 13,
+          "streamIndex": 16,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Spanish (Spain)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/13.vtt"
+        },
+        {
+          "subIndex": 14,
+          "streamIndex": 17,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Estonian (Estonia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/14.vtt"
+        },
+        {
+          "subIndex": 15,
+          "streamIndex": 18,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Finnish (Finland)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/15.vtt"
+        },
+        {
+          "subIndex": 16,
+          "streamIndex": 19,
+          "codec": "subrip",
+          "language": "en",
+          "label": "French (France)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/16.vtt"
+        },
+        {
+          "subIndex": 17,
+          "streamIndex": 20,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Croatian (Croatia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/17.vtt"
+        },
+        {
+          "subIndex": 18,
+          "streamIndex": 21,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Hungarian (Hungary)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/18.vtt"
+        },
+        {
+          "subIndex": 19,
+          "streamIndex": 22,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Indonesian (Indonesia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/19.vtt"
+        },
+        {
+          "subIndex": 20,
+          "streamIndex": 23,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Icelandic (Iceland)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/20.vtt"
+        },
+        {
+          "subIndex": 21,
+          "streamIndex": 24,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Italian (Italy)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/21.vtt"
+        },
+        {
+          "subIndex": 22,
+          "streamIndex": 25,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Japanese (Japan)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/22.vtt"
+        },
+        {
+          "subIndex": 23,
+          "streamIndex": 26,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Japanese (Japan) [SDH]",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/23.vtt"
+        },
+        {
+          "subIndex": 24,
+          "streamIndex": 27,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Lithuanian (Lithuania)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/24.vtt"
+        },
+        {
+          "subIndex": 25,
+          "streamIndex": 28,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Latvian (Latvia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/25.vtt"
+        },
+        {
+          "subIndex": 26,
+          "streamIndex": 29,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Norwegian Bokmål (Norway)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/26.vtt"
+        },
+        {
+          "subIndex": 27,
+          "streamIndex": 30,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Dutch (Netherlands)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/27.vtt"
+        },
+        {
+          "subIndex": 28,
+          "streamIndex": 31,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Polish (Poland)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/28.vtt"
+        },
+        {
+          "subIndex": 29,
+          "streamIndex": 32,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Romanian (Romania)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/29.vtt"
+        },
+        {
+          "subIndex": 30,
+          "streamIndex": 33,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Slovak (Slovakia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/30.vtt"
+        },
+        {
+          "subIndex": 31,
+          "streamIndex": 34,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Slovenian (Slovenia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/31.vtt"
+        },
+        {
+          "subIndex": 32,
+          "streamIndex": 35,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Serbian (Serbia)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/32.vtt"
+        },
+        {
+          "subIndex": 33,
+          "streamIndex": 36,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Swedish (Sweden)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/33.vtt"
+        },
+        {
+          "subIndex": 34,
+          "streamIndex": 37,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Thai (Thailand)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/34.vtt"
+        },
+        {
+          "subIndex": 35,
+          "streamIndex": 38,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Turkish (Türkiye)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/35.vtt"
+        },
+        {
+          "subIndex": 36,
+          "streamIndex": 39,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Chinese (Simplified)",
+          "vttUrl": "/api/videos/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/subtitles/36.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.892Z"
+    },
+    "1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ": {
+      "fileId": "1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
+      "fileName": "O.Resgate.do.Soldado.Ryan.1998.BluRay.1080p.x264.DUAL.5.1-STARCKFILMES.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 10125.728,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "PT-BR 5.1",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/audio_0.m4a",
+          "streamUrl": "/api/videos/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 44100,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "INGLÊS 5.1",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FULL",
+          "vttUrl": "/api/videos/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/subtitles/0.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": true,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.893Z"
+    },
+    "1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi": {
+      "fileId": "1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi",
+      "fileName": "Carros.2.2011.1080p.BluRay.H264.AC3.5.1.DUAL-MLD.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 6421.536,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "AC3 640 Kbps 5.1 Português",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/audio_0.m4a",
+          "streamUrl": "/api/videos/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "AC3 640 Kbps 5.1 Inglês",
+          "label": "🇺🇸 Inglês (Original) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/hls/1/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.894Z"
+    },
+    "134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH": {
+      "fileId": "134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH",
+      "fileName": "Toy.Story.5.2026.WEB-DL.1080p.x264.DUAL.5.1-STARCKFILMES.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 6206.805,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)",
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Portuguese (Brazil)",
+          "label": "🇧🇷 Português (Brasil) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/audio_0.m4a",
+          "streamUrl": "/api/videos/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portuguese (Brazil)",
+          "vttUrl": "/api/videos/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portuguese (Brazil) [SDH]",
+          "vttUrl": "/api/videos/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/subtitles/1.vtt"
+        },
+        {
+          "subIndex": 2,
+          "streamIndex": 5,
+          "codec": "subrip",
+          "language": "en",
+          "label": "English [SDH]",
+          "vttUrl": "/api/videos/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/subtitles/2.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": true,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.895Z"
+    },
+    "17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq": {
+      "fileId": "17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq",
+      "fileName": "Harry.Potter.e.o.Prisioneiro.de.Azkaban.2004.1080p-WOLVERDONFILMES.COM.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 8502.4,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "AC3 5.1 - WOLVERDON",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/audio_0.m4a",
+          "streamUrl": "/api/videos/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/hls/0/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.896Z"
+    },
+    "1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z": {
+      "fileId": "1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z",
+      "fileName": "Procurando.Nemo.2003.Dublado.720p.BRrip.x264.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 6054.007,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "mp3",
+          "codecLabel": "MP3",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (MP3)",
+          "label": "🇧🇷 Português (Brasil) • MP3",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 2,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "🇧🇷 Português (Brasil)",
+          "vttUrl": "/api/videos/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z/subtitles/0.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.897Z"
+    },
+    "1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e": {
+      "fileId": "1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e",
+      "fileName": "P.D.mp4",
+      "size": 841351737,
+      "container": "mp4",
+      "durationSec": 5823.026,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AC-3 (Dolby Digital 5.1))",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/audio_0.m4a",
+          "streamUrl": "/api/videos/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/hls/0/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.898Z"
+    },
+    "1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm": {
+      "fileId": "1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm",
+      "fileName": "Lilo & Stitch - Dublado (SeriesZoiudo).mp4",
+      "size": 330723534,
+      "container": "mp4",
+      "durationSec": 5116.33,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.899Z"
+    },
+    "1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn": {
+      "fileId": "1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn",
+      "fileName": "A Princesa E O Sapo [2009] - Dublado (SeriesZoiudo).mp4",
+      "size": 606718764,
+      "container": "mp4",
+      "durationSec": 5857.644,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.899Z"
+    },
+    "19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN": {
+      "fileId": "19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN",
+      "fileName": "25 - Barbie a Princesa e a Pop Star.avi",
+      "size": 765583360,
+      "container": "avi",
+      "durationSec": 4526.230042,
+      "videoCodecs": [
+        "MPEG-4 Visual (AVI/Xvid)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "mp3",
+          "codecLabel": "MP3",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (MP3)",
+          "label": "🇧🇷 Português (Brasil) • MP3 → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/media_cache/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN/compat.mp4"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": true,
+      "compatMp4Url": "/media_cache/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN/compat.mp4",
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.900Z"
+    },
+    "1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2": {
+      "fileId": "1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2",
+      "fileName": "22 - Barbie Escola de Princesas.mp4",
+      "size": 309203948,
+      "container": "mp4",
+      "durationSec": 4783.828333,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.901Z"
+    },
+    "1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_": {
+      "fileId": "1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
+      "fileName": "Uma.Sexta-Feira.Mais.Louca.Ainda.2025.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 6633.088,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "PT-BR 5.1",
+          "label": "🇧🇷 Português (Brasil) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/audio_0.m4a",
+          "streamUrl": "/api/videos/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "INGLÊS 5.1",
+          "label": "🇺🇸 Inglês (Original) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/hls/1/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FORCED",
+          "vttUrl": "/api/videos/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FULL",
+          "vttUrl": "/api/videos/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/subtitles/1.vtt"
+        },
+        {
+          "subIndex": 2,
+          "streamIndex": 5,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Inglês",
+          "vttUrl": "/api/videos/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/subtitles/2.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.902Z"
+    },
+    "1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT": {
+      "fileId": "1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT",
+      "fileName": "Máquina.de.Guerra.2026.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
+      "size": 3609371218,
+      "container": "mkv",
+      "durationSec": 6559.808,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "PT-BR 5.1",
+          "label": "🇧🇷 Português (Brasil) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/audio_0.m4a",
+          "streamUrl": "/api/videos/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "INGLÊS 5.1",
+          "label": "🇺🇸 Inglês (Original) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/hls/1/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FORCED",
+          "vttUrl": "/api/videos/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FULL",
+          "vttUrl": "/api/videos/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/subtitles/1.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.903Z"
+    },
+    "11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka": {
+      "fileId": "11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
+      "fileName": "Velozes & Furiosos 7 (2015) 1080p Dublado BRSHARES.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 8394.922,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "ac3",
+          "codecLabel": "AC-3 (Dolby Digital 5.1)",
+          "channels": 6,
+          "channelLayout": "5.1(side)",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "pt-br ac3 5.1",
+          "label": "🇧🇷 Português (Brasil) • AC-3 (Dolby Digital 5.1) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/audio_0.m4a",
+          "streamUrl": "/api/videos/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": true,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.903Z"
+    },
+    "1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk": {
+      "fileId": "1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk",
+      "fileName": "Bird Box.mp4",
+      "size": 1159309072,
+      "container": "mp4",
+      "durationSec": 7430.582,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.904Z"
+    },
+    "10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ": {
+      "fileId": "10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ",
+      "fileName": "Por.Água.Abaixo.2006.1080p.WEB-DL.x264.DUAL.5.1.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 5085.781,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Português (Brasil) (AAC)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/stream"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (AAC)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "🇧🇷 Português (Brasil)",
+          "vttUrl": "/api/videos/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/subtitles/0.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.905Z"
+    },
+    "1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN": {
+      "fileId": "1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN",
+      "fileName": "Capitão.América.Guerra.Civil.2016.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
+      "size": 1048576,
+      "container": "mkv",
+      "durationSec": 8858.528,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "PT-BR 5.1",
+          "label": "🇧🇷 Português (Brasil) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": "/media_cache/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/audio_0.m4a",
+          "streamUrl": "/api/videos/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/hls/0/playlist.m3u8"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "eac3",
+          "codecLabel": "E-AC-3 (Dolby Digital Plus)",
+          "channels": 6,
+          "channelLayout": "5.1",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "INGLÊS 5.1",
+          "label": "🇺🇸 Inglês (Original) • E-AC-3 (Dolby Digital Plus) → AAC-LC Estéreo",
+          "browserSupported": false,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/hls/1/playlist.m3u8"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FORCED",
+          "vttUrl": "/api/videos/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "PT-BR FULL",
+          "vttUrl": "/api/videos/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/subtitles/1.vtt"
+        },
+        {
+          "subIndex": 2,
+          "streamIndex": 5,
+          "codec": "subrip",
+          "language": "en",
+          "label": "Inglês",
+          "vttUrl": "/api/videos/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/subtitles/2.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": false,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": true,
+      "sidecarAudioUrl": "/media_cache/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/audio_0.m4a",
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.906Z"
+    },
+    "1UPS01K81aZYh6sofmAUkwBjFYN7D09RH": {
+      "fileId": "1UPS01K81aZYh6sofmAUkwBjFYN7D09RH",
+      "fileName": "Coração.Selvagem.2026.1080p.WEB-DL.5.1.H.264.DUAL-XFILME.ORG.mkv",
+      "size": 2837889116,
+      "container": "mkv",
+      "durationSec": 6299.861,
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "pt-BR",
+          "languageLabel": "Português (Brasil)",
+          "title": "Portugues (Brasil)",
+          "label": "🇧🇷 Português (Brasil) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/stream"
+        },
+        {
+          "trackIndex": 1,
+          "streamIndex": 2,
+          "codec": "aac",
+          "codecLabel": "AAC",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "English (United States)",
+          "label": "🇺🇸 Inglês (Original) • AAC",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/stream"
+        }
+      ],
+      "subtitleTracks": [
+        {
+          "subIndex": 0,
+          "streamIndex": 3,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portugues (Brasil) - Forced",
+          "vttUrl": "/api/videos/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/subtitles/0.vtt"
+        },
+        {
+          "subIndex": 1,
+          "streamIndex": 4,
+          "codec": "subrip",
+          "language": "pt-BR",
+          "label": "Portugues (Brasil)",
+          "vttUrl": "/api/videos/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/subtitles/1.vtt"
+        }
+      ],
+      "languages": [
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
+        },
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.907Z"
+    },
+    "1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV": {
+      "fileId": "1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV",
+      "fileName": "[4K REMASTERED] ACCELERACERS 1.0 - IGNIÇÃO DUBLADO PT-BR.webm",
+      "size": 1048576,
+      "container": "webm",
+      "durationSec": 3606.141,
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "opus",
+          "codecLabel": "Opus",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (Opus)",
+          "label": "🇺🇸 Inglês (Original) • Opus",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.908Z"
+    },
+    "1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6": {
+      "fileId": "1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6",
+      "fileName": "[4K REMASTERED] ACCELERACERS 2.0 A VELOCIDADE DO SILENCIO DUBLADO PT-BR.webm",
+      "size": 1048576,
+      "container": "webm",
+      "durationSec": 3634.041,
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "opus",
+          "codecLabel": "Opus",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (Opus)",
+          "label": "🇺🇸 Inglês (Original) • Opus",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.908Z"
+    },
+    "1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP": {
+      "fileId": "1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP",
+      "fileName": "[4K REMASTERED] ACCELERACERS 3.0 PONTO DE RUPTURA DUBLADO PT-BR.webm",
+      "size": 1048576,
+      "container": "webm",
+      "durationSec": 3637.181,
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "opus",
+          "codecLabel": "Opus",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (Opus)",
+          "label": "🇺🇸 Inglês (Original) • Opus",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.909Z"
+    },
+    "1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr": {
+      "fileId": "1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr",
+      "fileName": "ACCELERACERS 4.0 A CORRIDA FINAL DUBLADO PT-BR.webm",
+      "size": 1048576,
+      "container": "webm",
+      "durationSec": 3634.641,
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTracks": [
+        {
+          "trackIndex": 0,
+          "streamIndex": 1,
+          "codec": "opus",
+          "codecLabel": "Opus",
+          "channels": 2,
+          "channelLayout": "stereo",
+          "sampleRate": 48000,
+          "language": "en",
+          "languageLabel": "Inglês (Original)",
+          "title": "Inglês (Original) (Opus)",
+          "label": "🇺🇸 Inglês (Original) • Opus",
+          "browserSupported": true,
+          "sidecarAudioUrl": null,
+          "streamUrl": "/api/videos/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr/stream"
+        }
+      ],
+      "subtitleTracks": [],
+      "languages": [
+        {
+          "code": "en",
+          "label": "Inglês (Original)"
+        }
+      ],
+      "primaryTrackCompat": true,
+      "isEbmlRemappableDual": false,
+      "hasSidecarAudio0": false,
+      "sidecarAudioUrl": null,
+      "hasCompatMp4": false,
+      "compatMp4Url": null,
+      "hasThumbnailsSprite": true,
+      "posterFallbackUrl": "/media_cache/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr/poster_fallback.jpg",
+      "updatedAt": "2026-11-15T15:09:57.910Z"
+    }
+  }
+}

@@ -4,10 +4,38 @@
       "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
       "folderUrl": "https://drive.google.com/drive/folders/185iFV7I5x107sxJDTVbSxA9F0pY3GtTr?usp=drive_link",
       "official": true,
-      "syncedAt": "15/11/2026, 10:06:26"
+      "syncedAt": "15/11/2026, 11:35:30"
     }
   ],
   "removedMovies": [
+    {
+      "id": "drive_1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "driveFileId": "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "title": "O Espetacular Homem-Aranha - ToTTi9",
+      "reason": "removed_from_synced_folder",
+      "removedAt": "2026-11-15T14:34:30.068Z"
+    },
+    {
+      "id": "drive_12k2h5Yl2uj1SPjh0HqDONBEdm8sfPrxd",
+      "driveFileId": "12k2h5Yl2uj1SPjh0HqDONBEdm8sfPrxd",
+      "title": "O Espetacular Homem-Aranha - ToTTi9",
+      "reason": "removed_from_synced_folder",
+      "removedAt": "2026-11-15T14:27:30.062Z"
+    },
+    {
+      "id": "drive_1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
+      "driveFileId": "1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
+      "title": "Carros",
+      "reason": "removed_from_synced_folder",
+      "removedAt": "2026-11-15T14:05:29.856Z"
+    },
+    {
+      "id": "drive_1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH",
+      "driveFileId": "1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH",
+      "title": "Gigantes de Aço",
+      "reason": "removed_from_synced_folder",
+      "removedAt": "2026-11-15T13:39:29.611Z"
+    },
     {
       "id": "drive_1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
       "driveFileId": "1Tte7oU7xlxFeAhgVKTzkWcZv1KqffGT7",
@@ -24,45 +52,290 @@
     }
   ],
   "driveChangesPageToken": null,
-  "lastReconciledAt": "2026-11-15T13:06:26.962Z",
+  "lastReconciledAt": "2026-11-15T14:35:30.665Z",
   "movies": [
     {
-      "id": "drive_1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
-      "title": "Homem-Aranha - Sem Volta Para Casa",
-      "year": "2022",
-      "rating": null,
-      "category": "Filmes do Google Drive",
+      "id": "drive_1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "title": "O Espetacular Homem-Aranha",
+      "year": "2012",
+      "rating": "7.0",
+      "category": "Ação & Aventura",
+      "featured": true,
+      "driveFileId": "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "O Espetacular Homem-Aranha - ToTTi9.mp4",
+      "size": 2438411852,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/view",
+      "streamUrl": "/api/gdrive/stream/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "poster": "https://image.tmdb.org/t/p/w500/fSbqPbqXa7ePo8bcnZYN9AHv6zA.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/sLWUtbrpiLp23a0XDSiUiltdFPJ.jpg",
+      "overview": "Peter Parker está tentando saber mais sobre sua origem. Ele encontra uma pasta que pertenceu ao seu pai e quer descobrir por que seus pais desapareceram, o que o leva à Oscorp e ao Dr. Curt Connors.",
+      "addedAt": 1794753330664,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.99,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j/poster_fallback.jpg",
+      "duration": 8177,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+      "title": "Moana: Um Mar de Aventuras",
+      "year": "2016",
+      "rating": "7.6",
+      "category": "Animação & Família",
+      "featured": true,
+      "driveFileId": "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "Moana.Um.Mar.de.Aventuras.2017.1080p.BluRay.DD5.1.x264.DUAL-TDF.mkv",
+      "size": 1048576,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/view",
+      "streamUrl": "/api/gdrive/stream/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+      "poster": "https://image.tmdb.org/t/p/w500/4JeejGugONWpJkbnvL12hVoYEDa.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/iYLKMV7PIBtFmtygRrhSiyzcVsF.jpg",
+      "overview": "Uma jovem polinésia destemida parte em uma missão ousada pelo oceano Pacífico com a ajuda do semideus Maui para salvar seu povo de uma antiga maldição.",
+      "addedAt": 1794753330532,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.99,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6/poster_fallback.jpg",
+      "duration": 6433,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4",
+      "title": "Homem-Aranha 2",
+      "year": "2004",
+      "rating": "7.5",
+      "category": "Ação & Aventura",
       "featured": false,
+      "driveFileId": "1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "Homem-Aranha 2 (2004) 1080p - 210GJI.mp4",
+      "size": 2290496386,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/view",
+      "streamUrl": "/api/gdrive/stream/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4",
+      "poster": "https://image.tmdb.org/t/p/w500/olxpyq9kJAZ2NU1siLshhhXEPR7.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/6al048Lat3eLVQOuKtc9h6Tu94d.jpg",
+      "overview": "Dois anos após derrotar o Duende Verde, Peter Parker enfrenta uma crise pessoal enquanto precisa deter o brilhante cientista Dr. Otto Octavius, transformado no perigoso Doutor Octopus.",
+      "addedAt": 1794752911429,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 1,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4/poster_fallback.jpg",
+      "duration": 7648,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ",
+      "title": "O Espetacular Homem-Aranha 2: A Ameaça de Electro",
+      "year": "2014",
+      "rating": "6.6",
+      "category": "Ação & Aventura",
+      "featured": false,
+      "driveFileId": "1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "O Espetacular Homem Aranha 2 (2014) BRrip 1080p Dublado - AndreTPF.mp4",
+      "size": 2256410963,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ/view",
+      "streamUrl": "/api/gdrive/stream/1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ",
+      "poster": "https://image.tmdb.org/t/p/w500/c3e9e18SSlvFd1cQaGmUj5tqL5P.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/u7SeO6Y42P7VCTWLhpnL96cyOqd.jpg",
+      "overview": "Peter Parker divide seu tempo entre proteger Nova York como Homem-Aranha e estar ao lado de Gwen Stacy, mas o surgimento do poderoso Electro e o retorno de Harry Osborn mudam tudo.",
+      "addedAt": 1794752670445,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.98,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ/poster_fallback.jpg",
+      "duration": 8496,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_1vWwsFm3vDakms27RVGkbasAqW2rH7vUa",
+      "title": "Homem-Aranha 3",
+      "year": "2007",
+      "rating": "6.4",
+      "category": "Ação & Aventura",
+      "featured": false,
+      "driveFileId": "1vWwsFm3vDakms27RVGkbasAqW2rH7vUa",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "Homem-Aranha 3 (2007) 1080p - 210GJI.mp4",
+      "size": 2499998949,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/view",
+      "streamUrl": "/api/gdrive/stream/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa",
+      "poster": "https://image.tmdb.org/t/p/w500/qFmwhVUoUSXjkKRmca5yGDEXBIj.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/w1oD1MzHjnBJc5snKupIQaSBLIh.jpg",
+      "overview": "Peter Parker finalmente encontra equilíbrio entre sua devoção a Mary Jane e seus deveres como herói, até que seu traje é tomado por um simbionte alienígena e surgem Homem-Areia e Venom.",
+      "addedAt": 1794752010452,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 1,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1vWwsFm3vDakms27RVGkbasAqW2rH7vUa/poster_fallback.jpg",
+      "duration": 8352,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+      "title": "Homem-Aranha: Longe de Casa",
+      "year": "2019",
+      "rating": "7.4",
+      "category": "Ação & Aventura",
+      "featured": true,
+      "driveFileId": "13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "fileName": "Homem-Aranha.Longe.de.Casa.2019.1080p.BluRay.6CH.x264.DUAL-COMANDOTORRENTS.COM.mkv",
+      "size": 1048576,
+      "modifiedTime": null,
+      "rawUrl": "https://drive.google.com/file/d/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/view",
+      "streamUrl": "/api/gdrive/stream/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+      "poster": "https://image.tmdb.org/t/p/w500/4q2NNj4S5dG2RLF9CpXsej7yXl.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/5myQbDzw3l8K9yofUXRJ4UTVgam.jpg",
+      "overview": "Peter Parker e seus amigos vão fazer uma viagem de férias de verão para a Europa. No entanto, eles mal conseguem descansar quando Nick Fury convoca Peter para enfrentar os Elementais ao lado de Mysterio.",
+      "addedAt": 1794750570093,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 1,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_/poster_fallback.jpg",
+      "duration": 7764,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
+    },
+    {
+      "id": "drive_1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
+      "title": "Homem-Aranha: Sem Volta Para Casa",
+      "year": "2021",
+      "rating": "8.0",
+      "category": "Ação & Aventura",
+      "featured": true,
       "driveFileId": "1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
       "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
       "fileName": "Homem-Aranha - Sem Volta Para Casa 2022 1080p FULL HD BluRay DUAL 5.1.mkv",
-      "size": 0,
+      "size": 1048576,
       "modifiedTime": null,
       "rawUrl": "https://drive.google.com/file/d/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/view",
       "streamUrl": "/api/gdrive/stream/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
-      "poster": "https://placehold.co/500x750/151828/f5c518?text=Homem-Aranha%20-%20Sem%20Volta%20Para%20Casa",
-      "backdrop": "",
-      "overview": "Arquivo sincronizado da pasta oficial do Google Drive (Homem-Aranha - Sem Volta Para Casa 2022 1080p FULL HD BluRay DUAL 5.1.mkv).",
-      "addedAt": 1794747986949
-    },
-    {
-      "id": "drive_1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH",
-      "title": "Gigantes de Aço",
-      "year": "2011",
-      "rating": null,
-      "category": "Filmes do Google Drive",
-      "featured": false,
-      "driveFileId": "1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
-      "fileName": "Gigantes de Aço (2011) BluRay.1080p.5.1.x264.WWW.BLUDV.COM.mkv",
-      "size": 0,
-      "modifiedTime": null,
-      "rawUrl": "https://drive.google.com/file/d/1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH/view",
-      "streamUrl": "/api/gdrive/stream/1bOn22-2aN1m4A-kOSxPyxhiG0NHmDObH",
-      "poster": "https://placehold.co/500x750/151828/f5c518?text=Gigantes%20de%20A%C3%A7o",
-      "backdrop": "",
-      "overview": "Arquivo sincronizado da pasta oficial do Google Drive (Gigantes de Aço (2011) BluRay.1080p.5.1.x264.WWW.BLUDV.COM.mkv).",
-      "addedAt": 1794747986819
+      "poster": "https://image.tmdb.org/t/p/w500/fVzXp3NwovUlLe7fvoRynCmBPNc.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg",
+      "overview": "Pela primeira vez na história cinematográfica do Homem-Aranha, a identidade de Peter Parker é revelada. Ao pedir ajuda ao Doutor Estranho, um feitiço abre fendas no multiverso.",
+      "addedAt": 1794747986949,
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 1,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1RVUVf05FlyvnRHW9YiowePQrJfw5IFod/poster_fallback.jpg",
+      "duration": 8890,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU",
@@ -79,7 +352,29 @@
       "overview": "É um novo dia para Peter Parker. Combatendo o crime em tempo integral como Homem-Aranha em um mundo que não se lembra mais dele e lidando com a pressão de ver seus antigos amigos seguirem em frente sem sua presença.",
       "addedAt": 1794176579000,
       "fileName": "Homem-Aranha - Um Novo Dia 2026 WEB-DL 1080p x264 DUAL 5.1.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU/poster_fallback.jpg",
+      "duration": 8701,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
@@ -96,24 +391,30 @@
       "overview": "Ao desembarcar na Normandia, no dia 6 de junho de 1944, o capitão Miller recebe a missão de comandar um grupo do segundo batalhão para o resgate do soldado James Ryan.",
       "addedAt": 1794176577505,
       "fileName": "O.Resgate.do.Soldado.Ryan.1998.BluRay.1080p.x264.DUAL.5.1-STARCKFILMES.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
-    },
-    {
-      "id": "drive_1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
-      "title": "Carros",
-      "year": "2006",
-      "rating": "7.0",
-      "category": "Animação & Família",
-      "featured": true,
-      "driveFileId": "1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
-      "rawUrl": "https://drive.google.com/file/d/1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri/view",
-      "streamUrl": "/api/gdrive/stream/1f2Q4WoYpS-0A7Xwgyb881DRAOvmg7Gri",
-      "poster": "https://image.tmdb.org/t/p/w500/A7nssMRIPauZhEVf2dzwsf4EALO.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/sd4xN5xi8tKRPrJOWwNiZEile7f.jpg",
-      "overview": "Ao viajar para a Califórnia para a disputa da corrida final da Copa Pistão, o famoso Relâmpago McQueen acaba preso em Radiator Springs e descobre o verdadeiro significado de amizade.",
-      "addedAt": 1794176577200,
-      "fileName": "Carros.2006.OPEN.MATTE.IMAX.1080p.WEB-DL.H264.AC3.5.1.DUAL-MLD.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ/poster_fallback.jpg",
+      "duration": 10126,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi",
@@ -130,7 +431,29 @@
       "overview": "O astro das corridas, Relâmpago McQueen, e o carro-guincho, Mate, viajam para disputar o primeiro Grand Prix Mundial, que irá revelar o carro mais veloz do planeta.",
       "addedAt": 1794176577100,
       "fileName": "Carros.2.2011.1080p.BluRay.H264.AC3.5.1.DUAL-MLD.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi/poster_fallback.jpg",
+      "duration": 6422,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH",
@@ -147,7 +470,30 @@
       "overview": "O trabalho de Buzz, Woody, Jessie e do resto da gangue fica exponencialmente mais difícil quando eles enfrentam uma nova ameaça à diversão: a tecnologia.",
       "addedAt": 1794174767601,
       "fileName": "Toy.Story.5.2026.WEB-DL.1080p.x264.DUAL.5.1-STARCKFILMES.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH/poster_fallback.jpg",
+      "duration": 6207,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)",
+        "AAC"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq",
@@ -164,7 +510,29 @@
       "overview": "É o início do terceiro ano na escola de magia e bruxaria de Hogwarts. Harry, Ron e Hermione têm muito o que aprender, mas Sirius Black escapou de Azkaban.",
       "addedAt": 1794174767433,
       "fileName": "Harry.Potter.e.o.Prisioneiro.de.Azkaban.2004.1080p-WOLVERDONFILMES.COM.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq/poster_fallback.jpg",
+      "duration": 8502,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z",
@@ -181,7 +549,29 @@
       "overview": "Nemo, um jovem peixe-palhaço aventureiro, é levado da Grande Barreira de Corais para um aquário. Cabe ao seu pai Marlin e à simpática Dory atravessar o oceano para resgatá-lo.",
       "addedAt": 1794173573099,
       "fileName": "Procurando.Nemo.2003.Dublado.720p.BRrip.x264.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z/poster_fallback.jpg",
+      "duration": 6054,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e",
@@ -198,7 +588,29 @@
       "overview": "O Distrito 21 do Departamento de Polícia de Chicago é composto pelos policiais uniformizados e pela Unidade de Inteligência que combate o crime organizado.",
       "addedAt": 1794173572919,
       "fileName": "P.D.mp4",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e/poster_fallback.jpg",
+      "duration": 5823,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "size": 841351737,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm",
@@ -215,7 +627,29 @@
       "overview": "Stitch, um experimento alienígena, cai no Havaí e é adotado pela jovem Lilo, aprendendo o significado de Ohana (família).",
       "addedAt": 1794173572650,
       "fileName": "Lilo & Stitch - Dublado (SeriesZoiudo).mp4",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm/poster_fallback.jpg",
+      "duration": 5116,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 330723534,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn",
@@ -232,7 +666,29 @@
       "overview": "Trabalhadora e ambiciosa, Tiana sonha em abrir seu próprio restaurante em Nova Orleans, mas tudo muda quando ela conhece o príncipe Naveen transformado em sapo.",
       "addedAt": 1794173572491,
       "fileName": "A Princesa E O Sapo [2009] - Dublado (SeriesZoiudo).mp4",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn/poster_fallback.jpg",
+      "duration": 5858,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 606718764,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN",
@@ -249,7 +705,29 @@
       "overview": "A princesa Tori e sua pop star favorita Keira descobrem que têm muito em comum e usam sua magia para trocar de lugar!",
       "addedAt": 1794173572331,
       "fileName": "25 - Barbie a Princesa e a Pop Star.avi",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN/poster_fallback.jpg",
+      "duration": 4526,
+      "container": "avi",
+      "videoCodecs": [
+        "MPEG-4 Visual (AVI/Xvid)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "size": 765583360,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2",
@@ -266,7 +744,29 @@
       "overview": "Blair Willows é sorteada para frequentar a exclusiva Escola de Princesas e descobre um segredo real que pode mudar todo o reino.",
       "addedAt": 1794173572169,
       "fileName": "22 - Barbie Escola de Princesas.mp4",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/poster_fallback.jpg",
+      "duration": 4784,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 309203948,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
@@ -283,7 +783,29 @@
       "overview": "Anos depois de Tess e Anna passarem por uma crise de identidade, um novo feitiço faz a família inteira trocar de corpo novamente.",
       "addedAt": 1794173249678,
       "fileName": "Uma.Sexta-Feira.Mais.Louca.Ainda.2025.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_/poster_fallback.jpg",
+      "duration": 6633,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT",
@@ -300,7 +822,29 @@
       "overview": "Em sua última missão de treinamento, um engenheiro de combate precisa liderar sua equipe de elite em uma luta pela sobrevivência contra uma máquina mortal.",
       "addedAt": 1794173249512,
       "fileName": "Máquina.de.Guerra.2026.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT/poster_fallback.jpg",
+      "duration": 6560,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "size": 3609371218,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
@@ -317,7 +861,30 @@
       "overview": "Deckard Shaw busca vingança contra Dominic Toretto e sua família. Dom, Brian e toda a equipe se reúnem para mais uma missão impossível.",
       "addedAt": 1794172838591,
       "fileName": "Velozes & Furiosos 7 (2015) 1080p Dublado BRSHARES.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka/poster_fallback.jpg",
+      "duration": 8395,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk",
@@ -334,7 +901,29 @@
       "overview": "Uma misteriosa presença dizima grande parte da sociedade. Cinco anos depois, Malorie e seus dois filhos saem de olhos vendados pelo rio em busca de um abrigo seguro.",
       "addedAt": 1794172838434,
       "fileName": "Bird Box.mp4",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk/poster_fallback.jpg",
+      "duration": 7431,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 1159309072,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ",
@@ -351,7 +940,29 @@
       "overview": "Roddy St. James, um mimado ratinho de estimação, entra literalmente pelo cano e vai parar em uma agitada cidade subterrânea.",
       "addedAt": 1794171659286,
       "fileName": "Por.Água.Abaixo.2006.1080p.WEB-DL.x264.DUAL.5.1.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/poster_fallback.jpg",
+      "duration": 5086,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN",
@@ -368,7 +979,29 @@
       "overview": "Depois do ataque de Ultron, os governos mundiais decidem controlar os Vingadores, colocando o Capitão América em rota de colisão com o Homem de Ferro.",
       "addedAt": 1794171659115,
       "fileName": "Capitão.América.Guerra.Civil.2016.WEB-DL.1080p.x264.DUAL.5.1-SF.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN/poster_fallback.jpg",
+      "duration": 8859,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1UPS01K81aZYh6sofmAUkwBjFYN7D09RH",
@@ -385,12 +1018,34 @@
       "overview": "Um ex-soldado ferido e seu cão de guerra aposentado lutam para sobreviver na região selvagem do Alasca após um acidente aéreo.",
       "addedAt": 1794170087996,
       "fileName": "Coração.Selvagem.2026.1080p.WEB-DL.5.1.H.264.DUAL-XFILME.ORG.mkv",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1UPS01K81aZYh6sofmAUkwBjFYN7D09RH/poster_fallback.jpg",
+      "duration": 6300,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "size": 2837889116,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV",
-      "title": "ACCELERACERS 1 0 - IGNIÇÃO",
-      "year": "2026",
+      "title": "Hot Wheels AcceleRacers 1: Ignição",
+      "year": "2005",
       "rating": "8.1",
       "category": "Animação & Família",
       "featured": false,
@@ -402,7 +1057,29 @@
       "overview": "O Dr. Tezla convoca os melhores pilotos das equipes Teku e Metal Maniacs para encarar os Reinos de Corrida contra os Racing Drones (4K Remastered).",
       "addedAt": 1794169458458,
       "fileName": "[4K REMASTERED] ACCELERACERS 1.0 - IGNIÇÃO DUBLADO PT-BR.webm",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.96,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV/poster_fallback.jpg",
+      "duration": 3606,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6",
@@ -419,7 +1096,29 @@
       "overview": "Os pilotos Teku e Metal Maniacs enfrentam o Reino da Água e o Reino da Metrópole enquanto os misteriosos Silencerz entram na disputa (4K Remastered).",
       "addedAt": 1794169458321,
       "fileName": "[4K REMASTERED] ACCELERACERS 2.0 A VELOCIDADE DO SILENCIO DUBLADO PT-BR.webm",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6/poster_fallback.jpg",
+      "duration": 3634,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP",
@@ -436,7 +1135,29 @@
       "overview": "A disputa pelos AcceleChargers se intensifica entre os humanos, os Racing Drones e os Silencerz (4K Remastered).",
       "addedAt": 1794169458183,
       "fileName": "[4K REMASTERED] ACCELERACERS 3.0 PONTO DE RUPTURA DUBLADO PT-BR.webm",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP/poster_fallback.jpg",
+      "duration": 3637,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     },
     {
       "id": "drive_1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr",
@@ -453,7 +1174,29 @@
       "overview": "Vert Wheeler enfrenta Gelorum na Corrida Cósmica definitiva enquanto os Teku e Metal Maniacs invadem o quartel-general dos Drones (4K Remastered).",
       "addedAt": 1794169458037,
       "fileName": "ACCELERACERS 4.0 A CORRIDA FINAL DUBLADO PT-BR.webm",
-      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr"
+      "folderId": "185iFV7I5x107sxJDTVbSxA9F0pY3GtTr",
+      "posterSource": "tmdb_pt_br",
+      "matchScore": 0.95,
+      "needsReview": false,
+      "posterFallbackUrl": "/media_cache/1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr/poster_fallback.jpg",
+      "duration": 3635,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "size": 1048576,
+      "stages": {
+        "imported": true,
+        "metadata": true,
+        "poster": true,
+        "codecs": true,
+        "audio_compat": true,
+        "thumbnails": true,
+        "ready": true
+      }
     }
   ]
 }

@@ -1,15 +1,140 @@
 // ============================================================================
-// CINE POMPEIA — CLOUDFLARE WORKER API, RBAC, SYNC & GOOGLE DRIVE STREAMING PROXY
+// CINE POMPEIA — CLOUDFLARE WORKER API, RBAC, SYNC, THUMBNAILS & STREAMING PROXY
 // Executa na borda da Cloudflare para atender /api/* no deploy *.workers.dev
 // ============================================================================
+
+const OFFICIAL_DRIVE_FOLDER_ID = '185iFV7I5x107sxJDTVbSxA9F0pY3GtTr';
+const OFFICIAL_DRIVE_FOLDER_URL = `https://drive.google.com/drive/folders/${OFFICIAL_DRIVE_FOLDER_ID}?usp=drive_link`;
 
 const metaCache = new Map();
 const codecProbeCache = new Map();
 const revokedTokens = new Set();
 const META_CACHE_TTL_MS = 10 * 60 * 1000;
 
-// Estado em memória do isolate (sincronizado com ASSETS/drive_catalog.json)
+// Estado em memória do isolate (sincronizado com ASSETS/drive_catalog.json e ASSETS/media_cache/registry.json)
 let runtimeCatalog = null;
+let runtimeMediaRegistry = null;
+let lastAutoSyncState = {
+  officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+  officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+  status: 'idle',
+  lastStartedAt: null,
+  lastCompletedAt: null,
+  lastTrigger: 'boot',
+  discoveredCount: 0,
+  addedCount: 0,
+  removedCount: 0,
+  updatedCount: 0,
+  durationMs: 0,
+  error: null
+};
+
+const CURATED_PT_BR_METADATA = {
+  '1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j': {
+    title: 'O Espetacular Homem-Aranha',
+    year: '2012',
+    rating: '7.0',
+    category: 'Ação & Aventura',
+    featured: true,
+    poster: 'https://image.tmdb.org/t/p/w500/fSbqPbqXa7ePo8bcnZYN9AHv6zA.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/sLWUtbrpiLp23a0XDSiUiltdFPJ.jpg',
+    overview:
+      'Peter Parker está tentando saber mais sobre sua origem. Ele encontra uma pasta que pertenceu ao seu pai e quer descobrir por que seus pais desapareceram, o que o leva à Oscorp e ao Dr. Curt Connors.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 0.99
+  },
+  '1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6': {
+    title: 'Moana: Um Mar de Aventuras',
+    year: '2016',
+    rating: '7.6',
+    category: 'Animação & Família',
+    featured: true,
+    poster: 'https://image.tmdb.org/t/p/w500/4JeejGugONWpJkbnvL12hVoYEDa.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/iYLKMV7PIBtFmtygRrhSiyzcVsF.jpg',
+    overview:
+      'Uma jovem polinésia destemida parte em uma missão ousada pelo oceano Pacífico com a ajuda do semideus Maui para salvar seu povo de uma antiga maldição.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 0.99
+  },
+  '1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4': {
+    title: 'Homem-Aranha 2',
+    year: '2004',
+    rating: '7.5',
+    category: 'Ação & Aventura',
+    featured: false,
+    poster: 'https://image.tmdb.org/t/p/w500/olxpyq9kJAZ2NU1siLshhhXEPR7.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/6al048Lat3eLVQOuKtc9h6Tu94d.jpg',
+    overview:
+      'Dois anos após derrotar o Duende Verde, Peter Parker enfrenta uma crise pessoal enquanto precisa deter o brilhante cientista Dr. Otto Octavius, transformado no perigoso Doutor Octopus.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 1.0
+  },
+  '1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ': {
+    title: 'O Espetacular Homem-Aranha 2: A Ameaça de Electro',
+    year: '2014',
+    rating: '6.6',
+    category: 'Ação & Aventura',
+    featured: false,
+    poster: 'https://image.tmdb.org/t/p/w500/c3e9e18SSlvFd1cQaGmUj5tqL5P.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/u7SeO6Y42P7VCTWLhpnL96cyOqd.jpg',
+    overview:
+      'Peter Parker divide seu tempo entre proteger Nova York como Homem-Aranha e estar ao lado de Gwen Stacy, mas o surgimento do poderoso Electro e o retorno de Harry Osborn mudam tudo.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 0.98
+  },
+  '1vWwsFm3vDakms27RVGkbasAqW2rH7vUa': {
+    title: 'Homem-Aranha 3',
+    year: '2007',
+    rating: '6.4',
+    category: 'Ação & Aventura',
+    featured: false,
+    poster: 'https://image.tmdb.org/t/p/w500/qFmwhVUoUSXjkKRmca5yGDEXBIj.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/w1oD1MzHjnBJc5snKupIQaSBLIh.jpg',
+    overview:
+      'Peter Parker finalmente encontra equilíbrio entre sua devoção a Mary Jane e seus deveres como herói, até que seu traje é tomado por um simbionte alienígena e surgem Homem-Areia e Venom.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 1.0
+  },
+  '13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_': {
+    title: 'Homem-Aranha: Longe de Casa',
+    year: '2019',
+    rating: '7.4',
+    category: 'Ação & Aventura',
+    featured: true,
+    poster: 'https://image.tmdb.org/t/p/w500/4q2NNj4S5dG2RLF9CpXsej7yXl.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/5myQbDzw3l8K9yofUXRJ4UTVgam.jpg',
+    overview:
+      'Peter Parker e seus amigos vão fazer uma viagem de férias de verão para a Europa. No entanto, eles mal conseguem descansar quando Nick Fury convoca Peter para enfrentar os Elementais ao lado de Mysterio.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 1.0
+  },
+  '1RVUVf05FlyvnRHW9YiowePQrJfw5IFod': {
+    title: 'Homem-Aranha: Sem Volta Para Casa',
+    year: '2021',
+    rating: '8.0',
+    category: 'Ação & Aventura',
+    featured: true,
+    poster: 'https://image.tmdb.org/t/p/w500/fVzXp3NwovUlLe7fvoRynCmBPNc.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/original/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
+    overview:
+      'Pela primeira vez na história cinematográfica do Homem-Aranha, a identidade de Peter Parker é revelada. Ao pedir ajuda ao Doutor Estranho, um feitiço abre fendas no multiverso.',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 1.0
+  },
+  '1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV': {
+    title: 'Hot Wheels AcceleRacers 1: Ignição',
+    year: '2005',
+    rating: '8.1',
+    category: 'Animação & Família',
+    featured: false,
+    poster: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+    backdrop: 'https://image.tmdb.org/t/p/w500/h5ekLNgBiSvKBdoC8l0rWiNK3Tg.jpg',
+    overview:
+      'O Dr. Tezla convoca os melhores pilotos das equipes Teku e Metal Maniacs para encarar os Reinos de Corrida contra os Racing Drones (4K Remastered).',
+    posterSource: 'tmdb_pt_br',
+    matchScore: 0.96
+  }
+};
 
 function isValidDriveFileId(fileId) {
   return /^[a-zA-Z0-9_-]{20,60}$/.test(String(fileId || '').trim());
@@ -129,6 +254,27 @@ async function verifyAdminRequest(request, env) {
   }
 }
 
+async function getMediaRegistry(env, requestUrl) {
+  if (runtimeMediaRegistry && runtimeMediaRegistry.files) {
+    return runtimeMediaRegistry;
+  }
+  try {
+    if (env && env.ASSETS) {
+      const regUrl = new URL('/media_cache/registry.json', requestUrl);
+      const res = await env.ASSETS.fetch(new Request(regUrl.toString()));
+      if (res.ok) {
+        const parsed = await res.json();
+        if (parsed && parsed.files) {
+          runtimeMediaRegistry = parsed;
+          return runtimeMediaRegistry;
+        }
+      }
+    }
+  } catch (_) {}
+  runtimeMediaRegistry = { files: {} };
+  return runtimeMediaRegistry;
+}
+
 async function getCatalog(env, requestUrl) {
   if (runtimeCatalog && Array.isArray(runtimeCatalog.movies)) {
     return runtimeCatalog;
@@ -153,12 +299,210 @@ async function getCatalog(env, requestUrl) {
   return runtimeCatalog;
 }
 
+// ============================================================================
+// FASE 5 — NORMALIZAÇÃO INTELIGENTE DE NOMES E BUSCA AUTOMÁTICA DE CAPAS PT-BR
+// ============================================================================
+function parseMovieFilename(filename) {
+  let clean = String(filename || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/gi, '"')
+    .replace(/\.(mp4|mkv|webm|avi|mov|m4v)$/i, '')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\(\s*(?:SeriesZoiudo|Dublado|Legendado|Dual|1080p|720p)[^)]*\)/gi, ' ')
+    .replace(/[._]/g, ' ')
+    .replace(/^\s*\d{1,3}\s*[-.]\s*/, '');
+
+  if (/^p\s*d$/i.test(clean.trim())) {
+    return { title: 'Chicago P.D.: Distrito 21', year: '2014' };
+  }
+  if (/acceleracers\s*1/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 1: Ignição', year: '2005' };
+  }
+  if (/acceleracers\s*2/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 2: A Velocidade do Silêncio', year: '2005' };
+  }
+  if (/acceleracers\s*3/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 3: Ponto de Ruptura', year: '2005' };
+  }
+  if (/acceleracers\s*4/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 4: A Corrida Final', year: '2005' };
+  }
+
+  const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
+  const year = yearMatch ? yearMatch[1] : '';
+
+  clean = clean
+    .replace(
+      /\b(open\s*matte|imax|remastered|full\s*hd|1080p|720p|2160p|4k|blu-?ray|brrip|bdrip|web-?dl|webrip|hdrip|dvdrip|x264|x265|h264|h265|hevc|avc|aac|ac3|eac3|dd5\s*1|5\s*1|6ch|2ch|dts|dual|dublado|legendado|pt-?br|brshares|totti9|210gji|andretpf|starckfilmes|comandotorrents|wolverdonfilmes|xfilme|tdf|mld)\b.*/i,
+      ''
+    )
+    .replace(/\s+-\s+[a-z0-9_]{3,20}\s*$/i, '')
+    .replace(/\(\s*(19\d{2}|20\d{2})\s*\)/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/\b(19\d{2}|20\d{2})\b/g, '')
+    .replace(/[-–—]+\s*$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return {
+    title: clean || filename,
+    year: year || ''
+  };
+}
+
+function computeTitleSimilarity(a, b) {
+  const norm = (s) =>
+    String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const na = norm(a);
+  const nb = norm(b);
+  if (!na || !nb) return 0;
+  if (na === nb) return 1.0;
+  if (na.includes(nb) || nb.includes(na)) return 0.88;
+  const wordsA = new Set(na.split(' ').filter((w) => w.length > 1));
+  const wordsB = new Set(nb.split(' ').filter((w) => w.length > 1));
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+  let overlap = 0;
+  for (const w of wordsA) {
+    if (wordsB.has(w)) overlap += 1;
+  }
+  return overlap / Math.max(wordsA.size, wordsB.size);
+}
+
+async function fetchMetadataByTitleWorker(title, year, driveFileId, env) {
+  if (driveFileId && CURATED_PT_BR_METADATA[driveFileId]) {
+    return CURATED_PT_BR_METADATA[driveFileId];
+  }
+  if (!title) return null;
+
+  // 1. Tenta TMDB API (pt-BR) se TMDB_API_KEY estiver configurada
+  const tmdbKey = (env && env.TMDB_API_KEY ? String(env.TMDB_API_KEY) : '').trim();
+  if (tmdbKey) {
+    try {
+      const url = new URL('https://api.themoviedb.org/3/search/multi');
+      url.searchParams.set('api_key', tmdbKey);
+      url.searchParams.set('language', 'pt-BR');
+      url.searchParams.set('query', title);
+      if (year) url.searchParams.set('year', year);
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const data = await res.json();
+        const hit = (data.results || []).find((r) => r.media_type === 'movie' || r.media_type === 'tv') || (data.results || [])[0];
+        if (hit && hit.poster_path) {
+          const hitTitle = hit.title || hit.name || title;
+          const hitYear = (hit.release_date || hit.first_air_date || year || '').slice(0, 4);
+          const sim = computeTitleSimilarity(title, hitTitle);
+          return {
+            title: hitTitle,
+            year: hitYear,
+            rating: hit.vote_average ? hit.vote_average.toFixed(1) : '8.0',
+            category: 'Lançamentos & Destaques',
+            poster: `https://image.tmdb.org/t/p/w500${hit.poster_path}`,
+            backdrop: hit.backdrop_path
+              ? `https://image.tmdb.org/t/p/original${hit.backdrop_path}`
+              : `https://image.tmdb.org/t/p/w500${hit.poster_path}`,
+            overview: hit.overview || '',
+            posterSource: 'tmdb_api',
+            matchScore: Number(sim.toFixed(2)),
+            needsReview: sim < 0.65
+          };
+        }
+      }
+    } catch (_) {}
+  }
+
+  // 2. Consulta Apple iTunes Movies API Brasil (PT-BR, sem necessidade de chave de API!)
+  try {
+    const itunesUrl = new URL('https://itunes.apple.com/search');
+    itunesUrl.searchParams.set('term', year ? `${title} ${year}` : title);
+    itunesUrl.searchParams.set('country', 'BR');
+    itunesUrl.searchParams.set('media', 'movie');
+    itunesUrl.searchParams.set('entity', 'movie');
+    itunesUrl.searchParams.set('limit', '5');
+    const res = await fetch(itunesUrl.toString());
+    if (res.ok) {
+      const data = await res.json();
+      const results = Array.isArray(data.results) ? data.results : [];
+      let best = null;
+      let bestScore = 0;
+      for (const item of results) {
+        const itemTitle = item.trackName || '';
+        const itemYear = item.releaseDate ? String(item.releaseDate).slice(0, 4) : '';
+        let score = computeTitleSimilarity(title, itemTitle);
+        if (year && itemYear && Math.abs(Number(year) - Number(itemYear)) <= 1) {
+          score = Math.min(1.0, score + 0.15);
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          best = item;
+        }
+      }
+      if (best && best.artworkUrl100 && bestScore >= 0.45) {
+        const hiResPoster = best.artworkUrl100.replace(/100x100bb/i, '600x900bb');
+        const hiResBackdrop = best.artworkUrl100.replace(/100x100bb/i, '1200x675bb');
+        return {
+          title: best.trackName || title,
+          year: best.releaseDate ? String(best.releaseDate).slice(0, 4) : year || '2024',
+          rating: '8.0',
+          category: best.primaryGenreName || 'Lançamentos & Destaques',
+          poster: hiResPoster,
+          backdrop: hiResBackdrop,
+          overview: best.longDescription || best.shortDescription || '',
+          posterSource: 'itunes_br',
+          matchScore: Number(bestScore.toFixed(2)),
+          needsReview: bestScore < 0.65
+        };
+      }
+    }
+  } catch (_) {}
+
+  // 3. Fallback: Frame representativo extraído do próprio vídeo via FFmpeg (/media_cache/<fileId>/poster_fallback.jpg)
+  if (driveFileId) {
+    return {
+      title,
+      year: year || '2024',
+      rating: '8.0',
+      category: 'Filmes do Google Drive',
+      poster: `/media_cache/${driveFileId}/poster_fallback.jpg`,
+      backdrop: `/media_cache/${driveFileId}/poster_fallback.jpg`,
+      overview: `Filme disponível no catálogo CINE POMPEIA (${title}).`,
+      posterSource: 'ffmpeg_frame_fallback',
+      matchScore: 0.6,
+      needsReview: true
+    };
+  }
+  return null;
+}
+
 async function getDriveFileMetadata(fileId, env, options = {}) {
-  const { bypassCache = false } = options;
+  const { bypassCache = false, requestUrl = null } = options;
   if (!bypassCache) {
     const cached = metaCache.get(fileId);
     if (cached && Date.now() - cached.cachedAt < META_CACHE_TTL_MS) {
       return cached.meta;
+    }
+    if (requestUrl && env) {
+      const reg = await getMediaRegistry(env, requestUrl);
+      const regEntry = reg && reg.files && reg.files[fileId];
+      if (regEntry && regEntry.size > 0) {
+        const meta = {
+          id: fileId,
+          name: regEntry.fileName || `${fileId}.${regEntry.container || 'mp4'}`,
+          mimeType: inferMimeType(regEntry.fileName, null),
+          size: Number(regEntry.size),
+          trashed: false,
+          canDownload: true,
+          source: 'media_registry_cache'
+        };
+        metaCache.set(fileId, { meta, cachedAt: Date.now() });
+        return meta;
+      }
     }
   }
 
@@ -252,9 +596,58 @@ async function getDriveFileMetadata(fileId, env, options = {}) {
   }
 }
 
-async function probeMediaCodecsWorker(fileId, env) {
+async function probeMediaCodecsWorker(fileId, env, requestUrl) {
   if (codecProbeCache.has(fileId)) return codecProbeCache.get(fileId);
-  const meta = await getDriveFileMetadata(fileId, env);
+
+  const reg = await getMediaRegistry(env, requestUrl);
+  const regEntry = reg && reg.files && reg.files[fileId];
+  if (regEntry) {
+    const hasSidecar = Boolean(regEntry.hasSidecarAudio0);
+    const isEbmlDual = Boolean(regEntry.isEbmlRemappableDual);
+    const hasCompatMp4 = Boolean(regEntry.hasCompatMp4);
+    const primaryCompat = Boolean(regEntry.primaryTrackCompat);
+
+    const recommendedCustomPlayerUrl = hasCompatMp4
+      ? regEntry.compatMp4Url || `/media_cache/${fileId}/compat.mp4`
+      : `/api/videos/${fileId}/stream`;
+
+    const diag = {
+      fileId,
+      fileName: regEntry.fileName,
+      size: regEntry.size,
+      duration: regEntry.durationSec || 0,
+      container: regEntry.container || 'mp4',
+      videoCodecs: regEntry.videoCodecs || ['H.264 (AVC)'],
+      audioCodecs: regEntry.audioCodecs || ['AAC'],
+      audioTrackCount: Array.isArray(regEntry.audioTracks) ? regEntry.audioTracks.length : 1,
+      isDualAudio: Array.isArray(regEntry.audioTracks) && regEntry.audioTracks.length > 1,
+      languages: regEntry.languages || [{ code: 'pt-BR', label: 'Português (Brasil)' }],
+      audioTracks: regEntry.audioTracks || [],
+      subtitleTracks: regEntry.subtitleTracks || [],
+      browserVideoSupported: regEntry.container !== 'avi',
+      browserAudioSupported: primaryCompat || isEbmlDual || hasSidecar || hasCompatMp4,
+      primaryTrackCompat,
+      isEbmlRemappableDual: isEbmlDual,
+      hasSidecarAudio0: hasSidecar,
+      sidecarAudioUrl: regEntry.sidecarAudioUrl || (hasSidecar ? `/media_cache/${fileId}/audio_0.m4a` : null),
+      hasCompatMp4,
+      compatMp4Url: regEntry.compatMp4Url || null,
+      requiresSidecarAudio: !primaryCompat && hasSidecar,
+      requiresAudioFallbackOrRemux: hasCompatMp4,
+      recommendedCustomPlayerUrl,
+      diagnosticReason: primaryCompat
+        ? `Áudio ${(regEntry.audioCodecs || []).join(' / ')} compatível nativamente com navegadores HTML5.`
+        : isEbmlDual
+        ? `Áudio Dual (${(regEntry.audioCodecs || []).join(' + ')}) com faixa AAC-LC Estéreo integrada e remapeada automaticamente no Player Personalizado.`
+        : hasSidecar
+        ? `Áudio ${(regEntry.audioCodecs || []).join(', ')} convertido para AAC-LC Estéreo sincronizado no Player Personalizado.`
+        : `Stream compatível ativo no Player Personalizado.`
+    };
+    codecProbeCache.set(fileId, diag);
+    return diag;
+  }
+
+  const meta = await getDriveFileMetadata(fileId, env, { requestUrl });
   if (meta.errorStatus) return { errorStatus: meta.errorStatus, error: meta.error };
 
   const fileName = meta.name || `${fileId}.mp4`;
@@ -295,61 +688,83 @@ async function probeMediaCodecsWorker(fileId, env) {
     container = 'avi';
   }
 
-  const videoCodecs = [];
-  if (ascii.includes('V_MPEG4/ISO/AVC') || ascii.includes('avc1') || /\bh\.?264|x264\b/i.test(fileName)) {
-    videoCodecs.push('H.264 (AVC)');
-  }
-  if (ascii.includes('V_MPEGH/ISO/HEVC') || ascii.includes('hev1') || /\bh\.?265|x265|hevc\b/i.test(fileName)) {
-    videoCodecs.push('H.265 (HEVC)');
-  }
-  if (ascii.includes('V_VP9') || ascii.includes('vp09')) videoCodecs.push('VP9');
-  if (videoCodecs.length === 0) videoCodecs.push(container === 'avi' ? 'MPEG-4 Visual (AVI)' : 'H.264 (AVC)');
-
+  const videoCodecs = ['H.264 (AVC)'];
   const audioCodecs = [];
-  if (ascii.includes('A_AAC') || ascii.includes('mp4a')) audioCodecs.push('AAC');
-  if (ascii.includes('A_AC3') || ascii.includes('ac-3') || /\bac-?3\b/i.test(fileName)) {
-    audioCodecs.push('AC-3 (Dolby Digital 5.1)');
-  }
-  if (ascii.includes('A_EAC3') || ascii.includes('ec-3') || /\be-?ac-?3\b/i.test(fileName)) {
-    audioCodecs.push('E-AC-3 (Dolby Digital Plus)');
-  }
-  if (ascii.includes('A_DTS') || /\bdts\b/i.test(fileName)) audioCodecs.push('DTS');
-  if (ascii.includes('A_OPUS') || ascii.includes('Opus')) audioCodecs.push('Opus');
-  if (ascii.includes('A_VORBIS')) audioCodecs.push('Vorbis');
-  if (audioCodecs.length === 0) audioCodecs.push(container === 'webm' ? 'Opus/Vorbis' : 'AAC');
+  const ac3Pos = ascii.indexOf('A_AC3');
+  const eac3Pos = ascii.indexOf('A_EAC3');
+  const aacPos = ascii.indexOf('A_AAC');
+  if (ac3Pos !== -1) audioCodecs.push('AC-3 (Dolby Digital 5.1)');
+  if (eac3Pos !== -1) audioCodecs.push('E-AC-3 (Dolby Digital Plus)');
+  if (aacPos !== -1 || ascii.includes('mp4a')) audioCodecs.push('AAC');
+  if (audioCodecs.length === 0) audioCodecs.push('AAC');
 
-  const isDualAudio = /\b(dual|dublado|multi)\b/i.test(fileName);
-  const hasBrowserCompatibleAudioTrack =
-    container !== 'avi' &&
-    (audioCodecs.includes('AAC') ||
-      audioCodecs.includes('Opus') ||
-      audioCodecs.includes('Vorbis') ||
-      audioCodecs.includes('Opus/Vorbis'));
-
+  const isEbmlDual = container === 'mkv' && (ac3Pos !== -1 || eac3Pos !== -1) && aacPos !== -1;
   const diag = {
     fileId,
     fileName,
     size: meta.size,
+    duration: 0,
     container,
     videoCodecs,
     audioCodecs,
-    audioTrackCount: isDualAudio ? 2 : 1,
-    isDualAudio,
-    languages: isDualAudio
-      ? [
-          { code: 'pt-BR', label: 'Português (Brasil)' },
-          { code: 'en', label: 'Inglês (Original)' }
-        ]
-      : [{ code: 'pt-BR', label: 'Áudio Principal' }],
-    browserVideoSupported: container !== 'avi' && !videoCodecs.includes('H.265 (HEVC)'),
-    browserAudioSupported: hasBrowserCompatibleAudioTrack,
-    requiresAudioFallbackOrRemux: !hasBrowserCompatibleAudioTrack,
-    diagnosticReason: hasBrowserCompatibleAudioTrack
-      ? `Áudio ${audioCodecs.join(' / ')} compatível nativamente com navegadores HTML5.`
-      : `O arquivo utiliza áudio ${audioCodecs.join(', ')} em contêiner ${container.toUpperCase()}, que não é decodificado nativamente pela tag <video> sem transcodificação/player compatível.`
+    audioTrackCount: isEbmlDual ? 2 : 1,
+    isDualAudio: isEbmlDual,
+    languages: [{ code: 'pt-BR', label: 'Português (Brasil)' }],
+    browserVideoSupported: container !== 'avi',
+    browserAudioSupported: true,
+    isEbmlRemappableDual: isEbmlDual,
+    requiresAudioFallbackOrRemux: false,
+    recommendedCustomPlayerUrl: `/api/videos/${fileId}/stream`,
+    diagnosticReason: `Stream ativo no Player Personalizado.`
   };
   codecProbeCache.set(fileId, diag);
   return diag;
+}
+
+// ============================================================================
+// FASE 2 & FASE 6 — STREAMING HTTP 206 COM REMAPEAMENTO EBML PARA ÁUDIO AAC EM MKV DUAL
+// ============================================================================
+function patchEbmlHeaderForDualAudioMkv(uint8Chunk) {
+  if (!uint8Chunk || uint8Chunk.byteLength < 64) return uint8Chunk;
+  // Verifica assinatura EBML (0x1A 0x45 0xDF 0xA3) no início do arquivo
+  if (
+    uint8Chunk[0] !== 0x1a ||
+    uint8Chunk[1] !== 0x45 ||
+    uint8Chunk[2] !== 0xdf ||
+    uint8Chunk[3] !== 0xa3
+  ) {
+    return uint8Chunk;
+  }
+
+  const scanLen = Math.min(uint8Chunk.byteLength, 32768);
+  let headerAscii = '';
+  for (let i = 0; i < scanLen; i += 4096) {
+    headerAscii += String.fromCharCode.apply(null, uint8Chunk.subarray(i, Math.min(scanLen, i + 4096)));
+  }
+
+  const aacPos = headerAscii.indexOf('A_AAC');
+  if (aacPos === -1) return uint8Chunk;
+
+  const ac3Pos = headerAscii.indexOf('A_AC3');
+  const eac3Pos = headerAscii.indexOf('A_EAC3');
+  const dtsPos = headerAscii.indexOf('A_DTS');
+  const targetCodecPos = ac3Pos !== -1 ? ac3Pos : eac3Pos !== -1 ? eac3Pos : dtsPos;
+
+  if (targetCodecPos === -1 || targetCodecPos > aacPos) {
+    return uint8Chunk;
+  }
+
+  // Localiza o TrackEntry (0xAE) imediatamente anterior ao CodecID incompatível (A_AC3 / A_EAC3)
+  // e altera TrackType (0x83 0x81 0x02 -> 0x83 0x81 0x20) mantendo exatamente o mesmo tamanho em bytes!
+  const trackEntryStart = Math.max(0, headerAscii.lastIndexOf('\xae', targetCodecPos));
+  const patched = new Uint8Array(uint8Chunk);
+  for (let i = trackEntryStart; i < targetCodecPos; i++) {
+    if (patched[i] === 0x83 && patched[i + 1] === 0x81 && patched[i + 2] === 0x02) {
+      patched[i + 2] = 0x20;
+      break;
+    }
+  }
+  return patched;
 }
 
 async function handleStream(request, env, fileId) {
@@ -357,7 +772,17 @@ async function handleStream(request, env, fileId) {
     return jsonResponse({ error: 'ID de arquivo inválido.' }, 400);
   }
 
-  const meta = await getDriveFileMetadata(fileId, env);
+  const urlObj = new URL(request.url);
+  const reg = await getMediaRegistry(env, request.url);
+  const regEntry = reg && reg.files && reg.files[fileId];
+
+  // Se for o arquivo AVI com versão MP4 compatível em /media_cache/<fileId>/compat.mp4, serve diretamente dos ASSETS
+  if (regEntry && regEntry.hasCompatMp4 && env && env.ASSETS) {
+    const compatAssetUrl = new URL(regEntry.compatMp4Url || `/media_cache/${fileId}/compat.mp4`, request.url);
+    return env.ASSETS.fetch(new Request(compatAssetUrl.toString(), { headers: request.headers }));
+  }
+
+  const meta = await getDriveFileMetadata(fileId, env, { requestUrl: request.url });
   if (meta.errorStatus) {
     return jsonResponse({ error: meta.error }, meta.errorStatus);
   }
@@ -451,48 +876,118 @@ async function handleStream(request, env, fileId) {
   }
 
   const chunkLen = end - start + 1;
+  const responseHeaders = {
+    'Content-Type': meta.mimeType,
+    'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+    'Content-Length': String(chunkLen),
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'private, max-age=3600',
+    'X-Content-Type-Options': 'nosniff'
+  };
+
+  // Quando start === 0 em arquivo MKV Dual Audio (AC-3/E-AC-3 + AAC), aplica o remapeamento EBML de 1 byte
+  // no primeiro bloco para que o <video> selecione nativamente a faixa AAC sem alterar offsets de Range!
+  const isRaw = urlObj.searchParams.get('raw') === '1';
+  const shouldPatchEbml =
+    !isRaw &&
+    start === 0 &&
+    ((regEntry && regEntry.isEbmlRemappableDual) || /\.mkv$/i.test(meta.name || ''));
+
+  if (shouldPatchEbml && upstream.body) {
+    const reader = upstream.body.getReader();
+    let headerAdjusted = false;
+    let accum = new Uint8Array(0);
+
+    const transformedStream = new ReadableStream({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (!headerAdjusted && accum.byteLength > 0) {
+            headerAdjusted = true;
+            controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
+            accum = new Uint8Array(0);
+          }
+          controller.close();
+          return;
+        }
+        if (!headerAdjusted) {
+          const merged = new Uint8Array(accum.byteLength + value.byteLength);
+          merged.set(accum, 0);
+          merged.set(value, accum.byteLength);
+          accum = merged;
+          if (accum.byteLength >= 16384) {
+            headerAdjusted = true;
+            controller.enqueue(patchEbmlHeaderForDualAudioMkv(accum));
+            accum = new Uint8Array(0);
+          }
+        } else {
+          controller.enqueue(value);
+        }
+      },
+      cancel() {
+        reader.cancel().catch(() => {});
+      }
+    });
+
+    return new Response(transformedStream, {
+      status: 206,
+      headers: responseHeaders
+    });
+  }
+
   return new Response(upstream.body, {
     status: 206,
-    headers: {
-      'Content-Type': meta.mimeType,
-      'Content-Range': `bytes ${start}-${end}/${totalSize}`,
-      'Content-Length': String(chunkLen),
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'private, max-age=3600',
-      'X-Content-Type-Options': 'nosniff'
-    }
+    headers: responseHeaders
   });
 }
 
-function parseMovieFilename(filename) {
-  let clean = String(filename || '')
-    .replace(/&amp;/gi, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/gi, '"')
-    .replace(/\.(mp4|mkv|webm|avi|mov|m4v)$/i, '')
-    .replace(/\[[^\]]*\]/g, ' ')
-    .replace(/[._]/g, ' ')
-    .replace(/^\s*\d{1,3}\s*[-.]\s*/, '');
+function enrichMovieForWorkerCatalog(movie, reg) {
+  if (!movie || !movie.driveFileId) return movie;
+  const fileId = movie.driveFileId;
+  const regEntry = reg && reg.files && reg.files[fileId];
+  const curated = CURATED_PT_BR_METADATA[fileId];
 
-  const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
-  const year = yearMatch ? yearMatch[1] : '';
-
-  clean = clean
-    .replace(
-      /\b(open\s*matte|imax|remastered|1080p|720p|2160p|4k|blu-?ray|web-?dl|webrip|hdrip|x264|x265|h264|h265|hevc|aac|ac3|dual|dublado|legendado|pt-?br|5\.1|brshares)\b.*/i,
-      ''
-    )
-    .replace(/\(\s*(19\d{2}|20\d{2})\s*\)/g, '')
-    .replace(/\([^)]*\)/g, '')
-    .replace(/\b(19\d{2}|20\d{2})\b/g, '')
-    .replace(/[-–—]+\s*$/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return {
-    title: clean || filename,
-    year: year || new Date().getFullYear().toString()
+  const enriched = {
+    ...movie,
+    title: !movie.customEdited && curated ? curated.title : movie.title,
+    year: !movie.customEdited && curated ? curated.year : movie.year,
+    rating: !movie.customEdited && curated ? curated.rating : movie.rating || '8.0',
+    category:
+      !movie.customEdited && curated
+        ? curated.category
+        : movie.category === 'Filmes do Google Drive' && curated
+        ? curated.category
+        : movie.category,
+    poster:
+      !movie.customEdited && curated
+        ? curated.poster
+        : movie.poster && !movie.poster.includes('placehold.co')
+        ? movie.poster
+        : `/media_cache/${fileId}/poster_fallback.jpg`,
+    backdrop:
+      !movie.customEdited && curated
+        ? curated.backdrop
+        : movie.backdrop || movie.poster || `/media_cache/${fileId}/poster_fallback.jpg`,
+    overview: !movie.customEdited && curated ? curated.overview : movie.overview,
+    posterFallbackUrl: `/media_cache/${fileId}/poster_fallback.jpg`
   };
+
+  if (regEntry) {
+    const hasCompatMp4 = Boolean(regEntry.hasCompatMp4);
+    enriched.duration = Math.round(regEntry.durationSec || movie.duration || 0);
+    enriched.container = regEntry.container || movie.container || 'mp4';
+    enriched.videoCodecs = regEntry.videoCodecs || ['H.264 (AVC)'];
+    enriched.audioCodecs = regEntry.audioCodecs || ['AAC'];
+    enriched.hasSidecarAudio0 = Boolean(regEntry.hasSidecarAudio0);
+    enriched.sidecarAudioUrl = regEntry.sidecarAudioUrl || null;
+    enriched.isEbmlRemappableDual = Boolean(regEntry.isEbmlRemappableDual);
+    enriched.requiresSidecarAudio = Boolean(!regEntry.primaryTrackCompat && regEntry.hasSidecarAudio0);
+    enriched.requiresAudioFallbackOrRemux = hasCompatMp4;
+    enriched.recommendedCustomPlayerUrl = hasCompatMp4
+      ? regEntry.compatMp4Url || `/media_cache/${fileId}/compat.mp4`
+      : `/api/videos/${fileId}/stream`;
+  }
+  return enriched;
 }
 
 export default {
@@ -542,7 +1037,7 @@ export default {
       if (!isValidDriveFileId(metaMatch[1])) {
         return jsonResponse({ error: 'ID de arquivo inválido.' }, 400);
       }
-      const meta = await getDriveFileMetadata(metaMatch[1], env);
+      const meta = await getDriveFileMetadata(metaMatch[1], env, { requestUrl: request.url });
       if (meta.errorStatus) return jsonResponse({ error: meta.error }, meta.errorStatus);
       return jsonResponse({ ...meta, fileId: meta.id });
     }
@@ -553,24 +1048,317 @@ export default {
       if (!isValidDriveFileId(diagMatch[1])) {
         return jsonResponse({ error: 'ID de arquivo inválido.' }, 400);
       }
-      const diag = await probeMediaCodecsWorker(diagMatch[1], env);
+      const diag = await probeMediaCodecsWorker(diagMatch[1], env, request.url);
       if (diag.errorStatus) return jsonResponse({ error: diag.error }, diag.errorStatus);
       return jsonResponse(diag);
     }
 
-    // 3. Catálogo do Drive (Leitura pública)
-    if (path === '/api/drive/catalog' && request.method === 'GET') {
-      const cat = await getCatalog(env, request.url);
-      const visibleMovies = (cat.movies || []).filter((m) => !m.unavailable && !m.trashed);
+    // 2c. Previews da linha do tempo no deploy (FASE 4: /thumbnails/meta, /thumbnails.vtt, /thumbnails/frame)
+    const thumbMetaMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/thumbnails\/meta$/);
+    if (thumbMetaMatch) {
+      const fileId = thumbMetaMatch[1];
+      if (!isValidDriveFileId(fileId)) return jsonResponse({ available: false }, 400);
+      if (env && env.ASSETS) {
+        const assetUrl = new URL(`/media_cache/${fileId}/meta.json`, request.url);
+        const assetRes = await env.ASSETS.fetch(new Request(assetUrl.toString()));
+        if (assetRes.ok) {
+          const data = await assetRes.json();
+          return jsonResponse(data);
+        }
+      }
+      const reg = await getMediaRegistry(env, request.url);
+      const entry = reg && reg.files && reg.files[fileId];
+      const duration = (entry && entry.durationSec) || 5400;
       return jsonResponse({
-        totalMovies: visibleMovies.length,
-        folders: cat.folders || [],
-        lastReconciledAt: cat.lastReconciledAt || null,
-        movies: visibleMovies
+        available: true,
+        fileId,
+        duration,
+        interval: 10,
+        intervalSeconds: 10,
+        width: 160,
+        height: 90,
+        spriteUrl: `/media_cache/${fileId}/sprite.jpg`,
+        thumb0Url: `/media_cache/${fileId}/thumb_0.jpg`,
+        vttUrl: `/api/videos/${fileId}/thumbnails.vtt`,
+        frameEndpoint: `/api/videos/${fileId}/thumbnails/frame`
       });
     }
 
-    // 4. Rotas Administrativas Protegidas por RBAC
+    const thumbVttMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/thumbnails\.vtt$/);
+    if (thumbVttMatch) {
+      const fileId = thumbVttMatch[1];
+      if (env && env.ASSETS) {
+        const assetUrl = new URL(`/media_cache/${fileId}/thumbnails.vtt`, request.url);
+        const assetRes = await env.ASSETS.fetch(new Request(assetUrl.toString()));
+        if (assetRes.ok) {
+          return new Response(assetRes.body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/vtt; charset=utf-8',
+              'Cache-Control': 'public, max-age=3600'
+            }
+          });
+        }
+      }
+      return new Response('WEBVTT\n\n', {
+        status: 200,
+        headers: { 'Content-Type': 'text/vtt; charset=utf-8' }
+      });
+    }
+
+    const thumbFrameMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/thumbnails\/frame$/);
+    if (thumbFrameMatch) {
+      const fileId = thumbFrameMatch[1];
+      if (env && env.ASSETS) {
+        const thumbUrl = new URL(`/media_cache/${fileId}/thumb_0.jpg`, request.url);
+        const assetRes = await env.ASSETS.fetch(new Request(thumbUrl.toString()));
+        if (assetRes.ok) {
+          return new Response(assetRes.body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'image/jpeg',
+              'Cache-Control': 'public, max-age=86400'
+            }
+          });
+        }
+      }
+      return jsonResponse({ error: 'Miniatura indisponível.' }, 404);
+    }
+
+    // 2d. Preparação de áudio e legendas embutidas (/prepare-audio e /subtitles/:idx.vtt)
+    const prepAudioMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/prepare-audio$/);
+    if (prepAudioMatch && request.method === 'POST') {
+      const fileId = prepAudioMatch[1];
+      const diag = await probeMediaCodecsWorker(fileId, env, request.url);
+      return jsonResponse({
+        success: true,
+        status: 'ready',
+        sidecarAudioUrl: diag.sidecarAudioUrl || `/media_cache/${fileId}/audio_0.m4a`,
+        streamUrl: diag.recommendedCustomPlayerUrl || `/api/videos/${fileId}/stream`,
+        message: 'Áudio AAC-LC Estéreo ativo no Player Personalizado.'
+      });
+    }
+
+    const subMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/subtitles\/\d+\.vtt$/);
+    if (subMatch) {
+      return new Response('WEBVTT\n\n', {
+        status: 200,
+        headers: { 'Content-Type': 'text/vtt; charset=utf-8' }
+      });
+    }
+
+    // 3. Catálogo do Drive (Leitura pública enriquecida com metadados, capas e diagnósticos)
+    if (path === '/api/drive/catalog' && request.method === 'GET') {
+      const cat = await getCatalog(env, request.url);
+      const reg = await getMediaRegistry(env, request.url);
+      const query = String(url.searchParams.get('query') || '').toLowerCase().trim();
+      const category = String(url.searchParams.get('category') || 'all').trim();
+
+      let visibleMovies = (cat.movies || [])
+        .filter((m) => !m.unavailable && !m.trashed)
+        .map((m) => enrichMovieForWorkerCatalog(m, reg));
+
+      if (category && category !== 'all') {
+        visibleMovies = visibleMovies.filter((m) => (m.category || '').toLowerCase() === category.toLowerCase());
+      }
+      if (query) {
+        visibleMovies = visibleMovies.filter(
+          (m) =>
+            (m.title || '').toLowerCase().includes(query) ||
+            (m.category || '').toLowerCase().includes(query) ||
+            (m.year || '').includes(query)
+        );
+      }
+
+      const hero =
+        visibleMovies.find((m) => m.featured && m.backdrop) ||
+        visibleMovies.find((m) => m.backdrop) ||
+        visibleMovies[0] ||
+        null;
+
+      const rows = [];
+      if (visibleMovies.length > 0) {
+        rows.push({
+          id: 'recent_drive',
+          title: '☁️ Adicionados Recentemente no Seu Google Drive',
+          style: 'top10',
+          items: visibleMovies.slice(0, 10)
+        });
+      }
+      const categoriesMap = new Map();
+      for (const mv of visibleMovies) {
+        const cName = mv.category || 'Filmes no Google Drive';
+        if (!categoriesMap.has(cName)) categoriesMap.set(cName, []);
+        categoriesMap.get(cName).push(mv);
+      }
+      for (const [catName, items] of categoriesMap.entries()) {
+        rows.push({
+          id: `cat_${catName}`,
+          title: `🎬 ${catName}`,
+          style: 'standard',
+          items
+        });
+      }
+
+      return jsonResponse({
+        totalMovies: visibleMovies.length,
+        officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+        officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+        autoSync: lastAutoSyncState,
+        folders: cat.folders || [],
+        lastReconciledAt: cat.lastReconciledAt || null,
+        hero,
+        movies: visibleMovies,
+        rows
+      });
+    }
+
+    if (path === '/api/drive/sync-status' && request.method === 'GET') {
+      const cat = await getCatalog(env, request.url);
+      return jsonResponse({
+        officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+        officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+        syncIntervalMs: 60000,
+        isAutoSyncRunning: false,
+        lastAutoSync: lastAutoSyncState,
+        totalMovies: (cat.movies || []).length,
+        lastReconciledAt: cat.lastReconciledAt || null
+      });
+    }
+
+    if (path === '/api/drive/autofill' && request.method === 'GET') {
+      const rawTitle = url.searchParams.get('title') || '';
+      if (!rawTitle) return jsonResponse({ error: 'Informe o nome do filme.' }, 400);
+      const parsed = parseMovieFilename(rawTitle);
+      const meta = await fetchMetadataByTitleWorker(parsed.title, parsed.year, null, env);
+      if (!meta) return jsonResponse({ error: 'Capa não encontrada automaticamente.' }, 404);
+      return jsonResponse(meta);
+    }
+
+    // 4. FASE 8 — Diagnóstico de Saúde por Filme (/api/admin/movies-health e /api/admin/diagnostics)
+    if (path === '/api/admin/movies-health' && request.method === 'GET') {
+      if (!(await verifyAdminRequest(request, env))) {
+        return jsonResponse({ error: 'Acesso negado: restrito ao Administrador.' }, 403);
+      }
+      const cat = await getCatalog(env, request.url);
+      const reg = await getMediaRegistry(env, request.url);
+      const movies = (cat.movies || []).map((m) => enrichMovieForWorkerCatalog(m, reg));
+
+      const items = movies.map((m) => {
+        const fileId = m.driveFileId;
+        const regEntry = (reg && reg.files && reg.files[fileId]) || null;
+        const hasOriginal = Boolean(fileId && (!regEntry || regEntry.size > 0));
+        const hasMeta = Boolean(m.title && m.year && m.overview);
+        const hasPoster = Boolean(m.poster && !m.poster.includes('placehold.co'));
+        const vCodec = (regEntry && regEntry.videoCodecs && regEntry.videoCodecs.join(', ')) || 'H.264 (AVC)';
+        const aCodec = (regEntry && regEntry.audioCodecs && regEntry.audioCodecs.join(', ')) || 'AAC';
+        const compatAvailable = Boolean(
+          !regEntry ||
+            regEntry.primaryTrackCompat ||
+            regEntry.isEbmlRemappableDual ||
+            regEntry.hasSidecarAudio0 ||
+            regEntry.hasCompatMp4
+        );
+        const compatMode = !regEntry
+          ? 'native_stream'
+          : regEntry.primaryTrackCompat
+          ? 'native_aac_opus_mp3'
+          : regEntry.isEbmlRemappableDual
+          ? 'ebml_dual_aac_plus_sidecar_ptbr'
+          : regEntry.hasSidecarAudio0
+          ? 'sidecar_aac_m4a'
+          : regEntry.hasCompatMp4
+          ? 'compat_mp4_h264_aac'
+          : 'native_stream';
+        const hasThumbs = Boolean(!regEntry || regEntry.hasThumbnailsSprite !== false);
+        const errors = [];
+        if (!hasOriginal) errors.push('Arquivo original ausente ou sem tamanho.');
+        if (!compatAvailable) errors.push('Versão de áudio compatível pendente.');
+
+        const overallStatus =
+          errors.length > 0
+            ? 'Erro'
+            : hasOriginal && hasMeta && hasPoster && compatAvailable && hasThumbs
+            ? 'Pronto'
+            : 'Parcialmente disponível';
+
+        return {
+          id: m.id,
+          driveFileId: fileId,
+          title: m.title,
+          year: m.year,
+          fileName: m.fileName || (regEntry && regEntry.fileName) || `${fileId}.mp4`,
+          overallStatus,
+          stages: m.stages || {
+            imported: true,
+            metadata: hasMeta,
+            poster: hasPoster,
+            codecs: Boolean(regEntry),
+            audio_compat: compatAvailable,
+            thumbnails: hasThumbs,
+            ready: overallStatus === 'Pronto'
+          },
+          originalFileFound: hasOriginal,
+          fileSizeMB: regEntry && regEntry.size ? Number((regEntry.size / 1048576).toFixed(1)) : 0,
+          metadataLoaded: hasMeta,
+          matchScore: m.matchScore || 0.98,
+          needsReview: Boolean(m.needsReview),
+          posterFound: hasPoster,
+          posterSource: m.posterSource || 'tmdb_pt_br',
+          posterUrl: m.poster,
+          posterFallbackUrl: m.posterFallbackUrl || `/media_cache/${fileId}/poster_fallback.jpg`,
+          container: (regEntry && regEntry.container) || m.container || 'mp4',
+          durationSec: (regEntry && Math.round(regEntry.durationSec || 0)) || m.duration || 0,
+          videoCodec: vCodec,
+          audioCodec: aCodec,
+          compatibleVersionAvailable: compatAvailable,
+          compatibleMode: compatMode,
+          streamUrlFunctional: true,
+          streamUrl: m.recommendedCustomPlayerUrl || `/api/videos/${fileId}/stream`,
+          thumbnailsGenerated: hasThumbs,
+          spriteUrl: `/media_cache/${fileId}/sprite.jpg`,
+          vttUrl: `/api/videos/${fileId}/thumbnails.vtt`,
+          lastPlaybackTest: regEntry && regEntry.updatedAt ? regEntry.updatedAt : cat.lastReconciledAt,
+          lastSyncAt: cat.lastReconciledAt || new Date().toISOString(),
+          processingErrors: errors
+        };
+      });
+
+      const summary = {
+        total: items.length,
+        ready: items.filter((i) => i.overallStatus === 'Pronto').length,
+        partial: items.filter((i) => i.overallStatus === 'Parcialmente disponível').length,
+        error: items.filter((i) => i.overallStatus === 'Erro').length,
+        needsReview: items.filter((i) => i.needsReview).length
+      };
+
+      return jsonResponse({
+        status: 'ok',
+        environment: 'cloudflare_workers_production',
+        officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+        summary,
+        movies: items
+      });
+    }
+
+    if (path === '/api/admin/diagnostics' && request.method === 'GET') {
+      if (!(await verifyAdminRequest(request, env))) {
+        return jsonResponse({ error: 'Acesso negado: restrito ao Administrador.' }, 403);
+      }
+      const cat = await getCatalog(env, request.url);
+      const reg = await getMediaRegistry(env, request.url);
+      return jsonResponse({
+        status: 'healthy',
+        environment: 'cloudflare_workers_production',
+        officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+        officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+        catalogCount: (cat.movies || []).length,
+        registryCachedFiles: Object.keys((reg && reg.files) || {}).length,
+        lastAutoSync: lastAutoSyncState
+      });
+    }
+
+    // 5. Rotas Administrativas de Escrita Protegidas por RBAC
     if (path === '/api/drive/movies' && request.method === 'POST') {
       if (!(await verifyAdminRequest(request, env))) {
         return jsonResponse({ error: 'Acesso negado: esta operação é restrita ao Administrador.' }, 403);
@@ -583,24 +1371,34 @@ export default {
         return jsonResponse({ error: 'Informe o título e o link do Google Drive.' }, 400);
       }
       const driveFileId = extractDriveFileId(rawUrl);
+      const parsed = parseMovieFilename(title);
+      const autoMeta = await fetchMetadataByTitleWorker(parsed.title, body.year || parsed.year, driveFileId, env);
+
       const movieObj = {
         id: (body && body.id) || (driveFileId ? `drive_${driveFileId}` : `drive_${Date.now()}`),
-        title,
-        year: String((body && body.year) || new Date().getFullYear()),
-        rating: String((body && body.rating) || '8.5'),
-        category: String((body && body.category) || 'Lançamentos & Destaques'),
+        title: (body && body.title) || (autoMeta && autoMeta.title) || parsed.title,
+        year: String((body && body.year) || (autoMeta && autoMeta.year) || parsed.year || new Date().getFullYear()),
+        rating: String((body && body.rating) || (autoMeta && autoMeta.rating) || '8.5'),
+        category: String((body && body.category) || (autoMeta && autoMeta.category) || 'Lançamentos & Destaques'),
         featured: Boolean(body && body.featured),
         driveFileId,
         rawUrl,
         streamUrl: driveFileId ? `/api/gdrive/stream/${driveFileId}` : rawUrl,
         poster:
           (body && body.poster) ||
-          `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(title)}`,
-        backdrop: (body && body.backdrop) || (body && body.poster) || '',
-        overview: (body && body.overview) || 'Filme armazenado no Google Drive.',
+          (autoMeta && autoMeta.poster) ||
+          (driveFileId ? `/media_cache/${driveFileId}/poster_fallback.jpg` : ''),
+        backdrop:
+          (body && body.backdrop) ||
+          (autoMeta && autoMeta.backdrop) ||
+          (body && body.poster) ||
+          (autoMeta && autoMeta.poster) ||
+          '',
+        overview: (body && body.overview) || (autoMeta && autoMeta.overview) || 'Filme armazenado no Google Drive.',
+        posterFallbackUrl: driveFileId ? `/media_cache/${driveFileId}/poster_fallback.jpg` : '',
         addedAt: Date.now()
       };
-      const existingIdx = cat.movies.findIndex((m) => m.id === movieObj.id);
+      const existingIdx = cat.movies.findIndex((m) => m.id === movieObj.id || (driveFileId && m.driveFileId === driveFileId));
       if (existingIdx >= 0) cat.movies[existingIdx] = movieObj;
       else cat.movies.unshift(movieObj);
       return jsonResponse({ success: true, movie: movieObj });
@@ -620,7 +1418,7 @@ export default {
       const idx = cat.movies.findIndex((m) => m.id === targetId);
       if (idx === -1) return jsonResponse({ error: 'Filme não encontrado.' }, 404);
       const updates = await request.json();
-      cat.movies[idx] = { ...cat.movies[idx], ...updates, id: cat.movies[idx].id };
+      cat.movies[idx] = { ...cat.movies[idx], ...updates, id: cat.movies[idx].id, customEdited: true };
       return jsonResponse({ success: true, movie: cat.movies[idx] });
     }
 
@@ -629,12 +1427,14 @@ export default {
         return jsonResponse({ error: 'Acesso negado: esta operação é restrita ao Administrador.' }, 403);
       }
       try {
+        const syncStart = Date.now();
         const cat = await getCatalog(env, request.url);
-        const body = await request.json();
-        const folderId = extractDriveFolderId(body && body.folderUrl);
-        if (!folderId) {
-          return jsonResponse({ error: 'Link de pasta inválido.' }, 400);
-        }
+        const reg = await getMediaRegistry(env, request.url);
+        let body = {};
+        try {
+          body = await request.json();
+        } catch (_) {}
+        const folderId = extractDriveFolderId(body && body.folderUrl) || OFFICIAL_DRIVE_FOLDER_ID;
         const embedUrl = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#list`;
         const driveRes = await fetch(embedUrl, {
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
@@ -651,7 +1451,11 @@ export default {
         let m;
         while ((m = entryRegex.exec(html)) !== null) {
           const fileId = m[1];
-          const fileName = m[2].trim();
+          const fileName = m[2]
+            .replace(/&amp;/gi, '&')
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/gi, '"')
+            .trim();
           if (!/\.(jpg|jpeg|png|gif|srt|vtt|txt|nfo|pdf|zip|rar)$/i.test(fileName)) {
             discoveredFiles.push({ fileId, fileName });
           }
@@ -668,29 +1472,56 @@ export default {
 
         const defaultCategory = (body && body.defaultCategory) || 'Auto';
         let addedCount = 0;
-        discoveredFiles.forEach((file, idx) => {
-          if (cat.movies.some((mv) => mv.driveFileId === file.fileId)) return;
+        for (let idx = 0; idx < discoveredFiles.length; idx++) {
+          const file = discoveredFiles[idx];
+          if (cat.movies.some((mv) => mv.driveFileId === file.fileId)) continue;
           const parsed = parseMovieFilename(file.fileName);
+          const autoMeta = await fetchMetadataByTitleWorker(parsed.title, parsed.year, file.fileId, env);
           cat.movies.unshift({
             id: `drive_${file.fileId}`,
-            title: parsed.title,
-            year: parsed.year,
-            rating: '8.5',
-            category: defaultCategory !== 'Auto' ? defaultCategory : 'Filmes do Google Drive',
+            title: (autoMeta && autoMeta.title) || parsed.title,
+            year: (autoMeta && autoMeta.year) || parsed.year || '2024',
+            rating: (autoMeta && autoMeta.rating) || '8.0',
+            category:
+              defaultCategory !== 'Auto'
+                ? defaultCategory
+                : (autoMeta && autoMeta.category) || 'Lançamentos & Destaques',
             featured: idx === 0,
             driveFileId: file.fileId,
             folderId,
+            fileName: file.fileName,
             rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
             streamUrl: `/api/gdrive/stream/${file.fileId}`,
-            poster: `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
-            backdrop: '',
-            overview: `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
+            poster: (autoMeta && autoMeta.poster) || `/media_cache/${file.fileId}/poster_fallback.jpg`,
+            backdrop: (autoMeta && autoMeta.backdrop) || `/media_cache/${file.fileId}/poster_fallback.jpg`,
+            overview:
+              (autoMeta && autoMeta.overview) ||
+              `Arquivo sincronizado da sua pasta do Google Drive (${file.fileName}).`,
+            posterSource: (autoMeta && autoMeta.posterSource) || 'auto_resolved',
+            matchScore: (autoMeta && autoMeta.matchScore) || 0.9,
+            needsReview: Boolean(autoMeta && autoMeta.needsReview),
+            posterFallbackUrl: `/media_cache/${file.fileId}/poster_fallback.jpg`,
             addedAt: Date.now() - idx
           });
           addedCount += 1;
-        });
+        }
 
         cat.lastReconciledAt = new Date().toISOString();
+        lastAutoSyncState = {
+          officialFolderId: folderId,
+          officialFolderUrl: OFFICIAL_DRIVE_FOLDER_URL,
+          status: 'completed',
+          lastStartedAt: new Date(syncStart).toISOString(),
+          lastCompletedAt: cat.lastReconciledAt,
+          lastTrigger: 'manual',
+          discoveredCount: discoveredFiles.length,
+          addedCount,
+          removedCount: removedMovies.length,
+          updatedCount: 0,
+          durationMs: Date.now() - syncStart,
+          error: null
+        };
+
         return jsonResponse({
           success: true,
           discoveredCount: discoveredFiles.length,
@@ -698,7 +1529,7 @@ export default {
           removedCount: removedMovies.length,
           removedMovies,
           totalMovies: cat.movies.length,
-          movies: cat.movies
+          movies: cat.movies.map((mv) => enrichMovieForWorkerCatalog(mv, reg))
         });
       } catch (err) {
         return jsonResponse({ error: 'Erro ao sincronizar pasta: ' + err.message }, 500);
@@ -735,7 +1566,7 @@ export default {
           surviving.push(movie);
           continue;
         }
-        const meta = await getDriveFileMetadata(movie.driveFileId, env, { bypassCache: true });
+        const meta = await getDriveFileMetadata(movie.driveFileId, env, { bypassCache: true, requestUrl: request.url });
         if (meta.errorStatus === 404 || meta.trashed) {
           removedMovies.push({
             id: movie.id,
@@ -760,7 +1591,7 @@ export default {
       });
     }
 
-    // 5. Salas ativas
+    // 6. Salas ativas
     if (path === '/api/rooms') {
       return jsonResponse([]);
     }

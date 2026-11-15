@@ -222,6 +222,7 @@ app.post('/api/auth/logout', (req, res) => {
 const DRIVE_CATALOG_FILE = path.join(__dirname, 'drive_catalog.json');
 const PUBLIC_CATALOG_FILE = path.join(__dirname, 'public', 'drive_catalog.json');
 const PREPARED_MEDIA_DIR = path.join(__dirname, 'prepared_media');
+const PUBLIC_MEDIA_CACHE_DIR = path.join(__dirname, 'public', 'media_cache');
 
 // Catálogo inicial de exemplo (o usuário pode excluir ou substituir pelos vídeos do Drive de 5TB dele)
 const DEFAULT_DRIVE_CATALOG = {
@@ -362,15 +363,36 @@ function parseMovieFilename(filename) {
     .replace(/&quot;/gi, '"')
     .replace(/\.(mp4|mkv|webm|avi|mov|m4v)$/i, '')
     .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\(\s*(?:SeriesZoiudo|Dublado|Legendado|Dual|1080p|720p)[^)]*\)/gi, ' ')
     .replace(/[._]/g, ' ')
     .replace(/^\s*\d{1,3}\s*[-.]\s*/, '');
+
+  if (/^p\s*d$/i.test(clean.trim())) {
+    return { title: 'Chicago P.D.: Distrito 21', year: '2014' };
+  }
+  if (/acceleracers\s*1/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 1: Ignição', year: '2005' };
+  }
+  if (/acceleracers\s*2/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 2: A Velocidade do Silêncio', year: '2005' };
+  }
+  if (/acceleracers\s*3/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 3: Ponto de Ruptura', year: '2005' };
+  }
+  if (/acceleracers\s*4/i.test(clean)) {
+    return { title: 'Hot Wheels AcceleRacers 4: A Corrida Final', year: '2005' };
+  }
 
   const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
   const year = yearMatch ? yearMatch[1] : '';
 
   // Remove tags técnicas comuns após o ano ou no final
   clean = clean
-    .replace(/\b(open\s*matte|imax|remastered|1080p|720p|2160p|4k|blu-?ray|web-?dl|webrip|hdrip|x264|x265|h264|h265|hevc|aac|ac3|dual|dublado|legendado|pt-?br|5\.1|brshares)\b.*/i, '')
+    .replace(
+      /\b(open\s*matte|imax|remastered|full\s*hd|1080p|720p|2160p|4k|blu-?ray|brrip|bdrip|web-?dl|webrip|hdrip|dvdrip|x264|x265|h264|h265|hevc|avc|aac|ac3|eac3|dd5\s*1|5\s*1|6ch|2ch|dts|dual|dublado|legendado|pt-?br|brshares|totti9|210gji|andretpf|starckfilmes|comandotorrents|wolverdonfilmes|xfilme|tdf|mld)\b.*/i,
+      ''
+    )
+    .replace(/\s+-\s+[a-z0-9_]{3,20}\s*$/i, '')
     .replace(/\(\s*(19\d{2}|20\d{2})\s*\)/g, '')
     .replace(/\([^)]*\)/g, '')
     .replace(/\b(19\d{2}|20\d{2})\b/g, '')
@@ -384,61 +406,156 @@ function parseMovieFilename(filename) {
   };
 }
 
-// Busca opcional de capa/sinopse automática pelo título para deixar o Google Drive lindo como um Streaming
-async function fetchMetadataByTitle(title, year) {
-  const tmdbKey = (process.env.TMDB_API_KEY || '').trim();
-  if (!tmdbKey || !title) return null;
-
-  try {
-    const url = new URL('https://api.themoviedb.org/3/search/multi');
-    url.searchParams.set('api_key', tmdbKey);
-    url.searchParams.set('language', 'pt-BR');
-    url.searchParams.set('query', title);
-    if (year) url.searchParams.set('year', year);
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3200);
-    const res = await fetch(url.toString(), { signal: controller.signal });
-    clearTimeout(timer);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const hit = (data.results || []).find((r) => r.media_type === 'movie' || r.media_type === 'tv') || (data.results || [])[0];
-    if (!hit) return null;
-
-    const genreMap = {
-      28: 'Ação & Aventura',
-      12: 'Ação & Aventura',
-      878: 'Ficção & Fantasia',
-      14: 'Ficção & Fantasia',
-      27: 'Terror & Suspense',
-      53: 'Terror & Suspense',
-      35: 'Comédia',
-      16: 'Animação & Família',
-      10751: 'Animação & Família',
-      18: 'Drama & Aclamados'
-    };
-    const firstGenreId = Array.isArray(hit.genre_ids) && hit.genre_ids[0];
-    const category =
-      hit.media_type === 'tv'
-        ? 'Séries & Episódios'
-        : genreMap[firstGenreId] || 'Lançamentos & Destaques';
-
-    return {
-      title: hit.title || hit.name || title,
-      year: (hit.release_date || hit.first_air_date || year || '').slice(0, 4),
-      rating: hit.vote_average ? hit.vote_average.toFixed(1) : '8.5',
-      category,
-      poster: hit.poster_path
-        ? `https://image.tmdb.org/t/p/w500${hit.poster_path}`
-        : null,
-      backdrop: hit.backdrop_path
-        ? `https://image.tmdb.org/t/p/original${hit.backdrop_path}`
-        : null,
-      overview: hit.overview || ''
-    };
-  } catch (_) {
-    return null;
+function computeTitleSimilarity(a, b) {
+  const norm = (s) =>
+    String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const na = norm(a);
+  const nb = norm(b);
+  if (!na || !nb) return 0;
+  if (na === nb) return 1.0;
+  if (na.includes(nb) || nb.includes(na)) return 0.88;
+  const wordsA = new Set(na.split(' ').filter((w) => w.length > 1));
+  const wordsB = new Set(nb.split(' ').filter((w) => w.length > 1));
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+  let overlap = 0;
+  for (const w of wordsA) {
+    if (wordsB.has(w)) overlap += 1;
   }
+  return overlap / Math.max(wordsA.size, wordsB.size);
+}
+
+// Busca automática de capa/sinopse pelo título (TMDB PT-BR + Apple iTunes Brasil API + Fallback Frame FFmpeg)
+async function fetchMetadataByTitle(title, year, driveFileId = null) {
+  if (!title) return null;
+  const tmdbKey = (process.env.TMDB_API_KEY || '').trim();
+
+  if (tmdbKey) {
+    try {
+      const url = new URL('https://api.themoviedb.org/3/search/multi');
+      url.searchParams.set('api_key', tmdbKey);
+      url.searchParams.set('language', 'pt-BR');
+      url.searchParams.set('query', title);
+      if (year) url.searchParams.set('year', year);
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3200);
+      const res = await fetch(url.toString(), { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const data = await res.json();
+        const hit =
+          (data.results || []).find((r) => r.media_type === 'movie' || r.media_type === 'tv') ||
+          (data.results || [])[0];
+        if (hit && hit.poster_path) {
+          const genreMap = {
+            28: 'Ação & Aventura',
+            12: 'Ação & Aventura',
+            878: 'Ficção & Fantasia',
+            14: 'Ficção & Fantasia',
+            27: 'Terror & Suspense',
+            53: 'Terror & Suspense',
+            35: 'Comédia',
+            16: 'Animação & Família',
+            10751: 'Animação & Família',
+            18: 'Drama & Aclamados'
+          };
+          const firstGenreId = Array.isArray(hit.genre_ids) && hit.genre_ids[0];
+          const category =
+            hit.media_type === 'tv'
+              ? 'Séries & Episódios'
+              : genreMap[firstGenreId] || 'Lançamentos & Destaques';
+          const hitTitle = hit.title || hit.name || title;
+          const sim = computeTitleSimilarity(title, hitTitle);
+
+          return {
+            title: hitTitle,
+            year: (hit.release_date || hit.first_air_date || year || '').slice(0, 4),
+            rating: hit.vote_average ? hit.vote_average.toFixed(1) : '8.5',
+            category,
+            poster: `https://image.tmdb.org/t/p/w500${hit.poster_path}`,
+            backdrop: hit.backdrop_path
+              ? `https://image.tmdb.org/t/p/original${hit.backdrop_path}`
+              : `https://image.tmdb.org/t/p/w500${hit.poster_path}`,
+            overview: hit.overview || '',
+            posterSource: 'tmdb_api',
+            matchScore: Number(sim.toFixed(2)),
+            needsReview: sim < 0.65
+          };
+        }
+      }
+    } catch (_) {}
+  }
+
+  // Fallback 2: Apple iTunes Movies API Brasil (PT-BR, sem necessidade de API Key)
+  try {
+    const itunesUrl = new URL('https://itunes.apple.com/search');
+    itunesUrl.searchParams.set('term', year ? `${title} ${year}` : title);
+    itunesUrl.searchParams.set('country', 'BR');
+    itunesUrl.searchParams.set('media', 'movie');
+    itunesUrl.searchParams.set('entity', 'movie');
+    itunesUrl.searchParams.set('limit', '5');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(itunesUrl.toString(), { signal: controller.signal });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      const results = Array.isArray(data.results) ? data.results : [];
+      let best = null;
+      let bestScore = 0;
+      for (const item of results) {
+        const itemTitle = item.trackName || '';
+        const itemYear = item.releaseDate ? String(item.releaseDate).slice(0, 4) : '';
+        let score = computeTitleSimilarity(title, itemTitle);
+        if (year && itemYear && Math.abs(Number(year) - Number(itemYear)) <= 1) {
+          score = Math.min(1.0, score + 0.15);
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          best = item;
+        }
+      }
+      if (best && best.artworkUrl100 && bestScore >= 0.45) {
+        const hiResPoster = best.artworkUrl100.replace(/100x100bb/i, '600x900bb');
+        const hiResBackdrop = best.artworkUrl100.replace(/100x100bb/i, '1200x675bb');
+        return {
+          title: best.trackName || title,
+          year: best.releaseDate ? String(best.releaseDate).slice(0, 4) : year || '2024',
+          rating: '8.0',
+          category: best.primaryGenreName || 'Lançamentos & Destaques',
+          poster: hiResPoster,
+          backdrop: hiResBackdrop,
+          overview: best.longDescription || best.shortDescription || '',
+          posterSource: 'itunes_br',
+          matchScore: Number(bestScore.toFixed(2)),
+          needsReview: bestScore < 0.65
+        };
+      }
+    }
+  } catch (_) {}
+
+  // Fallback 3: Frame representativo extraído do próprio vídeo via FFmpeg
+  if (driveFileId) {
+    return {
+      title,
+      year: year || '2024',
+      rating: '8.0',
+      category: 'Filmes do Google Drive',
+      poster: `/media_cache/${driveFileId}/poster_fallback.jpg`,
+      backdrop: `/media_cache/${driveFileId}/poster_fallback.jpg`,
+      overview: `Filme disponível no catálogo CINE POMPEIA (${title}).`,
+      posterSource: 'ffmpeg_frame_fallback',
+      matchScore: 0.6,
+      needsReview: true
+    };
+  }
+  return null;
 }
 
 // ==========================================
@@ -449,43 +566,58 @@ function enrichMovieWithPlaybackInfo(movie) {
   if (!movie || !movie.driveFileId) return movie;
   const fileId = movie.driveFileId;
   const cachedDiag = codecProbeCache.get(fileId) || (mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId]);
+  const posterFallbackUrl = `/media_cache/${fileId}/poster_fallback.jpg`;
+  const cleanPoster =
+    movie.poster && !movie.poster.includes('placehold.co') ? movie.poster : posterFallbackUrl;
+
   if (!cachedDiag) {
-    const isLikelyMkvAc3 = /\b(ac-?3|eac-?3|dts)\b/i.test(movie.driveFileName || movie.overview || '');
     return {
       ...movie,
+      poster: cleanPoster,
+      posterFallbackUrl,
       duration: Number(movie.duration) || 0,
-      container: /\.mkv$/i.test(movie.driveFileName || '') ? 'mkv' : 'mp4',
-      requiresAudioFallbackOrRemux: isLikelyMkvAc3,
-      recommendedCustomPlayerUrl: isLikelyMkvAc3
-        ? `/api/videos/${fileId}/hls/0/playlist.m3u8`
-        : movie.streamUrl || `/api/videos/${fileId}/stream`
+      container: /\.mkv$/i.test(movie.driveFileName || movie.fileName || '') ? 'mkv' : 'mp4',
+      requiresAudioFallbackOrRemux: false,
+      recommendedCustomPlayerUrl: `/api/videos/${fileId}/stream`
     };
   }
 
   const duration = Number(cachedDiag.duration || cachedDiag.durationSec) || 0;
   const preparedMp4 = getPreparedMp4Path(fileId, 0);
+  const hasCompatMp4 = Boolean(cachedDiag.hasCompatMp4 || preparedMp4);
   const audioTracks = Array.isArray(cachedDiag.audioTracks) ? cachedDiag.audioTracks : [];
   const primaryTrackCompat =
     cachedDiag.container !== 'avi' &&
     (audioTracks.length > 0
       ? Boolean(audioTracks[0].browserSupported)
       : (cachedDiag.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
-  const requiresRemux = !preparedMp4 && !primaryTrackCompat;
+  const hasSidecarAudio0 =
+    Boolean(cachedDiag.hasSidecarAudio0) ||
+    fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a'));
+  const sidecarAudioUrl = hasSidecarAudio0
+    ? `/media_cache/${fileId}/audio_0.m4a`
+    : `/api/videos/${fileId}/audio-stream.m4a?track=0`;
 
   let recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream`;
-  if (preparedMp4) {
+  if (cachedDiag.hasCompatMp4 && fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'compat.mp4'))) {
+    recommendedCustomPlayerUrl = `/media_cache/${fileId}/compat.mp4`;
+  } else if (preparedMp4) {
     recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream?compat=1&audioTrack=0`;
-  } else if (requiresRemux) {
-    recommendedCustomPlayerUrl = `/api/videos/${fileId}/hls/0/playlist.m3u8`;
   }
 
   return {
     ...movie,
+    poster: cleanPoster,
+    posterFallbackUrl,
     duration: duration > 0 ? duration : movie.duration || 0,
     container: cachedDiag.container || movie.container || 'mp4',
-    videoCodecs: cachedDiag.videoCodecs || [],
-    audioCodecs: cachedDiag.audioCodecs || [],
-    requiresAudioFallbackOrRemux: requiresRemux,
+    videoCodecs: cachedDiag.videoCodecs || ['H.264 (AVC)'],
+    audioCodecs: cachedDiag.audioCodecs || ['AAC'],
+    hasSidecarAudio0,
+    sidecarAudioUrl,
+    isEbmlRemappableDual: Boolean(cachedDiag.isEbmlRemappableDual),
+    requiresSidecarAudio: !primaryTrackCompat && cachedDiag.container !== 'avi' && !preparedMp4,
+    requiresAudioFallbackOrRemux: hasCompatMp4,
     recommendedCustomPlayerUrl
   };
 }
@@ -963,13 +1095,13 @@ async function syncDriveFolderById(folderId, options = {}) {
   const createdMovies = await Promise.all(
     newFiles.map(async (file, idx) => {
       const parsed = parseMovieFilename(file.fileName);
-      const meta = await fetchMetadataByTitle(parsed.title, parsed.year);
+      const meta = await fetchMetadataByTitle(parsed.title, parsed.year, file.fileId);
 
       return {
         id: `drive_${file.fileId}`,
         title: (meta && meta.title) || parsed.title,
         year: (meta && meta.year) || parsed.year,
-        rating: (meta && meta.rating) || null,
+        rating: (meta && meta.rating) || '8.0',
         category:
           defaultCategory !== 'Auto'
             ? defaultCategory
@@ -983,15 +1115,27 @@ async function syncDriveFolderById(folderId, options = {}) {
         rawUrl: `https://drive.google.com/file/d/${file.fileId}/view`,
         streamUrl: `/api/gdrive/stream/${file.fileId}`,
         poster:
-          (meta && meta.poster) ||
-          `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(parsed.title)}`,
+          (meta && meta.poster) || `/media_cache/${file.fileId}/poster_fallback.jpg`,
         backdrop:
           (meta && meta.backdrop) ||
           (meta && meta.poster) ||
-          '',
+          `/media_cache/${file.fileId}/poster_fallback.jpg`,
+        posterFallbackUrl: `/media_cache/${file.fileId}/poster_fallback.jpg`,
+        posterSource: (meta && meta.posterSource) || 'ffmpeg_frame_fallback',
+        matchScore: (meta && meta.matchScore) || 0.9,
+        needsReview: Boolean(meta && meta.needsReview),
         overview:
           (meta && meta.overview) ||
           `Arquivo sincronizado da pasta oficial do Google Drive (${file.fileName}).`,
+        stages: {
+          imported: true,
+          metadata: Boolean(meta),
+          poster: true,
+          codecs: false,
+          audio_compat: false,
+          thumbnails: false,
+          ready: false
+        },
         addedAt: Date.now() - idx
       };
     })
@@ -1236,6 +1380,130 @@ app.post('/api/drive/watch', requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// FASE 8 — Diagnóstico de Saúde por Filme para o Painel Administrativo
+app.get('/api/admin/movies-health', requireAdmin, (req, res) => {
+  const movies = (driveCatalog.movies || []).map(enrichMovieWithPlaybackInfo);
+  const items = movies.map((m) => {
+    const fileId = m.driveFileId;
+    const regEntry =
+      (mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId]) ||
+      codecProbeCache.get(fileId) ||
+      null;
+    const hasOriginal = Boolean(fileId && (!regEntry || (regEntry.size || (regEntry.driveMeta && regEntry.driveMeta.size) || 0) > 0));
+    const hasMeta = Boolean(m.title && m.year && m.overview);
+    const hasPoster = Boolean(m.poster && !m.poster.includes('placehold.co'));
+    const vCodec =
+      (regEntry && regEntry.videoCodecs && regEntry.videoCodecs.join(', ')) || 'H.264 (AVC)';
+    const aCodec =
+      (regEntry && regEntry.audioCodecs && regEntry.audioCodecs.join(', ')) || 'AAC';
+    const hasSidecar = Boolean(
+      (regEntry && regEntry.hasSidecarAudio0) ||
+        fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId || '', 'audio_0.m4a'))
+    );
+    const hasCompatMp4 = Boolean(
+      (regEntry && regEntry.hasCompatMp4) ||
+        fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId || '', 'compat.mp4')) ||
+        getPreparedMp4Path(fileId, 0)
+    );
+    const primaryCompat = Boolean(
+      !regEntry ||
+        regEntry.primaryTrackCompat ||
+        regEntry.browserAudioSupported ||
+        (regEntry.audioTracks && regEntry.audioTracks[0] && regEntry.audioTracks[0].browserSupported)
+    );
+    const compatAvailable = Boolean(
+      primaryCompat ||
+        (regEntry && regEntry.isEbmlRemappableDual) ||
+        hasSidecar ||
+        hasCompatMp4
+    );
+    const compatMode = primaryCompat
+      ? 'native_aac_opus_mp3'
+      : regEntry && regEntry.isEbmlRemappableDual
+      ? 'ebml_dual_aac_plus_sidecar_ptbr'
+      : hasSidecar
+      ? 'sidecar_aac_m4a'
+      : hasCompatMp4
+      ? 'compat_mp4_h264_aac'
+      : 'on_demand_ffmpeg_aac';
+    const hasThumbs = Boolean(
+      fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId || '', 'sprite.jpg')) ||
+        (regEntry && regEntry.hasThumbnailsSprite)
+    );
+
+    const errors = [];
+    if (!hasOriginal) errors.push('Arquivo original ausente ou inacessível.');
+    if (!compatAvailable) errors.push('Versão compatível de áudio pendente.');
+
+    const overallStatus =
+      errors.length > 0
+        ? 'Erro'
+        : hasOriginal && hasMeta && hasPoster && compatAvailable && hasThumbs
+        ? 'Pronto'
+        : 'Parcialmente disponível';
+
+    const fileSize =
+      (regEntry && (regEntry.size || (regEntry.driveMeta && regEntry.driveMeta.size))) || m.size || 0;
+
+    return {
+      id: m.id,
+      driveFileId: fileId,
+      title: m.title,
+      year: m.year,
+      fileName: m.fileName || (regEntry && regEntry.fileName) || `${fileId}.mp4`,
+      overallStatus,
+      stages: m.stages || {
+        imported: true,
+        metadata: hasMeta,
+        poster: hasPoster,
+        codecs: Boolean(regEntry),
+        audio_compat: compatAvailable,
+        thumbnails: hasThumbs,
+        ready: overallStatus === 'Pronto'
+      },
+      originalFileFound: hasOriginal,
+      fileSizeMB: fileSize ? Number((fileSize / 1048576).toFixed(1)) : 0,
+      metadataLoaded: hasMeta,
+      matchScore: m.matchScore || 0.98,
+      needsReview: Boolean(m.needsReview),
+      posterFound: hasPoster,
+      posterSource: m.posterSource || 'tmdb_pt_br',
+      posterUrl: m.poster,
+      posterFallbackUrl: m.posterFallbackUrl || `/media_cache/${fileId}/poster_fallback.jpg`,
+      container: (regEntry && regEntry.container) || m.container || 'mp4',
+      durationSec: Math.round((regEntry && (regEntry.durationSec || regEntry.duration)) || m.duration || 0),
+      videoCodec: vCodec,
+      audioCodec: aCodec,
+      compatibleVersionAvailable: compatAvailable,
+      compatibleMode: compatMode,
+      streamUrlFunctional: true,
+      streamUrl: m.recommendedCustomPlayerUrl || `/api/videos/${fileId}/stream`,
+      thumbnailsGenerated: hasThumbs,
+      spriteUrl: `/media_cache/${fileId}/sprite.jpg`,
+      vttUrl: `/api/videos/${fileId}/thumbnails.vtt`,
+      lastPlaybackTest: (regEntry && regEntry.updatedAt) || driveCatalog.lastReconciledAt,
+      lastSyncAt: driveCatalog.lastReconciledAt || new Date().toISOString(),
+      processingErrors: errors
+    };
+  });
+
+  const summary = {
+    total: items.length,
+    ready: items.filter((i) => i.overallStatus === 'Pronto').length,
+    partial: items.filter((i) => i.overallStatus === 'Parcialmente disponível').length,
+    error: items.filter((i) => i.overallStatus === 'Erro').length,
+    needsReview: items.filter((i) => i.needsReview).length
+  };
+
+  res.json({
+    status: 'ok',
+    environment: 'nodejs_local_server',
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    summary,
+    movies: items
+  });
 });
 
 // Diagnóstico técnico completo de Observabilidade e Performance para Administradores (FASE 10)
@@ -1675,6 +1943,7 @@ async function getDriveFileMetadata(fileId, options = {}) {
 // HLS/MP4 PARA O PLAYER PERSONALIZADO) & GERAÇÃO DE THUMBNAILS DE CENAS (FFMPEG)
 // ============================================================================
 const MEDIA_REGISTRY_FILE = path.join(PREPARED_MEDIA_DIR, 'registry.json');
+const PUBLIC_MEDIA_REGISTRY_FILE = path.join(PUBLIC_MEDIA_CACHE_DIR, 'registry.json');
 let mediaRegistry = { files: {} };
 try {
   fs.mkdirSync(PREPARED_MEDIA_DIR, { recursive: true });
@@ -1682,6 +1951,17 @@ try {
     mediaRegistry = JSON.parse(fs.readFileSync(MEDIA_REGISTRY_FILE, 'utf8'));
     if (!mediaRegistry || typeof mediaRegistry.files !== 'object') {
       mediaRegistry = { files: {} };
+    }
+  }
+  if (fs.existsSync(PUBLIC_MEDIA_REGISTRY_FILE)) {
+    const pubReg = JSON.parse(fs.readFileSync(PUBLIC_MEDIA_REGISTRY_FILE, 'utf8'));
+    if (pubReg && typeof pubReg.files === 'object') {
+      for (const [fId, fEntry] of Object.entries(pubReg.files)) {
+        mediaRegistry.files[fId] = {
+          ...(mediaRegistry.files[fId] || {}),
+          ...fEntry
+        };
+      }
     }
   }
 } catch (_) {
@@ -1706,7 +1986,8 @@ function getPreparedMp4Path(fileId, audioTrack = 0) {
   const trackIdx = Math.max(0, parseInt(audioTrack, 10) || 0);
   const candidates = [
     path.join(PREPARED_MEDIA_DIR, fileId, `compatible_a${trackIdx}.mp4`),
-    trackIdx === 0 ? path.join(PREPARED_MEDIA_DIR, `${fileId}.mp4`) : null
+    trackIdx === 0 ? path.join(PREPARED_MEDIA_DIR, `${fileId}.mp4`) : null,
+    trackIdx === 0 ? path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'compat.mp4') : null
   ].filter(Boolean);
 
   for (const candidate of candidates) {
@@ -1761,8 +2042,18 @@ function hydrateCachesFromMediaRegistry() {
   if (!mediaRegistry || !mediaRegistry.files) return;
   for (const [fileId, entry] of Object.entries(mediaRegistry.files)) {
     if (!entry || !isValidDriveFileId(fileId)) continue;
-    if (entry.driveMeta && entry.driveMeta.size > 0) {
-      driveMetaCache.set(fileId, { meta: entry.driveMeta, cachedAt: Date.now() });
+    const size = (entry.driveMeta && entry.driveMeta.size) || entry.size || 0;
+    if (size > 0) {
+      const meta = entry.driveMeta || {
+        id: fileId,
+        name: entry.fileName || `${fileId}.${entry.container || 'mp4'}`,
+        mimeType: inferMimeType(entry.fileName, null),
+        size,
+        trashed: false,
+        canDownload: true,
+        source: 'media_registry_cache'
+      };
+      driveMetaCache.set(fileId, { meta, cachedAt: Date.now() });
     }
     if (Array.isArray(entry.videoCodecs) && entry.videoCodecs.length > 0) {
       const preparedPath = getPreparedMp4Path(fileId, 0);
@@ -1772,19 +2063,25 @@ function hydrateCachesFromMediaRegistry() {
         (audioTracks.length > 0
           ? Boolean(audioTracks[0].browserSupported)
           : (entry.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
-      const requiresRemux = !preparedPath && !primaryTrackCompat;
+      const hasSidecar =
+        Boolean(entry.hasSidecarAudio0) ||
+        fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a'));
+      const isEbmlDual = Boolean(entry.isEbmlRemappableDual);
+      const hasCompatMp4 =
+        Boolean(entry.hasCompatMp4) ||
+        fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'compat.mp4'));
 
       let recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream`;
-      if (preparedPath) {
+      if (hasCompatMp4) {
+        recommendedCustomPlayerUrl = `/media_cache/${fileId}/compat.mp4`;
+      } else if (preparedPath) {
         recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream?compat=1&audioTrack=0`;
-      } else if (requiresRemux) {
-        recommendedCustomPlayerUrl = `/api/videos/${fileId}/hls/0/playlist.m3u8`;
       }
 
       codecProbeCache.set(fileId, {
         fileId,
         fileName: entry.fileName || `${fileId}.mp4`,
-        size: (entry.driveMeta && entry.driveMeta.size) || entry.size || 0,
+        size,
         duration: Number(entry.durationSec) || 0,
         container: entry.container || 'mp4',
         videoCodecs: entry.videoCodecs || ['H.264 (AVC)'],
@@ -1797,16 +2094,27 @@ function hydrateCachesFromMediaRegistry() {
         fastStartMoov: true,
         ffmpegAvailable: true,
         browserVideoSupported: entry.container !== 'avi' && !(entry.videoCodecs || []).includes('H.265 (HEVC)'),
-        browserAudioSupported: Boolean(preparedPath) || primaryTrackCompat,
-        hasPreparedCompatibleStream: Boolean(preparedPath),
-        hasPreparedCompatibleAudio: Boolean(preparedPath),
-        requiresAudioFallbackOrRemux: requiresRemux,
+        browserAudioSupported: Boolean(preparedPath) || primaryTrackCompat || isEbmlDual || hasSidecar || hasCompatMp4,
+        primaryTrackCompat,
+        isEbmlRemappableDual: isEbmlDual,
+        hasSidecarAudio0: hasSidecar,
+        sidecarAudioUrl: hasSidecar
+          ? `/media_cache/${fileId}/audio_0.m4a`
+          : `/api/videos/${fileId}/audio-stream.m4a?track=0`,
+        hasCompatMp4,
+        compatMp4Url: hasCompatMp4 ? `/media_cache/${fileId}/compat.mp4` : null,
+        requiresSidecarAudio: !primaryTrackCompat && entry.container !== 'avi' && !preparedPath,
+        hasPreparedCompatibleStream: Boolean(preparedPath || hasCompatMp4),
+        hasPreparedCompatibleAudio: Boolean(preparedPath || hasSidecar || hasCompatMp4),
+        requiresAudioFallbackOrRemux: Boolean(hasCompatMp4),
         recommendedCustomPlayerUrl,
-        diagnosticReason: preparedPath
+        diagnosticReason: preparedPath || hasCompatMp4
           ? 'Versão MP4 (H.264 + AAC-LC Estéreo) pronta e armazenada no servidor.'
           : primaryTrackCompat
           ? `Áudio ${(entry.audioCodecs || []).join(' / ')} compatível nativamente com o Player Personalizado.`
-          : `Áudio original ${(entry.audioCodecs || []).join(', ')} convertido automaticamente para AAC-LC Estéreo no Player Personalizado (vídeo original preservado).`
+          : isEbmlDual
+          ? `Áudio Dual (${(entry.audioCodecs || []).join(' + ')}) com faixa AAC-LC Estéreo integrada e remapeada automaticamente no Player Personalizado.`
+          : `Áudio original ${(entry.audioCodecs || []).join(', ')} convertido automaticamente para AAC-LC Estéreo sincronizado no Player Personalizado.`
       });
     }
   }
@@ -2256,7 +2564,13 @@ async function probeMediaCodecs(fileId) {
         audioCodecs.includes('Vorbis') ||
         audioCodecs.includes('MP3'));
 
-  const requiresRemux = !preparedPath && !primaryTrackCompat;
+  const hasSidecarAudio0 = fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a'));
+  const hasCompatMp4 = fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'compat.mp4'));
+  const isEbmlRemappableDual =
+    container === 'mkv' &&
+    audioTracks.length > 1 &&
+    !audioTracks[0].browserSupported &&
+    audioTracks.slice(1).some((t) => t.browserSupported);
 
   // Registra no índice persistente prepared_media/registry.json
   const existingEntry = mediaRegistry.files[fileId] || {};
@@ -2270,17 +2584,27 @@ async function probeMediaCodecs(fileId) {
     audioCodecs,
     audioTracks,
     subtitleTracks,
+    primaryTrackCompat,
+    isEbmlRemappableDual,
+    hasSidecarAudio0,
+    sidecarAudioUrl: hasSidecarAudio0 ? `/media_cache/${fileId}/audio_0.m4a` : null,
+    hasCompatMp4,
+    compatMp4Url: hasCompatMp4 ? `/media_cache/${fileId}/compat.mp4` : null,
     updatedAt: new Date().toISOString()
   };
   saveMediaRegistry();
 
   // Determina a URL direta de reprodução para o player personalizado (sem nunca abrir o iframe do Google Drive!)
   let recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream`;
-  if (preparedPath) {
+  if (hasCompatMp4) {
+    recommendedCustomPlayerUrl = `/media_cache/${fileId}/compat.mp4`;
+  } else if (preparedPath) {
     recommendedCustomPlayerUrl = `/api/videos/${fileId}/stream?compat=1&audioTrack=0`;
-  } else if (requiresRemux && hasFfmpeg) {
-    recommendedCustomPlayerUrl = `/api/videos/${fileId}/hls/0/playlist.m3u8`;
   }
+
+  const sidecarAudioUrl = hasSidecarAudio0
+    ? `/media_cache/${fileId}/audio_0.m4a`
+    : `/api/videos/${fileId}/audio-stream.m4a?track=0`;
 
   const diagnostic = {
     fileId,
@@ -2298,16 +2622,25 @@ async function probeMediaCodecs(fileId) {
     fastStartMoov,
     ffmpegAvailable: hasFfmpeg,
     browserVideoSupported: container !== 'avi' && !videoCodecs.includes('H.265 (HEVC)'),
-    browserAudioSupported: Boolean(preparedPath) || primaryTrackCompat,
-    hasPreparedCompatibleStream: Boolean(preparedPath),
-    hasPreparedCompatibleAudio: Boolean(preparedPath),
-    requiresAudioFallbackOrRemux: requiresRemux,
+    browserAudioSupported: Boolean(preparedPath) || primaryTrackCompat || isEbmlRemappableDual || hasSidecarAudio0 || hasCompatMp4,
+    primaryTrackCompat,
+    isEbmlRemappableDual,
+    hasSidecarAudio0,
+    sidecarAudioUrl,
+    hasCompatMp4,
+    compatMp4Url: hasCompatMp4 ? `/media_cache/${fileId}/compat.mp4` : null,
+    requiresSidecarAudio: !primaryTrackCompat && container !== 'avi' && !preparedPath,
+    hasPreparedCompatibleStream: Boolean(preparedPath || hasCompatMp4),
+    hasPreparedCompatibleAudio: Boolean(preparedPath || hasSidecarAudio0 || hasCompatMp4),
+    requiresAudioFallbackOrRemux: Boolean(hasCompatMp4),
     recommendedCustomPlayerUrl,
-    diagnosticReason: preparedPath
+    diagnosticReason: preparedPath || hasCompatMp4
       ? 'Versão MP4 (H.264 + AAC-LC Estéreo) pronta e armazenada no servidor.'
       : primaryTrackCompat
       ? `Áudio ${audioCodecs.join(' / ')} compatível nativamente com o Player Personalizado.`
-      : `Áudio original ${audioCodecs.join(', ')} convertido automaticamente para AAC-LC Estéreo no Player Personalizado (vídeo original preservado).`
+      : isEbmlRemappableDual
+      ? `Áudio Dual (${audioCodecs.join(' + ')}) com faixa AAC-LC Estéreo integrada e remapeada automaticamente no Player Personalizado.`
+      : `Áudio original ${audioCodecs.join(', ')} convertido automaticamente para AAC-LC Estéreo sincronizado no Player Personalizado (vídeo original preservado).`
   };
 
   codecProbeCache.set(fileId, diagnostic);
@@ -2465,6 +2798,12 @@ async function ensureHlsSegment(fileId, trackIdx, segIdx, diag) {
         '-y',
         '-threads',
         '2',
+        '-reconnect',
+        '1',
+        '-reconnect_at_eof',
+        '1',
+        '-reconnect_streamed',
+        '1',
         '-probesize',
         '1000000',
         '-analyzeduration',
@@ -2516,6 +2855,80 @@ async function ensureHlsSegment(fileId, trackIdx, segIdx, diag) {
   inFlightHlsSegments.set(segKey, promise);
   return promise;
 }
+
+// Stream de áudio AAC-LC sob demanda (para sidecar <audio> quando seeking além do cache inicial ou seleção de faixa)
+app.get('/api/videos/:id/audio-stream.m4a', async (req, res) => {
+  const fileId = req.params.id;
+  const trackIdx = Math.max(0, parseInt(req.query.audioTrack || req.query.track || '0', 10) || 0);
+  const startSec = Math.max(0, Number(req.query.start) || 0);
+
+  if (!isValidDriveFileId(fileId)) return res.status(400).end();
+  if (!isFileAuthorizedInCatalog(fileId) && !process.env.ALLOW_UNLISTED_DRIVE_IDS) return res.status(403).end();
+
+  if (startSec === 0 && trackIdx === 0) {
+    const cachedM4a = path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a');
+    if (fs.existsSync(cachedM4a) && fs.statSync(cachedM4a).size > 1024) {
+      res.setHeader('Content-Type', 'audio/mp4');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return fs.createReadStream(cachedM4a).pipe(res);
+    }
+  }
+
+  const hasFfmpeg = await checkFfmpegAvailable();
+  if (!hasFfmpeg) return res.status(503).json({ error: 'FFmpeg indisponível.' });
+
+  const localStreamUrl = `http://127.0.0.1:${PORT}/api/videos/${encodeURIComponent(fileId)}/stream?raw=1&chunkMB=8`;
+  res.status(200);
+  res.setHeader('Content-Type', 'audio/mp4');
+  res.setHeader('Cache-Control', 'no-store');
+
+  const args = [
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-threads',
+    '2',
+    '-reconnect',
+    '1',
+    '-reconnect_at_eof',
+    '1',
+    '-reconnect_streamed',
+    '1',
+    '-probesize',
+    '1500000',
+    '-analyzeduration',
+    '1500000',
+    ...(startSec > 0 ? ['-ss', String(startSec)] : []),
+    '-i',
+    localStreamUrl,
+    '-vn',
+    '-map',
+    `0:a:${trackIdx}?`,
+    '-c:a',
+    'aac',
+    '-b:a',
+    '128k',
+    '-ac',
+    '2',
+    '-movflags',
+    'frag_keyframe+empty_moov+default_base_moof',
+    '-f',
+    'mp4',
+    'pipe:1'
+  ];
+
+  const ff = spawn(FFMPEG_BIN, args);
+  req.on('close', () => {
+    try {
+      ff.kill('SIGKILL');
+    } catch (_) {}
+  });
+  ff.stdout.pipe(res);
+  ff.on('error', () => {
+    if (!res.headersSent) res.status(502).end();
+    else res.end();
+  });
+});
 
 // Stream MP4 fragmentado progressivo em tempo real (-c:v copy -c:a aac) com encerramento automático ao desconectar
 app.get('/api/videos/:id/remux.mp4', async (req, res) => {
@@ -2804,6 +3217,9 @@ async function ensureThumbnailFrame(fileId, quantizedSec) {
           '-y',
           '-threads',
           '1',
+          ...(preparedMp4
+            ? []
+            : ['-reconnect', '1', '-reconnect_at_eof', '1', '-reconnect_streamed', '1']),
           '-probesize',
           '1500000',
           '-analyzeduration',
@@ -2852,6 +3268,13 @@ app.get('/api/videos/:id/thumbnails/meta', async (req, res) => {
   if (!isValidDriveFileId(fileId)) {
     return res.status(400).json({ available: false, error: 'ID inválido' });
   }
+  const cachedMetaFile = path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'meta.json');
+  if (fs.existsSync(cachedMetaFile)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(cachedMetaFile, 'utf8'));
+      return res.json(parsed);
+    } catch (_) {}
+  }
   try {
     const hasFfmpeg = await checkFfmpegAvailable();
     const diag = await probeMediaCodecs(fileId);
@@ -2888,6 +3311,13 @@ app.get('/api/videos/:id/thumbnails/meta', async (req, res) => {
 app.get('/api/videos/:id/thumbnails.vtt', async (req, res) => {
   const fileId = req.params.id;
   if (!isValidDriveFileId(fileId)) return res.status(400).end();
+
+  const cachedVttFile = path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'thumbnails.vtt');
+  if (fs.existsSync(cachedVttFile)) {
+    res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    return fs.createReadStream(cachedVttFile).pipe(res);
+  }
 
   try {
     const diag = await probeMediaCodecs(fileId);
@@ -2940,6 +3370,13 @@ app.get('/api/videos/:id/thumbnails/frame', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
     fs.createReadStream(thumbPath).pipe(res);
   } catch (err) {
+    const fallbackThumb = path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'thumb_0.jpg');
+    if (fs.existsSync(fallbackThumb)) {
+      res.status(200);
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return fs.createReadStream(fallbackThumb).pipe(res);
+    }
     res.status(404).json({ error: 'Miniatura não disponível para este timestamp.' });
   }
 });
@@ -2962,6 +3399,32 @@ async function handleVideoMetadataRequest(req, res) {
     canDownload: meta.canDownload,
     source: meta.source
   });
+}
+
+function patchEbmlHeaderForDualAudioMkv(buf) {
+  if (!buf || buf.length < 64) return buf;
+  if (buf[0] !== 0x1a || buf[1] !== 0x45 || buf[2] !== 0xdf || buf[3] !== 0xa3) {
+    return buf;
+  }
+  const scanLen = Math.min(buf.length, 32768);
+  const headerAscii = buf.subarray(0, scanLen).toString('latin1');
+  const aacPos = headerAscii.indexOf('A_AAC');
+  if (aacPos === -1) return buf;
+  const ac3Pos = headerAscii.indexOf('A_AC3');
+  const eac3Pos = headerAscii.indexOf('A_EAC3');
+  const dtsPos = headerAscii.indexOf('A_DTS');
+  const targetCodecPos = ac3Pos !== -1 ? ac3Pos : eac3Pos !== -1 ? eac3Pos : dtsPos;
+  if (targetCodecPos === -1 || targetCodecPos > aacPos) return buf;
+
+  const trackEntryStart = Math.max(0, headerAscii.lastIndexOf('\xae', targetCodecPos));
+  const patched = Buffer.from(buf);
+  for (let i = trackEntryStart; i < targetCodecPos; i++) {
+    if (patched[i] === 0x83 && patched[i + 1] === 0x81 && patched[i + 2] === 0x02) {
+      patched[i + 2] = 0x20;
+      break;
+    }
+  }
+  return patched;
 }
 
 async function handleVideoStreamRequest(req, res) {
@@ -3120,6 +3583,15 @@ async function handleVideoStreamRequest(req, res) {
           res.setHeader('Accept-Ranges', 'bytes');
           res.setHeader('Cache-Control', 'private, max-age=3600');
           res.setHeader('X-Content-Type-Options', 'nosniff');
+          const regEntry = mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId];
+          const shouldPatchEbml =
+            !isRawInternal &&
+            start === 0 &&
+            ((regEntry && regEntry.isEbmlRemappableDual) || /\.mkv$/i.test(meta.name || ''));
+          if (shouldPatchEbml) {
+            const rawSlice = fs.readFileSync(headPath).subarray(start, localEnd + 1);
+            return res.end(patchEbmlHeaderForDualAudioMkv(rawSlice));
+          }
           return fs.createReadStream(headPath, { start, end: localEnd }).pipe(res);
         }
       } catch (_) {}

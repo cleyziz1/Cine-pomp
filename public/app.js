@@ -524,6 +524,10 @@
   const drivePreviewIframe = document.getElementById('drivePreviewIframe');
   const cineNativePlayerContainer = document.getElementById('cineNativePlayerContainer');
   const nativeVideo = document.getElementById('nativeVideo');
+  const compatSidecarAudio = document.getElementById('compatSidecarAudio');
+  const adminMoviesHealthList = document.getElementById('adminMoviesHealthList');
+  const healthSummaryBadge = document.getElementById('healthSummaryBadge');
+  const refreshMoviesHealthBtn = document.getElementById('refreshMoviesHealthBtn');
   const playerPosterOverlay = document.getElementById('playerPosterOverlay');
   const playerPosterBackdrop = document.getElementById('playerPosterBackdrop');
   const playerPosterTitle = document.getElementById('playerPosterTitle');
@@ -881,6 +885,7 @@
       // Ao sair da sala para o catálogo/página inicial, para imediatamente qualquer reprodução
       try {
         if (!nativeVideo.paused) nativeVideo.pause();
+        if (compatSidecarAudio && !compatSidecarAudio.paused) compatSidecarAudio.pause();
       } catch (_) {}
       if (drivePreviewIframe && drivePreviewIframe.src !== 'about:blank') {
         drivePreviewIframe.src = 'about:blank';
@@ -1369,8 +1374,13 @@
   }
 
   function createPosterCardHtml(item) {
-    const fallbackPoster = `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(item.title || 'Filme')}`;
-    const posterSrc = item.poster || fallbackPoster;
+    const frameFallback =
+      item.posterFallbackUrl ||
+      (item.driveFileId ? `/media_cache/${encodeURIComponent(item.driveFileId)}/poster_fallback.jpg` : '');
+    const fallbackPoster =
+      frameFallback || `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(item.title || 'Filme')}`;
+    const posterSrc =
+      item.poster && !String(item.poster).includes('placehold.co') ? item.poster : fallbackPoster;
     const hasValidRating = item.rating && !Number.isNaN(Number(item.rating)) && Number(item.rating) > 0;
     const ratingBadgeHtml = hasValidRating
       ? `<span class="stream-card-rating">⭐ ${escapeHtml(String(item.rating))}</span>`
@@ -1556,6 +1566,57 @@
     cancelEditMovieBtn.addEventListener('click', resetSingleMovieForm);
   }
 
+  async function loadAdminMoviesHealth() {
+    if (!adminMoviesHealthList || !isAdminUser()) return;
+    if (healthSummaryBadge) healthSummaryBadge.textContent = 'verificando...';
+    adminMoviesHealthList.innerHTML =
+      '<p style="font-size:0.78rem; color:var(--text-muted);">Analisando saúde dos filmes...</p>';
+    try {
+      const res = await fetch('/api/admin/movies-health', { headers: getAdminAuthHeaders() });
+      if (!res.ok) throw new Error('Falha ao carregar saúde');
+      const data = await res.json();
+      const s = data.summary || {};
+      if (healthSummaryBadge) {
+        healthSummaryBadge.textContent = `${s.ready || 0}/${s.total || 0} Prontos • ${s.partial || 0} Parciais • ${s.error || 0} Erros`;
+      }
+      const list = Array.isArray(data.movies) ? data.movies : [];
+      adminMoviesHealthList.innerHTML = list
+        .map((m) => {
+          const badgeColor =
+            m.overallStatus === 'Pronto'
+              ? '#4ade80'
+              : m.overallStatus === 'Erro'
+              ? '#f87171'
+              : '#fbbf24';
+          return `
+            <div class="addon-row-item" style="flex-direction:column; align-items:stretch; gap:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <strong style="font-size:0.8rem;">${escapeHtml(m.title)} (${escapeHtml(m.year || 'HD')})</strong>
+                <span style="font-size:0.72rem; font-weight:700; color:${badgeColor};">${escapeHtml(m.overallStatus)}</span>
+              </div>
+              <div style="font-size:0.7rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:8px;">
+                <span>📦 ${escapeHtml((m.container || 'mp4').toUpperCase())} (${m.fileSizeMB || 0} MB)</span>
+                <span>🎞️ ${escapeHtml(m.videoCodec || 'H.264')}</span>
+                <span>🔊 ${escapeHtml(m.audioCodec || 'AAC')} [${escapeHtml(m.compatibleMode || 'native')}]</span>
+                <span>🖼️ Capa: ${m.posterFound ? 'OK' : 'Pendente'} (${escapeHtml(m.posterSource || 'tmdb')})</span>
+                <span>🎞️ Thumbs: ${m.thumbnailsGenerated ? 'OK' : 'Pendente'}</span>
+                ${m.needsReview ? '<span style="color:#fbbf24;">⚠️ Revisar capa</span>' : ''}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    } catch (_) {
+      if (healthSummaryBadge) healthSummaryBadge.textContent = 'indisponível';
+      adminMoviesHealthList.innerHTML =
+        '<p style="font-size:0.78rem; color:#fca5a5;">Não foi possível consultar /api/admin/movies-health.</p>';
+    }
+  }
+
+  if (refreshMoviesHealthBtn) {
+    refreshMoviesHealthBtn.addEventListener('click', loadAdminMoviesHealth);
+  }
+
   function openDriveManager() {
     if (!isAdminUser()) {
       if (adminLoginModal) adminLoginModal.classList.remove('hidden');
@@ -1565,6 +1626,7 @@
     resetSingleMovieForm();
     renderManagerMoviesList(allDriveMovies);
     driveManagerModal.classList.remove('hidden');
+    loadAdminMoviesHealth();
     fetch('/api/drive/sync-status')
       .then((r) => (r.ok ? r.json() : null))
       .then((st) => {
@@ -2066,6 +2128,105 @@
   const clientDiagnosticsCache = new Map(); // fileId -> diag
   const clientThumbMetaCache = new Map(); // fileId -> meta
   const clientThumbFrameCache = new Map(); // `${fileId}:${snapped}` -> objectUrl | 'loading' | 'error'
+  const clientSpriteImageCache = new Map(); // fileId -> HTMLImageElement | 'loading' | 'error'
+
+  let compatSidecarAudioActive = false;
+  let compatSidecarFileId = '';
+  let compatSidecarTrackIdx = 0;
+  let compatSidecarOffsetSec = 0;
+
+  function stopCompatSidecarAudio() {
+    compatSidecarAudioActive = false;
+    compatSidecarFileId = '';
+    compatSidecarOffsetSec = 0;
+    if (!compatSidecarAudio) return;
+    try {
+      compatSidecarAudio.pause();
+      compatSidecarAudio.removeAttribute('src');
+      compatSidecarAudio.load();
+    } catch (_) {}
+  }
+
+  function syncCompatSidecarAudio(forceSeek = false) {
+    if (!compatSidecarAudioActive || !compatSidecarAudio) return;
+    compatSidecarAudio.volume = nativeVideo.volume;
+    compatSidecarAudio.muted = nativeVideo.muted;
+    compatSidecarAudio.playbackRate = nativeVideo.playbackRate || 1;
+
+    const videoTime = nativeVideo.currentTime || 0;
+    const targetAudioTime = Math.max(0, videoTime - compatSidecarOffsetSec);
+
+    if (nativeVideo.paused || nativeVideo.ended || nativeVideo.readyState < 2) {
+      if (!compatSidecarAudio.paused) {
+        try {
+          compatSidecarAudio.pause();
+        } catch (_) {}
+      }
+      if (forceSeek && Number.isFinite(targetAudioTime) && compatSidecarAudio.readyState >= 1) {
+        const maxDur = Number.isFinite(compatSidecarAudio.duration) ? compatSidecarAudio.duration : Infinity;
+        if (targetAudioTime < maxDur) {
+          compatSidecarAudio.currentTime = targetAudioTime;
+        }
+      }
+      return;
+    }
+
+    // Se o áudio sidecar em cache (/media_cache/<id>/audio_0.m4a) tiver duração menor que o seek atual e estivermos no localhost,
+    // muda dinamicamente para /api/videos/:id/audio-stream.m4a?start=<sec>
+    const maxDur = Number.isFinite(compatSidecarAudio.duration) ? compatSidecarAudio.duration : 0;
+    if (maxDur > 5 && targetAudioTime >= maxDur - 0.5 && window.location.hostname === 'localhost') {
+      const seekSec = Math.floor(videoTime);
+      compatSidecarOffsetSec = seekSec;
+      compatSidecarAudio.src = `/api/videos/${encodeURIComponent(compatSidecarFileId)}/audio-stream.m4a?track=${compatSidecarTrackIdx}&start=${seekSec}`;
+      compatSidecarAudio.load();
+      compatSidecarAudio.play().catch(() => {});
+      return;
+    }
+
+    if (maxDur > 0 && targetAudioTime >= maxDur) {
+      if (!compatSidecarAudio.paused) compatSidecarAudio.pause();
+      return;
+    }
+
+    if (
+      compatSidecarAudio.readyState >= 1 &&
+      (forceSeek || Math.abs((compatSidecarAudio.currentTime || 0) - targetAudioTime) > 0.14)
+    ) {
+      try {
+        compatSidecarAudio.currentTime = targetAudioTime;
+      } catch (_) {}
+    }
+
+    if (compatSidecarAudio.paused) {
+      compatSidecarAudio.play().catch(() => {});
+    }
+  }
+
+  function attachCompatSidecarAudio(fileId, trackIdx = 0, diag = null) {
+    if (!compatSidecarAudio || !fileId) return;
+    const isTrack0 = trackIdx === 0;
+    const hasStaticM4a = Boolean(diag && diag.hasSidecarAudio0);
+    const targetUrl =
+      isTrack0 && hasStaticM4a
+        ? diag.sidecarAudioUrl || `/media_cache/${encodeURIComponent(fileId)}/audio_0.m4a`
+        : `/api/videos/${encodeURIComponent(fileId)}/audio-stream.m4a?track=${trackIdx}`;
+
+    compatSidecarAudioActive = true;
+    compatSidecarFileId = fileId;
+    compatSidecarTrackIdx = trackIdx;
+    compatSidecarOffsetSec = 0;
+
+    if (!compatSidecarAudio.src || !compatSidecarAudio.src.endsWith(targetUrl)) {
+      compatSidecarAudio.src = targetUrl;
+      compatSidecarAudio.load();
+    }
+    syncCompatSidecarAudio(true);
+
+    if (syncModeIndicator) {
+      syncModeIndicator.textContent =
+        '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Sincronizado • WebSocket/P2P)';
+    }
+  }
 
   function getEffectiveDuration() {
     if (nativeVideo.duration && Number.isFinite(nativeVideo.duration) && nativeVideo.duration > 0) {
@@ -2285,14 +2446,25 @@
     activeAudioTrackIndex = trackIdx;
     hideAudioDiagBanner();
 
-    let targetUrl = `/api/videos/${encodeURIComponent(fileId)}/hls/${trackIdx}/playlist.m3u8`;
+    // Se o vídeo principal já está carregando/reproduzindo H.264 (/api/videos/:id/stream),
+    // ativa o áudio AAC-LC sincronizado via sidecar <audio> SEM recarregar/interromper o <video>!
     if (
-      trackIdx === 0 &&
       currentDiagnostics &&
-      currentDiagnostics.hasPreparedCompatibleAudio &&
-      currentDiagnostics.preparedAudioUrl
+      currentDiagnostics.browserVideoSupported !== false &&
+      currentDiagnostics.container !== 'avi' &&
+      (currentDiagnostics.hasSidecarAudio0 || currentDiagnostics.requiresSidecarAudio || trackIdx > 0)
     ) {
-      targetUrl = currentDiagnostics.preparedAudioUrl;
+      attachCompatSidecarAudio(fileId, trackIdx, currentDiagnostics);
+      return;
+    }
+
+    let targetUrl = `/api/videos/${encodeURIComponent(fileId)}/stream`;
+    if (
+      currentDiagnostics &&
+      currentDiagnostics.hasCompatMp4 &&
+      currentDiagnostics.compatMp4Url
+    ) {
+      targetUrl = currentDiagnostics.compatMp4Url;
     } else if (
       currentDiagnostics &&
       Array.isArray(currentDiagnostics.audioTracks) &&
@@ -2315,15 +2487,6 @@
     if (syncModeIndicator) {
       syncModeIndicator.textContent =
         '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Compatível • Sincronia WebSocket/P2P)';
-    }
-
-    // Dispara também a fila de preparação em segundo plano caso o usuário seja Admin e ainda não exista versão completa em disco
-    if (isAdminUser() && currentDiagnostics && !currentDiagnostics.hasPreparedCompatibleAudio) {
-      fetch(`/api/videos/${encodeURIComponent(fileId)}/prepare-audio`, {
-        method: 'POST',
-        headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ trackIndex: trackIdx })
-      }).catch(() => {});
     }
   }
 
@@ -2475,9 +2638,12 @@
       renderEmbeddedSubtitleOptions(diag, fileId);
       updateCustomPlayerUi();
 
-      // FASE 1: Quando o arquivo possui áudio AC-3 5.1 / E-AC-3 / DTS ou container AVI,
-      // comuta automaticamente para a versão/stream AAC-LC Estéreo DENTRO do Player Personalizado!
-      if (diag.requiresAudioFallbackOrRemux && diag.recommendedCustomPlayerUrl) {
+      // FASE 1 & FASE 6: Quando o arquivo possui áudio AC-3 5.1 / E-AC-3 / DTS:
+      // 1) Se for H.264 com sidecar AAC-LC (/media_cache/<id>/audio_0.m4a), ativa o áudio sidecar SEM recarregar o <video>!
+      // 2) Se for container AVI com compat.mp4 pronto, comuta o <video> para /media_cache/<id>/compat.mp4.
+      if (diag.requiresSidecarAudio && diag.browserVideoSupported !== false) {
+        attachCompatSidecarAudio(fileId, activeAudioTrackIndex, diag);
+      } else if (diag.requiresAudioFallbackOrRemux && diag.recommendedCustomPlayerUrl) {
         if (activeCustomStreamUrl !== diag.recommendedCustomPlayerUrl) {
           const hasStarted = (nativeVideo.currentTime || 0) > 0.5;
           loadUrlIntoCustomPlayer(diag.recommendedCustomPlayerUrl, initialPlayback, hasStarted);
@@ -2590,6 +2756,7 @@
 
     setNativeError('');
     hideAudioDiagBanner();
+    stopCompatSidecarAudio();
     if (audioDecodeCheckTimer) {
       clearTimeout(audioDecodeCheckTimer);
       audioDecodeCheckTimer = null;
@@ -2911,13 +3078,35 @@
   let lastPreviewSnappedSec = -1;
   let lastPreviewFileId = '';
 
+  function preloadSpriteImageForFile(fileId, spriteUrl) {
+    if (!fileId || !spriteUrl || clientSpriteImageCache.has(fileId)) return;
+    clientSpriteImageCache.set(fileId, 'loading');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      clientSpriteImageCache.set(fileId, img);
+    };
+    img.onerror = () => {
+      clientSpriteImageCache.set(fileId, 'error');
+    };
+    img.src = spriteUrl;
+  }
+
   async function preloadThumbnailMetaForVideo(fileId) {
-    if (!fileId || clientThumbMetaCache.has(fileId)) return;
+    if (!fileId) return;
+    const existing = clientThumbMetaCache.get(fileId);
+    if (existing) {
+      if (existing.spriteUrl) preloadSpriteImageForFile(fileId, existing.spriteUrl);
+      return;
+    }
     try {
       const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/thumbnails/meta`);
       if (res.ok) {
         const meta = await res.json();
         clientThumbMetaCache.set(fileId, meta);
+        if (meta && meta.spriteUrl) {
+          preloadSpriteImageForFile(fileId, meta.spriteUrl);
+        }
       }
     } catch (_) {}
   }
@@ -2932,6 +3121,39 @@
     }
   }
 
+  function renderSpriteTileForTimestamp(fileId, targetSec, meta) {
+    const img = clientSpriteImageCache.get(fileId);
+    if (!img || img === 'loading' || img === 'error' || !img.naturalWidth) return null;
+    const tiles = Array.isArray(meta && meta.tiles) ? meta.tiles : [];
+    const cols = Number(meta && meta.cols) || 2;
+    const rows = Number(meta && meta.rows) || 2;
+    const tileW = Number(meta && meta.width) || Math.floor(img.naturalWidth / cols) || 160;
+    const tileH = Number(meta && meta.height) || Math.floor(img.naturalHeight / rows) || 90;
+
+    let tile = null;
+    if (tiles.length > 0) {
+      tile = tiles.reduce((best, cur) =>
+        Math.abs((cur.t || 0) - targetSec) < Math.abs((best.t || 0) - targetSec) ? cur : best
+      );
+    } else {
+      const dur = Math.max(1, Number(meta && meta.duration) || getEffectiveDuration() || 1);
+      const total = cols * rows;
+      const idx = Math.min(total - 1, Math.max(0, Math.floor((targetSec / dur) * total)));
+      tile = { x: (idx % cols) * tileW, y: Math.floor(idx / cols) * tileH, w: tileW, h: tileH };
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = tile.w || tileW;
+      canvas.height = tile.h || tileH;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, tile.x || 0, tile.y || 0, tile.w || tileW, tile.h || tileH, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.85);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function requestSceneThumbnailFrame(fileId, targetSec, intervalSec) {
     if (!fileId || !seekPreviewImg || !seekPreviewPlaceholder) return;
     const step = intervalSec || (getEffectiveDuration() > 1800 ? 10 : 5);
@@ -2943,6 +3165,20 @@
     }
     lastPreviewFileId = fileId;
     lastPreviewSnappedSec = snapped;
+
+    // 1. Tenta crop instantâneo (< 1ms) do sprite sheet local/deploy (/media_cache/<fileId>/sprite.jpg)
+    const meta = clientThumbMetaCache.get(fileId);
+    if (meta && meta.spriteUrl && !clientSpriteImageCache.has(fileId)) {
+      preloadSpriteImageForFile(fileId, meta.spriteUrl);
+    }
+    const spriteTileUrl = renderSpriteTileForTimestamp(fileId, targetSec, meta);
+    if (spriteTileUrl) {
+      clientThumbFrameCache.set(cacheKey, spriteTileUrl);
+      seekPreviewImg.src = spriteTileUrl;
+      seekPreviewImg.classList.remove('hidden');
+      seekPreviewPlaceholder.classList.add('hidden');
+      return;
+    }
 
     const cached = clientThumbFrameCache.get(cacheKey);
     if (cached && cached !== 'loading' && cached !== 'error') {
@@ -3104,18 +3340,18 @@
   });
   nativeVideo.addEventListener('seeking', () => {
     setPlayerState('seeking', '⏳ Buscando cena...');
+    syncCompatSidecarAudio(true);
   });
   nativeVideo.addEventListener('playing', () => {
     setPlayerState('playing');
     showPlayerControlsAndScheduleHide();
+    syncCompatSidecarAudio(false);
 
-    // FASE 1: Caso um vídeo tenha iniciado no stream bruto mas o navegador não esteja decodificando áudio (ex: AC-3 / DTS),
-    // comuta automaticamente para o stream HLS AAC-LC Estéreo DENTRO do próprio Player Personalizado!
-    // IMPORTANTE: Nunca dispara se o vídeo estiver mudo (muted = true decodifica 0 bytes no Chromium)
-    // ou se o diagnóstico FFprobe já confirmou áudio compatível (browserAudioSupported === true).
+    // FASE 1 & FASE 6: Caso um vídeo tenha iniciado no stream bruto mas o navegador não esteja decodificando áudio (ex: AC-3 / DTS),
+    // ativa automaticamente o áudio AAC-LC Estéreo sincronizado via sidecar <audio> DENTRO do Player Personalizado (sem recarregar o <video>)!
     if (audioDecodeCheckTimer) clearTimeout(audioDecodeCheckTimer);
     audioDecodeCheckTimer = setTimeout(() => {
-      if (nativeVideo.paused || nativeVideo.muted || nativeVideo.currentTime < 1.2) return;
+      if (compatSidecarAudioActive || nativeVideo.paused || nativeVideo.muted || nativeVideo.currentTime < 1.2) return;
       if (currentDiagnostics && currentDiagnostics.browserAudioSupported && !currentDiagnostics.requiresAudioFallbackOrRemux) {
         return;
       }
@@ -3123,7 +3359,7 @@
         activeCustomStreamUrl &&
         (activeCustomStreamUrl.includes('/hls/') ||
           activeCustomStreamUrl.includes('/remux.mp4') ||
-          activeCustomStreamUrl.includes('prepared=1') ||
+          activeCustomStreamUrl.includes('/compat.mp4') ||
           activeCustomStreamUrl.includes('compat=1'))
       ) {
         return;
@@ -3138,7 +3374,7 @@
           roomState.media &&
           (roomState.media.driveFileId || extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl));
         if (fileId) {
-          activateCompatibleCustomAudio(fileId, activeAudioTrackIndex, true);
+          attachCompatSidecarAudio(fileId, activeAudioTrackIndex, currentDiagnostics);
         }
       }
     }, 1800);
@@ -3146,6 +3382,10 @@
   nativeVideo.addEventListener('volumechange', () => {
     nativeMuteBtn.textContent = nativeVideo.muted || nativeVideo.volume === 0 ? '🔇' : '🔊';
     nativeVolumeBar.value = String(nativeVideo.muted ? 0 : nativeVideo.volume);
+    syncCompatSidecarAudio(false);
+  });
+  nativeVideo.addEventListener('ratechange', () => {
+    syncCompatSidecarAudio(false);
   });
   nativeVideo.addEventListener('error', () => {
     const err = nativeVideo.error;
@@ -3182,6 +3422,7 @@
     ) {
       setPlayerState('playing');
     }
+    syncCompatSidecarAudio(false);
     updateCustomPlayerUi();
     if (roomState && roomState.media && roomState.media.id && !nativeVideo.paused) {
       if (Math.floor(nativeVideo.currentTime) % 5 === 0) {
@@ -3192,6 +3433,7 @@
   nativeVideo.addEventListener('play', () => {
     updateCustomPlayerUi();
     showPlayerControlsAndScheduleHide();
+    syncCompatSidecarAudio(false);
     if (isApplyingRemoteSync || !iCanControl()) return;
     sendRoomAction('playback_command', {
       action: 'play',
@@ -3206,6 +3448,7 @@
     }
     updateCustomPlayerUi();
     showPlayerControlsAndScheduleHide();
+    syncCompatSidecarAudio(false);
     if (isApplyingRemoteSync || !iCanControl()) return;
     sendRoomAction('playback_command', {
       action: 'pause',
@@ -3218,11 +3461,13 @@
     setPlayerState('ended');
     updateCustomPlayerUi();
     showPlayerControlsAndScheduleHide();
+    syncCompatSidecarAudio(false);
   });
 
   nativeVideo.addEventListener('seeked', () => {
     setPlayerState(nativeVideo.paused ? 'paused' : 'playing');
     updateCustomPlayerUi();
+    syncCompatSidecarAudio(true);
     if (isApplyingRemoteSync || !iCanControl()) return;
     sendRoomAction('playback_command', {
       action: 'seek',

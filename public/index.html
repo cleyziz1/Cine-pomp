@@ -265,6 +265,15 @@
           <h4 style="color:#fff; margin-bottom: 0.65rem;">🎞️ Filmes Cadastrados no Seu Catálogo (<span id="managerMoviesCount">0</span>)</h4>
           <div id="managerMoviesList" class="stremio-addons-list" style="max-height: 210px;"></div>
         </div>
+
+        <!-- FASE 8: DIAGNÓSTICO DE SAÚDE POR FILME (ADMIN) -->
+        <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.55rem; flex-wrap:wrap;">
+            <h4 style="color:#fff; margin:0;">🩺 Diagnóstico de Saúde por Filme (<span id="healthSummaryBadge">carregando...</span>)</h4>
+            <button type="button" id="refreshMoviesHealthBtn" class="btn-secondary btn-sm">🔄 Atualizar Saúde</button>
+          </div>
+          <div id="adminMoviesHealthList" class="stremio-addons-list" style="max-height: 220px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -492,6 +501,7 @@
               disablePictureInPicture
               oncontextmenu="return false;"
             ></video>
+            <audio id="compatSidecarAudio" preload="auto" crossorigin="anonymous" class="hidden"></audio>
 
             <!-- FASE 2: Placeholder Visual (Backdrop/Pôster) durante o carregamento inicial para evitar tela preta -->
             <div id="playerPosterOverlay" class="player-poster-overlay hidden">
