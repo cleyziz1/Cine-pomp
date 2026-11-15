@@ -3,3 +3,4 @@ node_modules/
 custom_streams.json
 stremio_addons.json
 *.log
+prepared_media/

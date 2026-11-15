@@ -533,11 +533,20 @@
   const audioTrackSection = document.getElementById('audioTrackSection');
   const audioCodecBadgeInfo = document.getElementById('audioCodecBadgeInfo');
   const audioTracksListContainer = document.getElementById('audioTracksListContainer');
+  const embeddedSubtitlesSection = document.getElementById('embeddedSubtitlesSection');
+  const embeddedSubtitlesContainer = document.getElementById('embeddedSubtitlesContainer');
   const subtitleFileInput = document.getElementById('subtitleFileInput');
   const subtitleClearBtn = document.getElementById('subtitleClearBtn');
   const nativeSourcesDrawer = document.getElementById('nativeSourcesDrawer');
   const closeSourcesDrawerBtn = document.getElementById('closeSourcesDrawerBtn');
   const nativeCenterPlayBtn = document.getElementById('nativeCenterPlayBtn');
+  const cineCustomControls = document.getElementById('cineCustomControls');
+  const cineSeekWrapper = document.getElementById('cineSeekWrapper');
+  const seekPreviewTooltip = document.getElementById('seekPreviewTooltip');
+  const seekPreviewImg = document.getElementById('seekPreviewImg');
+  const seekPreviewPlaceholder = document.getElementById('seekPreviewPlaceholder');
+  const seekPreviewStatusText = document.getElementById('seekPreviewStatusText');
+  const seekPreviewTime = document.getElementById('seekPreviewTime');
   const nativeSeekBar = document.getElementById('nativeSeekBar');
   const nativePlayPauseBtn = document.getElementById('nativePlayPauseBtn');
   const nativeRewindBtn = document.getElementById('nativeRewindBtn');
@@ -1351,19 +1360,22 @@
   function createPosterCardHtml(item) {
     const fallbackPoster = `https://placehold.co/500x750/151828/f5c518?text=${encodeURIComponent(item.title || 'Filme')}`;
     const posterSrc = item.poster || fallbackPoster;
+    const hasValidRating = item.rating && !Number.isNaN(Number(item.rating)) && Number(item.rating) > 0;
+    const ratingBadgeHtml = hasValidRating
+      ? `<span class="stream-card-rating">⭐ ${escapeHtml(String(item.rating))}</span>`
+      : '';
     return `
-      <div class="stream-card" data-id="${escapeHtml(item.id)}">
+      <div class="stream-card" data-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="${escapeHtml(item.title)} (${escapeHtml(item.year || 'HD')})">
         <div class="stream-card-poster">
-          <img src="${escapeHtml(posterSrc)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.onerror=null;this.src='${escapeHtml(fallbackPoster)}';" />
-          <span class="stream-card-rating">⭐ ${escapeHtml(item.rating || '8.5')}</span>
-          <span class="stream-card-native-badge">☁️ DRIVE</span>
+          <img src="${escapeHtml(posterSrc)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${escapeHtml(fallbackPoster)}';" />
+          ${ratingBadgeHtml}
           <div class="stream-card-hover">
             <div class="hover-play-pill">▶ Assistir na Sala</div>
           </div>
         </div>
         <div class="stream-card-info">
-          <div class="stream-card-title">${escapeHtml(item.title)}</div>
-          <div class="stream-card-year">${escapeHtml(item.year || 'HD')} • ${escapeHtml(
+          <div class="stream-card-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+          <div class="stream-card-year" title="${escapeHtml(item.year || 'HD')} • ${escapeHtml(item.category || 'Filme')}">${escapeHtml(item.year || 'HD')} • ${escapeHtml(
       item.category || 'Filme'
     )}</div>
         </div>
@@ -1373,10 +1385,17 @@
 
   function bindPosterCardClicks(container) {
     container.querySelectorAll('.stream-card').forEach((card) => {
-      card.addEventListener('click', (e) => {
+      const activateCard = (e) => {
         e.stopPropagation();
         const found = allDriveMovies.find((m) => m.id === card.dataset.id);
         if (found) openMovieDetailModal(found);
+      };
+      card.addEventListener('click', activateCard);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activateCard(e);
+        }
       });
     });
   }
@@ -1419,9 +1438,9 @@
               <h3 class="row-title">${escapeHtml(row.title)}</h3>
             </div>
             <div class="row-scroll-wrapper">
-              <button class="row-arrow left" aria-label="Anterior">‹</button>
-              <div class="row-track">${cardsHtml}</div>
-              <button class="row-arrow right" aria-label="Próximo">›</button>
+              <button class="row-arrow left" aria-label="Rolar para a esquerda">‹</button>
+              <div class="row-track" tabindex="0" aria-label="${escapeHtml(row.title)}">${cardsHtml}</div>
+              <button class="row-arrow right" aria-label="Rolar para a direita">›</button>
             </div>
           </div>
         `;
@@ -1433,8 +1452,18 @@
       const leftBtn = wrapper.querySelector('.row-arrow.left');
       const rightBtn = wrapper.querySelector('.row-arrow.right');
 
-      leftBtn.addEventListener('click', () => track.scrollBy({ left: -780, behavior: 'smooth' }));
-      rightBtn.addEventListener('click', () => track.scrollBy({ left: 780, behavior: 'smooth' }));
+      const scrollStep = () => Math.max(380, Math.floor(track.clientWidth * 0.78));
+      leftBtn.addEventListener('click', () => track.scrollBy({ left: -scrollStep(), behavior: 'smooth' }));
+      rightBtn.addEventListener('click', () => track.scrollBy({ left: scrollStep(), behavior: 'smooth' }));
+      track.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          track.scrollBy({ left: -240, behavior: 'smooth' });
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          track.scrollBy({ left: 240, behavior: 'smooth' });
+        }
+      });
     });
 
     bindPosterCardClicks(streamingRowsContainer);
@@ -1988,10 +2017,28 @@
   });
 
   // ==========================================
-  // PLAYER NATIVO CINE POMPEIA + DIAGNÓSTICO DE ÁUDIO (FASE 5)
+  // FASE 1, 2 & 3 — PLAYER PERSONALIZADO CINE POMPEIA:
+  // • Áudio AAC-LC Estéreo Direto no Player (FFprobe + HLS VOD / MP4 Preparado, SEM abrir player do Drive)
+  // • Auto-Hide de Controles e Cursor após 3s de Inatividade
+  // • Preview de Cenas 16:9 na Barra de Reprodução (Com Cache e Quantização)
   // ==========================================
   let currentDiagnostics = null;
+  let activeAudioTrackIndex = 0;
+  let activeCustomStreamUrl = '';
   let audioDecodeCheckTimer = null;
+  const clientDiagnosticsCache = new Map(); // fileId -> diag
+  const clientThumbMetaCache = new Map(); // fileId -> meta
+  const clientThumbFrameCache = new Map(); // `${fileId}:${snapped}` -> objectUrl | 'loading' | 'error'
+
+  function getEffectiveDuration() {
+    if (nativeVideo.duration && Number.isFinite(nativeVideo.duration) && nativeVideo.duration > 0) {
+      return nativeVideo.duration;
+    }
+    if (currentDiagnostics && Number(currentDiagnostics.duration) > 0) {
+      return Number(currentDiagnostics.duration);
+    }
+    return 0;
+  }
 
   function hideAudioDiagBanner() {
     if (nativeAudioDiagBanner) nativeAudioDiagBanner.classList.add('hidden');
@@ -2010,50 +2057,171 @@
     dismissAudioDiagBtn.addEventListener('click', hideAudioDiagBanner);
   }
 
+  function loadUrlIntoCustomPlayer(url, playbackState, preserveCurrentTime = false) {
+    if (!url) return;
+    activeCustomStreamUrl = url;
+    const savedTime = preserveCurrentTime ? (nativeVideo.currentTime || 0) : Number(playbackState && playbackState.currentTime) || 0;
+    const shouldPlay = preserveCurrentTime
+      ? !nativeVideo.paused
+      : Boolean(playbackState && playbackState.status === 'playing');
+    const targetRate = preserveCurrentTime
+      ? (nativeVideo.playbackRate || 1)
+      : Number(playbackState && playbackState.playbackRate) || 1;
+
+    if (hlsInstance) {
+      try {
+        hlsInstance.destroy();
+      } catch (_) {}
+      hlsInstance = null;
+    }
+
+    const isHls = url.includes('.m3u8');
+    if (isHls && window.Hls && window.Hls.isSupported()) {
+      setNativeLoading(true, '⏳ Preparando áudio AAC-LC Estéreo no Player Personalizado...');
+      hlsInstance = new window.Hls({
+        enableWorker: true,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        startPosition: savedTime > 0 ? savedTime : -1
+      });
+      hlsInstance.loadSource(url);
+      hlsInstance.attachMedia(nativeVideo);
+      hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        setNativeLoading(false);
+        setNativeError('');
+        if (nativeVideo.volume === 0) {
+          nativeVideo.volume = 1;
+          nativeVolumeBar.value = '1';
+        }
+        applyPlaybackToNativeVideo({
+          status: shouldPlay ? 'playing' : 'paused',
+          currentTime: savedTime,
+          playbackRate: targetRate
+        });
+      });
+      hlsInstance.on(window.Hls.Events.ERROR, (_, data) => {
+        if (data && data.fatal) {
+          if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+            hlsInstance.startLoad();
+          } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+            hlsInstance.recoverMediaError();
+          } else {
+            setNativeLoading(false);
+            setNativeError('Erro ao carregar stream HLS no Player Personalizado.');
+          }
+        }
+      });
+      return;
+    }
+
+    setNativeLoading(true, '⏳ Carregando mídia no Player Personalizado...');
+    nativeVideo.src = url;
+    nativeVideo.load();
+    nativeVideo.addEventListener(
+      'loadedmetadata',
+      () => {
+        setNativeLoading(false);
+        setNativeError('');
+        if (nativeVideo.volume === 0) {
+          nativeVideo.volume = 1;
+          nativeVolumeBar.value = '1';
+        }
+        applyPlaybackToNativeVideo({
+          status: shouldPlay ? 'playing' : 'paused',
+          currentTime: savedTime,
+          playbackRate: targetRate
+        });
+      },
+      { once: true }
+    );
+  }
+
+  function activateCompatibleCustomAudio(fileId, trackIdx = 0, preserveTime = true) {
+    if (!fileId) return;
+    activeAudioTrackIndex = trackIdx;
+    hideAudioDiagBanner();
+
+    let targetUrl = `/api/videos/${encodeURIComponent(fileId)}/hls/${trackIdx}/playlist.m3u8`;
+    if (
+      trackIdx === 0 &&
+      currentDiagnostics &&
+      currentDiagnostics.hasPreparedCompatibleAudio &&
+      currentDiagnostics.preparedAudioUrl
+    ) {
+      targetUrl = currentDiagnostics.preparedAudioUrl;
+    } else if (
+      currentDiagnostics &&
+      Array.isArray(currentDiagnostics.audioTracks) &&
+      currentDiagnostics.audioTracks[trackIdx] &&
+      currentDiagnostics.audioTracks[trackIdx].streamUrl
+    ) {
+      targetUrl = currentDiagnostics.audioTracks[trackIdx].streamUrl;
+    }
+
+    loadUrlIntoCustomPlayer(
+      targetUrl,
+      roomState ? roomState.playback : { status: 'paused', currentTime: 0, playbackRate: 1 },
+      preserveTime
+    );
+
+    if (syncModeIndicator) {
+      syncModeIndicator.textContent =
+        '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Compatível • Sincronia WebSocket/P2P)';
+    }
+
+    // Dispara também a fila de preparação em segundo plano caso o usuário seja Admin e ainda não exista versão completa em disco
+    if (isAdminUser() && currentDiagnostics && !currentDiagnostics.hasPreparedCompatibleAudio) {
+      fetch(`/api/videos/${encodeURIComponent(fileId)}/prepare-audio`, {
+        method: 'POST',
+        headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ trackIndex: trackIdx })
+      }).catch(() => {});
+    }
+  }
+
   if (switchCompatibleAudioBtn) {
-    switchCompatibleAudioBtn.addEventListener('click', async () => {
+    switchCompatibleAudioBtn.addEventListener('click', () => {
       if (!roomState || !roomState.media) return;
       const fileId =
         roomState.media.driveFileId ||
         extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl);
       if (!fileId) return;
+      // FASE 1: NUNCA redireciona para o Google Drive! Ativa o stream HLS/MP4 com áudio AAC-LC Estéreo direto no Player Personalizado!
+      activateCompatibleCustomAudio(fileId, activeAudioTrackIndex, true);
+    });
+  }
 
-      // Se for admin e ffmpeg estiver disponível no servidor local, tenta preparar AAC compatível;
-      // caso contrário, alterna imediatamente para o Player Oficial do Drive que decodifica AC-3/DTS/AVI com som estéreo!
-      if (isAdminUser() && currentDiagnostics && currentDiagnostics.ffmpegAvailable && !currentDiagnostics.hasPreparedCompatibleAudio) {
-        switchCompatibleAudioBtn.disabled = true;
-        switchCompatibleAudioBtn.textContent = '⏳ Convertendo áudio para AAC Estéreo...';
-        try {
-          const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/prepare-audio`, {
-            method: 'POST',
-            headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ trackIndex: 0 })
-          });
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.success) {
-            hideAudioDiagBanner();
-            const curTime = nativeVideo.currentTime || 0;
-            nativeVideo.src = `/api/videos/${encodeURIComponent(fileId)}/stream?prepared=1&t=${Date.now()}`;
-            nativeVideo.load();
-            nativeVideo.addEventListener('loadedmetadata', () => {
-              nativeVideo.currentTime = curTime;
-              nativeVideo.play().catch(() => {});
-            }, { once: true });
-            return;
-          }
-        } catch (_) {
-        } finally {
-          switchCompatibleAudioBtn.disabled = false;
-          switchCompatibleAudioBtn.textContent = '🔊 Ativar Áudio Compatível';
+  function renderEmbeddedSubtitleOptions(diag, fileId) {
+    if (!embeddedSubtitlesSection || !embeddedSubtitlesContainer) return;
+    const subTracks = diag && Array.isArray(diag.subtitleTracks) ? diag.subtitleTracks : [];
+    if (subTracks.length === 0) {
+      embeddedSubtitlesSection.classList.add('hidden');
+      embeddedSubtitlesContainer.innerHTML = '';
+      return;
+    }
+
+    embeddedSubtitlesSection.classList.remove('hidden');
+    embeddedSubtitlesContainer.innerHTML = subTracks
+      .map(
+        (s) => `
+        <button type="button" class="stremio-stream-item" data-vtt-url="${escapeHtml(s.vttUrl)}" data-vtt-label="${escapeHtml(s.label)}" style="text-align:left; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 10px; background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;">
+          <span class="stremio-stream-title">💬 ${escapeHtml(s.label)}</span>
+        </button>
+      `
+      )
+      .join('');
+
+    embeddedSubtitlesContainer.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const vttUrl = btn.dataset.vttUrl;
+        const label = btn.dataset.vttLabel || 'Legenda';
+        if (vttUrl) {
+          attachSubtitleVttUrl(vttUrl, label);
+          embeddedSubtitlesContainer.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (nativeSourcesDrawer) nativeSourcesDrawer.classList.add('hidden');
         }
-      }
-
-      hideAudioDiagBanner();
-      if (iCanControl()) {
-        sendRoomAction('change_media', { playerType: 'drive_preview' });
-      } else {
-        switchPlayerRenderer('drive_preview');
-      }
+      });
     });
   }
 
@@ -2061,22 +2229,23 @@
     if (!audioTrackSection || !audioTracksListContainer) return;
     if (audioCodecBadgeInfo && diag) {
       const containerStr = (diag.container || 'mp4').toUpperCase();
-      const audioStr = (diag.audioCodecs || []).join(', ') || 'Estéreo';
-      audioCodecBadgeInfo.textContent = `${containerStr} • Áudio: ${audioStr}`;
+      const videoStr = (diag.videoCodecs || []).join(', ') || 'H.264';
+      const audioStr = (diag.audioCodecs || []).join(', ') || 'AAC Estéreo';
+      const compatTag = diag.requiresAudioFallbackOrRemux ? ' → Convertido p/ AAC-LC Estéreo' : ' (Nativo)';
+      audioCodecBadgeInfo.textContent = `${containerStr} • Vídeo: ${videoStr} • Áudio: ${audioStr}${compatTag}`;
     }
-    const tracks = [];
-    const htmlAudioTracks = nativeVideo.audioTracks;
 
-    if (htmlAudioTracks && htmlAudioTracks.length > 0) {
-      for (let i = 0; i < htmlAudioTracks.length; i += 1) {
-        const t = htmlAudioTracks[i];
+    const tracks = [];
+    if (diag && Array.isArray(diag.audioTracks) && diag.audioTracks.length > 0) {
+      diag.audioTracks.forEach((t, idx) => {
         tracks.push({
-          index: i,
-          label: t.label || t.language || `Faixa ${i + 1}`,
-          enabled: Boolean(t.enabled),
-          mode: 'native'
+          index: idx,
+          label: t.label || `${t.languageLabel || `Faixa ${idx + 1}`} • ${(t.codec || 'AAC').toUpperCase()}`,
+          enabled: idx === activeAudioTrackIndex,
+          mode: 'hls_or_compat',
+          streamUrl: t.streamUrl
         });
-      }
+      });
     } else if (diag && Array.isArray(diag.languages) && diag.languages.length > 0) {
       diag.languages.forEach((lang, idx) => {
         const langCode = typeof lang === 'string' ? lang : lang.code || lang.language || 'und';
@@ -2088,9 +2257,9 @@
         const displayLabel = labelMap[langCode] || (typeof lang === 'object' && lang.label) || langCode;
         tracks.push({
           index: idx,
-          label: `${displayLabel} • ${(diag.audioCodecs && diag.audioCodecs[0]) || 'Estéreo'}`,
-          enabled: idx === 0,
-          mode: 'diagnostic'
+          label: `${displayLabel} • ${(diag.audioCodecs && diag.audioCodecs[0]) || 'AAC Estéreo'}`,
+          enabled: idx === activeAudioTrackIndex,
+          mode: 'hls_or_compat'
         });
       });
     }
@@ -2104,8 +2273,9 @@
     audioTracksListContainer.innerHTML = tracks
       .map(
         (t) => `
-        <button type="button" class="stremio-stream-item ${t.enabled ? 'active' : ''}" data-track-idx="${t.index}" data-track-mode="${t.mode}" style="text-align:left; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 10px; background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;">
+        <button type="button" class="stremio-stream-item ${t.enabled ? 'active' : ''}" data-track-idx="${t.index}" style="text-align:left; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 10px; background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;">
           <span class="stremio-stream-title">${escapeHtml(t.label)}</span>
+          ${t.enabled ? '<span class="stremio-pt-badge">ATIVO</span>' : ''}
         </button>
       `
       )
@@ -2114,84 +2284,94 @@
     audioTracksListContainer.querySelectorAll('button').forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.trackIdx) || 0;
-        const mode = btn.dataset.trackMode;
-        if (mode === 'native' && nativeVideo.audioTracks) {
+        activeAudioTrackIndex = idx;
+
+        // Se o elemento <video> tiver múltiplas faixas nativas suportadas e não precisar de remux
+        if (
+          nativeVideo.audioTracks &&
+          nativeVideo.audioTracks.length > 1 &&
+          diag &&
+          !diag.requiresAudioFallbackOrRemux
+        ) {
           for (let i = 0; i < nativeVideo.audioTracks.length; i += 1) {
             nativeVideo.audioTracks[i].enabled = i === idx;
           }
+        } else if (fileId) {
+          activateCompatibleCustomAudio(fileId, idx, true);
         }
-        audioTracksListContainer.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
+
+        renderAudioTrackOptions(diag, fileId);
         if (nativeSourcesDrawer) nativeSourcesDrawer.classList.add('hidden');
       });
     });
   }
 
-  async function probeAndApplyAudioDiagnostics(fileId) {
+  async function probeAndApplyAudioDiagnostics(fileId, initialPlayback) {
     hideAudioDiagBanner();
     currentDiagnostics = null;
+    activeAudioTrackIndex = 0;
     if (!fileId) return;
 
     try {
-      const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/diagnostics`);
-      if (!res.ok) return;
-      const diag = await res.json();
+      let diag = clientDiagnosticsCache.get(fileId);
+      if (!diag) {
+        const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/diagnostics`);
+        if (!res.ok) return;
+        diag = await res.json();
+        clientDiagnosticsCache.set(fileId, diag);
+      }
       currentDiagnostics = diag;
       renderAudioTrackOptions(diag, fileId);
+      renderEmbeddedSubtitleOptions(diag, fileId);
+      updateCustomPlayerUi();
 
-      if (diag.requiresAudioFallbackOrRemux && !diag.hasPreparedCompatibleAudio) {
-        const codecLabel = (diag.audioCodecs || []).join(', ') || diag.container.toUpperCase();
-        showAudioDiagBanner(
-          `⚠️ <strong>Diagnóstico de Áudio:</strong> Este arquivo (${escapeHtml(diag.container.toUpperCase())}) utiliza áudio <strong>${escapeHtml(codecLabel)}</strong>, que o navegador pode reproduzir sem som no Player HTML5. Clique ao lado para ativar o <strong>Áudio Estéreo Compatível</strong>.`,
-          true
-        );
+      // FASE 1: Quando o arquivo possui áudio AC-3 5.1 / E-AC-3 / DTS ou container AVI,
+      // comuta automaticamente para a versão/stream AAC-LC Estéreo DENTRO do Player Personalizado!
+      if (diag.requiresAudioFallbackOrRemux && diag.recommendedCustomPlayerUrl) {
+        if (activeCustomStreamUrl !== diag.recommendedCustomPlayerUrl) {
+          const hasStarted = (nativeVideo.currentTime || 0) > 0.5;
+          loadUrlIntoCustomPlayer(diag.recommendedCustomPlayerUrl, initialPlayback, hasStarted);
+          if (syncModeIndicator) {
+            syncModeIndicator.textContent =
+              '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Compatível • Sincronia WebSocket/P2P)';
+          }
+        }
       }
     } catch (_) {}
   }
 
-  function switchPlayerRenderer(type) {
-    if (!roomState) return;
-    const fileId =
-      roomState.media.driveFileId ||
-      extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl);
-
-    if (type === 'drive_preview' && fileId) {
-      try {
-        nativeVideo.pause();
-      } catch (_) {}
-      hideAudioDiagBanner();
-      cineNativePlayerContainer.classList.add('hidden');
-      drivePreviewIframe.classList.remove('hidden');
-      drivePreviewIframe.src = `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`;
-      syncModeIndicator.textContent = '☁️ Player Oficial do Drive Ativo (Áudio Estéreo AAC Transcodificado • Use a Claquete 3-2-1)';
-    } else {
+  function switchPlayerRenderer() {
+    // FASE 1: Mantém 100% da reprodução no Player Personalizado (#cineNativePlayerContainer), nunca abrindo o iframe do Google Drive
+    if (drivePreviewIframe) {
       drivePreviewIframe.src = 'about:blank';
       drivePreviewIframe.classList.add('hidden');
+    }
+    if (cineNativePlayerContainer) {
       cineNativePlayerContainer.classList.remove('hidden');
+    }
+    if (syncModeIndicator) {
       syncModeIndicator.textContent = '⚡ Sincronia Automática WebSocket/P2P Ativa';
     }
   }
 
-  useNativeStreamBtn.addEventListener('click', () => {
-    if (!iCanControl()) return;
-    sendRoomAction('change_media', { playerType: 'native' });
-  });
+  if (useNativeStreamBtn) {
+    useNativeStreamBtn.addEventListener('click', () => {
+      if (!iCanControl()) return;
+      sendRoomAction('change_media', { playerType: 'native' });
+    });
+  }
 
-  useDrivePreviewBtn.addEventListener('click', () => {
-    if (!roomState) return;
-    const fileId =
-      roomState.media.driveFileId ||
-      extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl);
-    if (!fileId) {
-      alert('Este vídeo é um link direto (.mp4) e já está rodando no Player Nativo.');
-      return;
-    }
-    if (iCanControl()) {
-      sendRoomAction('change_media', { playerType: 'drive_preview' });
-    } else {
-      switchPlayerRenderer('drive_preview');
-    }
-  });
+  if (useDrivePreviewBtn) {
+    useDrivePreviewBtn.addEventListener('click', () => {
+      if (!roomState || !roomState.media) return;
+      const fileId =
+        roomState.media.driveFileId ||
+        extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl);
+      if (fileId) {
+        activateCompatibleCustomAudio(fileId, activeAudioTrackIndex, true);
+      }
+    });
+  }
 
   let activeSubtitleUrl = null;
 
@@ -2260,8 +2440,7 @@
   function updatePlayerMedia(media, playback) {
     const signature = JSON.stringify({
       streamUrl: media.streamUrl,
-      driveFileId: media.driveFileId,
-      playerType: media.playerType || 'native'
+      driveFileId: media.driveFileId
     });
 
     if (signature === lastLoadedMediaSignature) return;
@@ -2275,70 +2454,41 @@
     }
 
     const fileId = media.driveFileId || extractDriveFileId(media.rawUrl || media.streamUrl);
-
-    if (media.playerType === 'drive_preview') {
-      setNativeLoading(false);
-      switchPlayerRenderer('drive_preview');
-      return;
-    }
-
     switchPlayerRenderer('native');
+
     const url = media.streamUrl;
     if (!url) return;
 
-    if (fileId) {
-      probeAndApplyAudioDiagnostics(fileId);
-    }
-
-    if (hlsInstance) {
-      hlsInstance.destroy();
-      hlsInstance = null;
+    const effectivePlayback = { ...(playback || {}) };
+    if ((!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) && roomState && roomState.participantCount <= 1) {
+      const savedPos = getResumePosition(media.id);
+      if (savedPos > 5) {
+        effectivePlayback.currentTime = savedPos;
+      }
     }
 
     if (media.subtitleUrl) {
       attachSubtitleVttUrl(media.subtitleUrl, media.subtitleLabel || 'Legenda');
+    } else {
+      clearNativeSubtitles();
     }
 
-    const isHls = url.includes('.m3u8');
-    if (isHls && window.Hls && window.Hls.isSupported()) {
-      setNativeLoading(true, '⏳ Carregando stream HLS...');
-      hlsInstance = new window.Hls();
-      hlsInstance.loadSource(url);
-      hlsInstance.attachMedia(nativeVideo);
-      hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
-        setNativeLoading(false);
-        applyPlaybackToNativeVideo(playback);
-      });
-      hlsInstance.on(window.Hls.Events.ERROR, (_, data) => {
-        if (data && data.fatal) {
-          setNativeLoading(false);
-          setNativeError('Erro ao carregar stream HLS. Verifique a conexão.');
-        }
-      });
+    // Se já conhecemos o diagnóstico em cache e ele recomenda HLS/MP4 com áudio AAC-LC Estéreo, carrega direto!
+    const cachedDiag = fileId ? clientDiagnosticsCache.get(fileId) : null;
+    if (cachedDiag && cachedDiag.requiresAudioFallbackOrRemux && cachedDiag.recommendedCustomPlayerUrl) {
+      currentDiagnostics = cachedDiag;
+      renderAudioTrackOptions(cachedDiag, fileId);
+      renderEmbeddedSubtitleOptions(cachedDiag, fileId);
+      loadUrlIntoCustomPlayer(cachedDiag.recommendedCustomPlayerUrl, effectivePlayback, false);
     } else {
-      setNativeLoading(true, '⏳ Carregando metadados...');
-      nativeVideo.src = url;
-      nativeVideo.load();
-      nativeVideo.addEventListener(
-        'loadedmetadata',
-        () => {
-          setNativeLoading(false);
-          // Garante que o player nunca inicie mudo acidentalmente
-          if (nativeVideo.volume === 0) {
-            nativeVideo.volume = 1;
-            nativeVolumeBar.value = '1';
-          }
-          const effectivePlayback = { ...(playback || {}) };
-          if ((!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) && roomState && roomState.participantCount <= 1) {
-            const savedPos = getResumePosition(media.id);
-            if (savedPos > 5 && (!nativeVideo.duration || savedPos < nativeVideo.duration - 15)) {
-              effectivePlayback.currentTime = savedPos;
-            }
-          }
-          applyPlaybackToNativeVideo(effectivePlayback);
-        },
-        { once: true }
-      );
+      loadUrlIntoCustomPlayer(url, effectivePlayback, false);
+      if (fileId) {
+        probeAndApplyAudioDiagnostics(fileId, effectivePlayback);
+      }
+    }
+
+    if (fileId) {
+      preloadThumbnailMetaForVideo(fileId);
     }
   }
 
@@ -2348,9 +2498,9 @@
     nativeCenterPlayBtn.classList.toggle('playing', !isPaused);
 
     const cur = nativeVideo.currentTime || 0;
-    const dur = nativeVideo.duration && Number.isFinite(nativeVideo.duration) ? nativeVideo.duration : 0;
+    const dur = getEffectiveDuration();
     if (dur > 0) {
-      nativeSeekBar.value = String((cur / dur) * 100);
+      nativeSeekBar.value = String(Math.min(100, Math.max(0, (cur / dur) * 100)));
     }
     nativeTimeLabel.textContent = `${formatSeconds(cur)} / ${formatSeconds(dur)}`;
   }
@@ -2396,7 +2546,6 @@
 
     if (playback.status === 'playing') {
       nativeVideo.play().catch(() => {
-        // Se o navegador bloqueou autoplay com som, reproduz mutado e oferece botão de ativar áudio
         nativeVideo.muted = true;
         nativeMuteBtn.textContent = '🔇';
         nativeVideo.play().then(showUnmuteSyncBanner).catch(() => {});
@@ -2434,13 +2583,14 @@
 
   nativeForwardBtn.addEventListener('click', () => {
     if (!iCanControl()) return;
-    nativeVideo.currentTime = Math.min(nativeVideo.duration || 99999, nativeVideo.currentTime + 10);
+    const dur = getEffectiveDuration() || 99999;
+    nativeVideo.currentTime = Math.min(dur, nativeVideo.currentTime + 10);
   });
 
   nativeSeekBar.addEventListener('input', () => {
     if (!iCanControl()) return;
-    const dur = nativeVideo.duration;
-    if (dur && Number.isFinite(dur)) {
+    const dur = getEffectiveDuration();
+    if (dur && Number.isFinite(dur) && dur > 0) {
       nativeVideo.currentTime = (Number(nativeSeekBar.value) / 100) * dur;
     }
   });
@@ -2458,10 +2608,12 @@
 
   nativeSettingsGearBtn.addEventListener('click', () => {
     nativeSourcesDrawer.classList.toggle('hidden');
+    showPlayerControlsAndScheduleHide();
   });
 
   closeSourcesDrawerBtn.addEventListener('click', () => {
     nativeSourcesDrawer.classList.add('hidden');
+    showPlayerControlsAndScheduleHide();
   });
 
   document.querySelectorAll('.speed-option').forEach((opt) => {
@@ -2490,6 +2642,233 @@
       document.exitFullscreen().catch(() => {});
     }
   });
+
+  // ==========================================
+  // FASE 2 — OCULTAR AUTOMATICAMENTE OS CONTROLES DO PLAYER E O CURSOR (3 SEGUNDOS)
+  // ==========================================
+  const PLAYER_CONTROLS_IDLE_MS = 3000;
+  let controlsInactivityTimer = null;
+  let isHoveringControlsOrMenu = false;
+  let isDraggingSeekOrVolume = false;
+  let rafMouseMovePending = false;
+
+  function canAutoHidePlayerControls() {
+    if (!nativeVideo || nativeVideo.paused || nativeVideo.ended) return false;
+    if (nativeSourcesDrawer && !nativeSourcesDrawer.classList.contains('hidden')) return false;
+    if (isHoveringControlsOrMenu || isDraggingSeekOrVolume) return false;
+    return true;
+  }
+
+  function showPlayerControlsAndScheduleHide() {
+    if (screenWrapper) {
+      screenWrapper.classList.remove('controls-hidden');
+    }
+    if (controlsInactivityTimer) {
+      clearTimeout(controlsInactivityTimer);
+      controlsInactivityTimer = null;
+    }
+    if (canAutoHidePlayerControls()) {
+      controlsInactivityTimer = setTimeout(() => {
+        if (canAutoHidePlayerControls() && screenWrapper) {
+          screenWrapper.classList.add('controls-hidden');
+          hideSeekPreviewTooltip();
+        }
+      }, PLAYER_CONTROLS_IDLE_MS);
+    }
+  }
+
+  if (screenWrapper) {
+    const onPointerActivity = () => {
+      if (rafMouseMovePending) return;
+      rafMouseMovePending = true;
+      requestAnimationFrame(() => {
+        rafMouseMovePending = false;
+        showPlayerControlsAndScheduleHide();
+      });
+    };
+
+    screenWrapper.addEventListener('mousemove', onPointerActivity, { passive: true });
+    screenWrapper.addEventListener('pointermove', onPointerActivity, { passive: true });
+    screenWrapper.addEventListener('pointerdown', showPlayerControlsAndScheduleHide, { passive: true });
+    screenWrapper.addEventListener('touchstart', showPlayerControlsAndScheduleHide, { passive: true });
+    screenWrapper.addEventListener('keydown', showPlayerControlsAndScheduleHide);
+    screenWrapper.addEventListener('focusin', showPlayerControlsAndScheduleHide);
+    screenWrapper.addEventListener('mouseleave', () => {
+      if (canAutoHidePlayerControls()) {
+        if (controlsInactivityTimer) clearTimeout(controlsInactivityTimer);
+        controlsInactivityTimer = setTimeout(() => {
+          if (canAutoHidePlayerControls()) {
+            screenWrapper.classList.add('controls-hidden');
+          }
+        }, 800);
+      }
+    });
+  }
+
+  [cineCustomControls, nativeSourcesDrawer, playerBackToCatalogBtn, floatingOpenChatBtn].forEach((el) => {
+    if (!el) return;
+    el.addEventListener('mouseenter', () => {
+      isHoveringControlsOrMenu = true;
+      showPlayerControlsAndScheduleHide();
+    });
+    el.addEventListener('mouseleave', () => {
+      isHoveringControlsOrMenu = false;
+      showPlayerControlsAndScheduleHide();
+    });
+  });
+
+  [nativeSeekBar, nativeVolumeBar].forEach((slider) => {
+    if (!slider) return;
+    slider.addEventListener('pointerdown', () => {
+      isDraggingSeekOrVolume = true;
+      showPlayerControlsAndScheduleHide();
+    });
+  });
+
+  window.addEventListener('pointerup', () => {
+    if (isDraggingSeekOrVolume) {
+      isDraggingSeekOrVolume = false;
+      showPlayerControlsAndScheduleHide();
+      hideSeekPreviewTooltip();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (cinemaRoomView && !cinemaRoomView.classList.contains('hidden')) {
+      showPlayerControlsAndScheduleHide();
+    }
+  });
+
+  // ==========================================
+  // FASE 3 — PREVIEW DE CENAS 16:9 NA BARRA DE REPRODUÇÃO (SEEKBAR)
+  // ==========================================
+  let thumbFetchDebounceTimer = null;
+  let lastPreviewSnappedSec = -1;
+  let lastPreviewFileId = '';
+
+  async function preloadThumbnailMetaForVideo(fileId) {
+    if (!fileId || clientThumbMetaCache.has(fileId)) return;
+    try {
+      const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/thumbnails/meta`);
+      if (res.ok) {
+        const meta = await res.json();
+        clientThumbMetaCache.set(fileId, meta);
+      }
+    } catch (_) {}
+  }
+
+  function hideSeekPreviewTooltip() {
+    if (seekPreviewTooltip) {
+      seekPreviewTooltip.classList.add('hidden');
+    }
+    if (thumbFetchDebounceTimer) {
+      clearTimeout(thumbFetchDebounceTimer);
+      thumbFetchDebounceTimer = null;
+    }
+  }
+
+  function requestSceneThumbnailFrame(fileId, targetSec, intervalSec) {
+    if (!fileId || !seekPreviewImg || !seekPreviewPlaceholder) return;
+    const step = intervalSec || (getEffectiveDuration() > 1800 ? 10 : 5);
+    const snapped = Math.max(0, Math.floor(targetSec / step) * step);
+    const cacheKey = `${fileId}:${snapped}`;
+
+    if (lastPreviewFileId === fileId && lastPreviewSnappedSec === snapped) {
+      return;
+    }
+    lastPreviewFileId = fileId;
+    lastPreviewSnappedSec = snapped;
+
+    const cached = clientThumbFrameCache.get(cacheKey);
+    if (cached && cached !== 'loading' && cached !== 'error') {
+      seekPreviewImg.src = cached;
+      seekPreviewImg.classList.remove('hidden');
+      seekPreviewPlaceholder.classList.add('hidden');
+      return;
+    }
+
+    if (thumbFetchDebounceTimer) clearTimeout(thumbFetchDebounceTimer);
+    thumbFetchDebounceTimer = setTimeout(async () => {
+      if (clientThumbFrameCache.get(cacheKey) === 'loading') return;
+      clientThumbFrameCache.set(cacheKey, 'loading');
+      if (seekPreviewStatusText) seekPreviewStatusText.textContent = 'Carregando cena...';
+
+      try {
+        const res = await fetch(`/api/videos/${encodeURIComponent(fileId)}/thumbnails/frame?t=${snapped}`);
+        if (!res.ok) throw new Error('Thumb unavailable');
+        const blob = await res.blob();
+        if (!blob || blob.size < 100) throw new Error('Empty thumb');
+        const objectUrl = URL.createObjectURL(blob);
+        clientThumbFrameCache.set(cacheKey, objectUrl);
+
+        if (lastPreviewFileId === fileId && lastPreviewSnappedSec === snapped) {
+          seekPreviewImg.src = objectUrl;
+          seekPreviewImg.classList.remove('hidden');
+          seekPreviewPlaceholder.classList.add('hidden');
+        }
+      } catch (_) {
+        clientThumbFrameCache.set(cacheKey, 'error');
+        if (lastPreviewFileId === fileId && lastPreviewSnappedSec === snapped) {
+          seekPreviewImg.classList.add('hidden');
+          seekPreviewPlaceholder.classList.remove('hidden');
+          if (seekPreviewStatusText) seekPreviewStatusText.textContent = 'Prévia de tempo';
+        }
+      }
+    }, 55);
+  }
+
+  function updateSeekPreviewFromEvent(clientX) {
+    if (!cineSeekWrapper || !nativeSeekBar || !seekPreviewTooltip || !seekPreviewTime) return;
+    const rect = nativeSeekBar.getBoundingClientRect();
+    if (!rect || rect.width <= 0) return;
+
+    const rawX = clientX - rect.left;
+    const ratio = Math.min(1, Math.max(0, rawX / rect.width));
+    const dur = getEffectiveDuration();
+    const targetSec = dur > 0 ? ratio * dur : 0;
+
+    // Clamping horizontal para nunca ultrapassar as bordas laterais do player (metade de 168px = 84px + margem)
+    const halfTooltip = 88;
+    const minX = Math.min(halfTooltip, rect.width / 2);
+    const maxX = Math.max(rect.width - halfTooltip, rect.width / 2);
+    const clampedX = Math.min(maxX, Math.max(minX, rawX));
+
+    seekPreviewTooltip.style.left = `${clampedX}px`;
+    seekPreviewTime.textContent = formatSeconds(targetSec);
+    seekPreviewTooltip.classList.remove('hidden');
+
+    const fileId =
+      roomState &&
+      roomState.media &&
+      (roomState.media.driveFileId || extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl));
+
+    if (fileId && dur > 0) {
+      const meta = clientThumbMetaCache.get(fileId);
+      const intervalSec = meta && meta.intervalSeconds ? meta.intervalSeconds : dur > 1800 ? 10 : 5;
+      requestSceneThumbnailFrame(fileId, targetSec, intervalSec);
+    } else {
+      if (seekPreviewImg) seekPreviewImg.classList.add('hidden');
+      if (seekPreviewPlaceholder) seekPreviewPlaceholder.classList.remove('hidden');
+      if (seekPreviewStatusText) seekPreviewStatusText.textContent = 'Prévia da cena';
+    }
+  }
+
+  if (cineSeekWrapper && nativeSeekBar) {
+    const onSeekHover = (e) => {
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      if (typeof clientX === 'number') {
+        updateSeekPreviewFromEvent(clientX);
+      }
+    };
+    cineSeekWrapper.addEventListener('mousemove', onSeekHover, { passive: true });
+    cineSeekWrapper.addEventListener('pointermove', onSeekHover, { passive: true });
+    cineSeekWrapper.addEventListener('touchmove', onSeekHover, { passive: true });
+    cineSeekWrapper.addEventListener('mouseleave', () => {
+      if (!isDraggingSeekOrVolume) {
+        hideSeekPreviewTooltip();
+      }
+    });
+  }
 
   if (subtitleFileInput) {
     subtitleFileInput.addEventListener('change', async (e) => {
@@ -2532,26 +2911,30 @@
   nativeVideo.addEventListener('playing', () => {
     setNativeLoading(false);
     setNativeError('');
+    showPlayerControlsAndScheduleHide();
 
-    // FASE 5: Detecção em tempo real de vídeo reproduzindo sem decodificar bytes de áudio (ex: AC-3 / DTS / E-AC-3)
+    // FASE 1: Caso um vídeo tenha iniciado no stream bruto mas o navegador não esteja decodificando áudio (ex: AC-3 / DTS),
+    // comuta automaticamente para o stream HLS AAC-LC Estéreo DENTRO do próprio Player Personalizado!
     if (audioDecodeCheckTimer) clearTimeout(audioDecodeCheckTimer);
     audioDecodeCheckTimer = setTimeout(() => {
       if (nativeVideo.paused || nativeVideo.currentTime < 1) return;
+      if (activeCustomStreamUrl && (activeCustomStreamUrl.includes('/hls/') || activeCustomStreamUrl.includes('prepared=1') || activeCustomStreamUrl.includes('compat=1'))) {
+        return;
+      }
       const hasWebkitCounter = typeof nativeVideo.webkitAudioDecodedByteCount === 'number';
       const decodedAudioBytes = hasWebkitCounter ? nativeVideo.webkitAudioDecodedByteCount : -1;
       const mozNoAudio = typeof nativeVideo.mozHasAudio === 'boolean' && !nativeVideo.mozHasAudio;
 
       if ((hasWebkitCounter && decodedAudioBytes === 0) || mozNoAudio) {
-        const codecInfo =
-          currentDiagnostics && Array.isArray(currentDiagnostics.audioCodecs) && currentDiagnostics.audioCodecs.length > 0
-            ? currentDiagnostics.audioCodecs.join(', ')
-            : 'AC-3 / DTS Surround';
-        showAudioDiagBanner(
-          `🔇 <strong>Filme sem som detectado:</strong> O vídeo está reproduzindo, mas o navegador não suporta decodificar a trilha de áudio original (<strong>${escapeHtml(codecInfo)}</strong>). Clique ao lado para ativar o <strong>Áudio Estéreo Compatível</strong>.`,
-          true
-        );
+        const fileId =
+          roomState &&
+          roomState.media &&
+          (roomState.media.driveFileId || extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl));
+        if (fileId) {
+          activateCompatibleCustomAudio(fileId, activeAudioTrackIndex, true);
+        }
       }
-    }, 1800);
+    }, 1500);
   });
   nativeVideo.addEventListener('volumechange', () => {
     nativeMuteBtn.textContent = nativeVideo.muted || nativeVideo.volume === 0 ? '🔇' : '🔊';
@@ -2561,13 +2944,26 @@
     setNativeLoading(false);
     const err = nativeVideo.error;
     const code = err ? err.code : 0;
+    const fileId =
+      roomState &&
+      roomState.media &&
+      (roomState.media.driveFileId || extractDriveFileId(roomState.media.rawUrl || roomState.media.streamUrl));
+    // Se ocorreu erro de decodificação (code 3/4) no stream bruto, tenta automaticamente o stream HLS H.264/AAC no Player Personalizado
+    if (
+      (code === 3 || code === 4) &&
+      fileId &&
+      (!activeCustomStreamUrl || (!activeCustomStreamUrl.includes('/hls/') && !activeCustomStreamUrl.includes('compat=1')))
+    ) {
+      activateCompatibleCustomAudio(fileId, activeAudioTrackIndex, true);
+      return;
+    }
     const messages = {
       1: 'Reprodução cancelada pelo usuário.',
       2: 'Erro de rede ao transmitir o vídeo do servidor/Google Drive.',
-      3: 'Erro ao decodificar o vídeo (codec incompatível com este navegador). Tente o Player Interno do Drive (.MKV / 4K).',
+      3: 'Erro ao decodificar o vídeo neste navegador.',
       4: 'Formato ou origem de vídeo não suportada / arquivo inacessível. Verifique se está público no Drive.'
     };
-    setNativeError(messages[code] || 'Não foi possível reproduzir este vídeo no Player Nativo.');
+    setNativeError(messages[code] || 'Não foi possível reproduzir este vídeo no Player Personalizado.');
   });
 
   nativeVideo.addEventListener('timeupdate', () => {
@@ -2580,6 +2976,7 @@
   });
   nativeVideo.addEventListener('play', () => {
     updateCustomPlayerUi();
+    showPlayerControlsAndScheduleHide();
     if (isApplyingRemoteSync || !iCanControl()) return;
     sendRoomAction('playback_command', {
       action: 'play',
@@ -2590,12 +2987,18 @@
 
   nativeVideo.addEventListener('pause', () => {
     updateCustomPlayerUi();
+    showPlayerControlsAndScheduleHide();
     if (isApplyingRemoteSync || !iCanControl()) return;
     sendRoomAction('playback_command', {
       action: 'pause',
       currentTime: nativeVideo.currentTime,
       playbackRate: nativeVideo.playbackRate
     });
+  });
+
+  nativeVideo.addEventListener('ended', () => {
+    updateCustomPlayerUi();
+    showPlayerControlsAndScheduleHide();
   });
 
   nativeVideo.addEventListener('seeked', () => {

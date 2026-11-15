@@ -417,9 +417,11 @@
       <!-- BARRA SUPERIOR DO PROJETOR NATIVO -->
       <div class="player-subtoolbar">
         <div class="toolbar-group">
-          <button id="useNativeStreamBtn" class="shield-badge">⚡ Player Nativo (Auto-Sync)</button>
-          <button id="useDrivePreviewBtn" class="btn-secondary btn-sm" title="Decodificador compatível para arquivos .MKV com áudio Dolby AC-3 5.1 / DTS ou 4K">
-            ☁️ Player Interno do Drive (.MKV / AC-3 5.1)
+          <button id="useNativeStreamBtn" class="shield-badge" title="Reprodução direta no Player Personalizado com conversão automática de áudio AAC-LC Estéreo e sincronia em tempo real">
+            ⚡ Player Personalizado Cine Pompeia (Auto-Sync &amp; Áudio AAC)
+          </button>
+          <button id="useDrivePreviewBtn" class="btn-secondary btn-sm hidden" aria-hidden="true" tabindex="-1">
+            ☁️ Fallback Nuvem
           </button>
           <button id="openDriveFromRoomBtn" class="btn-gold btn-sm admin-only hidden">
             🎞️ Trocar Filme do Drive
@@ -518,7 +520,7 @@
                 <!-- Seção de Faixas de Áudio & Diagnóstico de Codec -->
                 <div id="audioTrackSection" style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
                   <div style="font-size:0.72rem; color:var(--gold); font-weight:700; margin-bottom:4px;">
-                    🎧 FAIXA DE ÁUDIO &amp; CODEC
+                    🎧 FAIXA DE ÁUDIO &amp; CODEC (FFPROBE)
                   </div>
                   <div id="audioCodecBadgeInfo" style="font-size:0.72rem; color:var(--text-muted); margin-bottom:6px;">
                     Verificando codec de áudio...
@@ -526,11 +528,19 @@
                   <div id="audioTracksListContainer" style="display:flex; flex-direction:column; gap:4px;"></div>
                 </div>
 
+                <!-- Legendas Embutidas (Extraídas via FFmpeg) + Upload Manual -->
+                <div id="embeddedSubtitlesSection" class="hidden" style="margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
+                  <div style="font-size:0.72rem; color:var(--gold); font-weight:700; margin-bottom:4px;">
+                    💬 LEGENDAS EMBUTIDAS NO ARQUIVO
+                  </div>
+                  <div id="embeddedSubtitlesContainer" style="display:flex; flex-direction:column; gap:4px;"></div>
+                </div>
+
                 <label class="stremio-stream-item" style="cursor:pointer; margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
-                  <span class="stremio-stream-title">💬 Carregar Legenda (.vtt / .srt)</span>
+                  <span class="stremio-stream-title">💬 Carregar Legenda Externa (.vtt / .srt)</span>
                   <input type="file" id="subtitleFileInput" accept=".vtt,.srt" class="hidden" />
                 </label>
-                <div id="subtitleClearBtn" class="stremio-stream-item hidden"><span class="stremio-stream-title" style="color:#fca5a5;">✕ Remover Legenda</span></div>
+                <div id="subtitleClearBtn" class="stremio-stream-item hidden"><span class="stremio-stream-title" style="color:#fca5a5;">✕ Desativar Legenda</span></div>
               </div>
             </div>
 
@@ -539,17 +549,32 @@
               ▶
             </button>
 
-            <!-- Barra Inferior do Player Nativo (Sem botão de download!) -->
-            <div class="cine-custom-controls">
-              <input
-                type="range"
-                id="nativeSeekBar"
-                class="cine-seek-bar-blue"
-                min="0"
-                max="100"
-                step="0.1"
-                value="0"
-              />
+            <!-- Barra Inferior do Player Nativo (Com Auto-Hide e Preview de Cenas 16:9) -->
+            <div class="cine-custom-controls" id="cineCustomControls">
+              <div class="cine-seek-wrapper" id="cineSeekWrapper">
+                <!-- FASE 3: Tooltip de Preview de Cenas 16:9 + Timestamp -->
+                <div id="seekPreviewTooltip" class="seek-preview-tooltip hidden" aria-hidden="true">
+                  <div class="seek-preview-thumb-frame">
+                    <img id="seekPreviewImg" class="seek-preview-img hidden" alt="Preview da cena" />
+                    <div id="seekPreviewPlaceholder" class="seek-preview-placeholder">
+                      <span class="seek-preview-icon">🎬</span>
+                      <span id="seekPreviewStatusText" class="seek-preview-status">Prévia da cena</span>
+                    </div>
+                  </div>
+                  <div id="seekPreviewTime" class="seek-preview-time">00:00</div>
+                </div>
+
+                <input
+                  type="range"
+                  id="nativeSeekBar"
+                  class="cine-seek-bar-blue"
+                  min="0"
+                  max="100"
+                  step="0.05"
+                  value="0"
+                  aria-label="Barra de progresso do vídeo"
+                />
+              </div>
               <div class="cine-controls-row">
                 <div class="cine-controls-left">
                   <button id="nativePlayPauseBtn" class="sony-ctrl-btn" title="Play / Pause">▶</button>
