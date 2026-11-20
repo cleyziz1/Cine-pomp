@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CINE POMPEIA — Seu Streaming Privado Conectado ao Google Drive (12 Poltronas)</title>
+  <title>CINE POMPEIA — Cinema Privado em Sincronia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="theme-redesign.css" />
+  <script src="/env-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -296,15 +299,18 @@
       <div class="detail-body">
         <p id="detailOverview" class="detail-overview"></p>
 
-        <div style="display:flex; gap:0.85rem; flex-wrap:wrap; justify-content:space-between; align-items:center;">
-          <button id="playDriveMovieNowBtn" class="btn-blue-pill btn-large" style="flex:1;">
-            ▶ Assistir Agora na Sala (Sincronizado com as 12 Poltronas)
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+          <button id="playDriveMovieNowBtn" class="btn-blue-pill btn-large" style="flex:1; min-width:200px;">
+            ▶ Assistir Agora
           </button>
+          <a id="downloadDriveMovieBtn" class="btn-secondary btn-large hidden" href="#" download title="Baixar arquivo original do filme" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;">
+            ↓ Baixar
+          </a>
           <button id="editDriveMovieBtn" class="btn-secondary btn-large admin-only hidden" title="Editar informações do filme (Administrador)">
-            ✏️ Editar Filme
+            Editar
           </button>
           <button id="deleteDriveMovieBtn" class="btn-secondary btn-large admin-only hidden" style="color:#fca5a5; border-color:rgba(239,68,68,0.35);">
-            🗑️ Remover do Catálogo
+            Remover
           </button>
         </div>
       </div>
@@ -316,14 +322,14 @@
        ========================================== -->
   <header class="cinema-topbar">
     <div class="topbar-left">
-      <div class="logo-mark" id="logoHomeBtn" style="cursor:pointer;">🍿 <span>CINE POMPEIA</span></div>
+      <div class="logo-mark" id="logoHomeBtn" style="cursor:pointer;" role="button" tabindex="0" aria-label="Ir para o início do Cine Pompeia"><span>CINE POMPEIA</span></div>
 
-      <nav class="main-nav-tabs">
+      <nav class="main-nav-tabs" aria-label="Navegação principal">
         <button id="navCatalogBtn" class="nav-tab active">
-          🏠 Catálogo do Meu Drive
+          Catálogo
         </button>
         <button id="navCinemaRoomBtn" class="nav-tab">
-          🎬 Sala de Cinema (<span id="navMovieShort">Em Cartaz</span>)
+          Sala (<span id="navMovieShort">Em Cartaz</span>)
         </button>
       </nav>
     </div>
@@ -332,80 +338,68 @@
       <input
         type="text"
         id="globalSearchInput"
-        placeholder="🔍 Buscar nos filmes do seu Google Drive..."
+        placeholder="Buscar filmes, gêneros ou ano..."
+        aria-label="Buscar filmes no catálogo"
         autocomplete="off"
       />
-      <button id="globalSearchClearBtn" class="search-clear-btn hidden" title="Limpar busca">✕</button>
+      <button id="globalSearchClearBtn" class="search-clear-btn hidden" title="Limpar busca" aria-label="Limpar busca">✕</button>
     </div>
 
     <div class="topbar-right">
       <button id="openDriveManagerBtn" class="btn-gold btn-sm admin-only hidden">
-        ☁️ Adicionar Filmes / Sincronizar Pasta Drive
+        + Gerenciar Drive
       </button>
       <div class="room-pill" title="Sala privada conectada em tempo real">
         <span class="dot-live"></span>
         <strong id="roomNameDisplay">SALA-POMPEIA</strong>
-        <span id="seatCountBadge" class="seat-count-badge">1/12 poltronas</span>
+        <span id="seatCountBadge" class="seat-count-badge">1/12</span>
       </div>
       <button id="copyInviteBtn" class="btn-secondary btn-sm" title="Copiar link para convidar amigos">
-        🔗 Convidar Amigos
+        Convidar
       </button>
       <button id="adminAuthBtn" class="btn-secondary btn-sm" title="Acesso Administrativo">
-        🔐 Admin
+        Admin
       </button>
     </div>
   </header>
 
   <!-- ==========================================
-       VISÃO 1: VITRINE DE STREAMING DO SEU GOOGLE DRIVE
+       VISÃO 1: VITRINE DE STREAMING
        ========================================== -->
   <section id="streamingHomeView" class="streaming-home-view">
-    <div class="platform-hub-bar">
-      <button class="platform-pill active" data-category="all">
-        ✨ Todos os Filmes do Drive
-      </button>
-      <button class="platform-pill" data-category="Lançamentos & Destaques">
-        🍿 Lançamentos & Destaques
-      </button>
-      <button class="platform-pill" data-category="Ação & Aventura">
-        💥 Ação & Aventura
-      </button>
-      <button class="platform-pill" data-category="Ficção & Fantasia">
-        🚀 Ficção & Fantasia
-      </button>
-      <button class="platform-pill" data-category="Terror & Suspense">
-        😱 Terror & Suspense
-      </button>
-      <button class="platform-pill" data-category="Comédia">
-        😂 Comédia
-      </button>
-      <button class="platform-pill" data-category="Animação & Família">
-        🎨 Animação & Família
-      </button>
-      <button class="platform-pill" data-category="Séries & Episódios">
-        📺 Séries & Episódios
-      </button>
+    <div class="platform-hub-bar" role="tablist" aria-label="Filtrar por categoria">
+      <button class="platform-pill active" data-category="all">Todos</button>
+      <button class="platform-pill" data-category="Lançamentos & Destaques">Destaques</button>
+      <button class="platform-pill" data-category="Ação & Aventura">Ação &amp; Aventura</button>
+      <button class="platform-pill" data-category="Ficção & Fantasia">Ficção &amp; Fantasia</button>
+      <button class="platform-pill" data-category="Terror & Suspense">Terror &amp; Suspense</button>
+      <button class="platform-pill" data-category="Comédia">Comédia</button>
+      <button class="platform-pill" data-category="Animação & Família">Animação &amp; Família</button>
+      <button class="platform-pill" data-category="Séries & Episódios">Séries</button>
     </div>
 
-    <!-- HERO BANNER DO FILME EM DESTAQUE NO SEU DRIVE -->
+    <!-- HERO BANNER CINEMATOGRÁFICO -->
     <div id="heroBanner" class="hero-banner">
       <div class="hero-gradient-overlay"></div>
       <div class="hero-content">
         <div class="hero-badges">
-          <span class="hero-top-badge">☁️ DIRETO DO SEU GOOGLE DRIVE (5TB)</span>
-          <span id="heroRating" class="hero-rating">⭐ 8.5</span>
+          <span class="hero-top-badge">EM DESTAQUE</span>
+          <span id="heroRating" class="hero-rating">★ 8.5</span>
           <span id="heroYear" class="hero-year">2026</span>
         </div>
-        <h1 id="heroTitle" class="hero-title">Bem-vindo ao Cine Pompeia</h1>
+        <h1 id="heroTitle" class="hero-title">Cine Pompeia</h1>
         <p id="heroOverview" class="hero-overview">
-          Conecte sua pasta do Google Drive ou adicione seus filmes para assistir com até 12 amigos em sincronia perfeita!
+          Cinema particular em sincronia para até 12 amigos, com áudio compatível e catálogo atualizado automaticamente.
         </p>
         <div class="hero-buttons">
           <button id="heroWatchNowBtn" class="btn-hero-play">
-            ▶ Assistir Agora na Sala
+            ▶ Assistir Agora
+          </button>
+          <button id="heroDetailsBtn" type="button" class="btn-hero-info">
+            Mais Detalhes
           </button>
           <button id="heroManageDriveBtn" class="btn-hero-info admin-only hidden">
-            ☁️ Adicionar Filmes / Sincronizar Pasta do Drive
+            Gerenciar Catálogo
           </button>
         </div>
       </div>
@@ -414,14 +408,23 @@
     <!-- RESULTADOS DE BUSCA / FILTRO -->
     <div id="searchResultsSection" class="search-results-section hidden">
       <div class="section-title-row">
-        <h2 id="searchResultsTitle">Filmes Encontrados no Seu Drive</h2>
-        <button id="backToHomeRowsBtn" class="btn-secondary btn-sm">← Mostrar Todas as Fileiras</button>
+        <h2 id="searchResultsTitle">Filmes Encontrados</h2>
+        <button id="backToHomeRowsBtn" class="btn-secondary btn-sm">← Voltar ao Catálogo</button>
       </div>
       <div id="searchResultsGrid" class="poster-grid"></div>
     </div>
 
-    <!-- TRILHOS HORIZONTAIS (CARROSSÉIS DO SEU GOOGLE DRIVE) -->
-    <div id="streamingRowsContainer" class="streaming-rows-container"></div>
+    <!-- TRILHOS HORIZONTAIS (CARROSSÉIS) COM SKELETON INICIAL -->
+    <div id="streamingRowsContainer" class="streaming-rows-container">
+      <div class="skeleton-row" aria-label="Carregando catálogo">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ==========================================

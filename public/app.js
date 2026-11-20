@@ -1500,6 +1500,14 @@
     projectDriveMovieToRoom(currentHeroMovie);
   });
 
+  const heroDetailsBtn = document.getElementById('heroDetailsBtn');
+  if (heroDetailsBtn) {
+    heroDetailsBtn.addEventListener('click', () => {
+      if (!currentHeroMovie) return;
+      openMovieDetailModal(currentHeroMovie);
+    });
+  }
+
   heroManageDriveBtn.addEventListener('click', () => {
     driveManagerModal.classList.remove('hidden');
   });
@@ -2071,6 +2079,16 @@
     detailYearBadge.textContent = movie.year || 'HD';
     detailTitle.textContent = movie.title;
     detailOverview.textContent = movie.overview || '';
+    const downloadDriveMovieBtn = document.getElementById('downloadDriveMovieBtn');
+    if (downloadDriveMovieBtn) {
+      const dlFileId = movie.driveFileId || extractDriveFileId(movie.rawUrl || movie.streamUrl);
+      if (dlFileId) {
+        downloadDriveMovieBtn.href = `/api/videos/${encodeURIComponent(dlFileId)}/download`;
+        downloadDriveMovieBtn.classList.remove('hidden');
+      } else {
+        downloadDriveMovieBtn.classList.add('hidden');
+      }
+    }
     updateAdminUiVisibility();
     movieDetailModal.classList.remove('hidden');
   }

@@ -14,7 +14,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 
-const requiredFiles = ['index.html', 'app.js', 'style.css'];
+const requiredFiles = ['index.html', 'app.js', 'style.css', 'design-tokens.css', 'theme-redesign.css'];
 for (const f of requiredFiles) {
   const full = path.join(PUBLIC_DIR, f);
   if (!fs.existsSync(full)) {

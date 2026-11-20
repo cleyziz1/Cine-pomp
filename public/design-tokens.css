@@ -1,0 +1,99 @@
+/* ============================================================================
+   CINE POMPEIA — DESIGN SYSTEM TOKENS ("OBSIDIAN CINEMA")
+   Identidade autoral: superfícies Obsidian neutras + Champagne Amber exclusivo
+   ============================================================================ */
+
+:root {
+  /* Superfícies neutras cinematográficas */
+  --surface-0: #09090b;
+  --surface-1: #111115;
+  --surface-2: #18181f;
+  --surface-3: #22222c;
+  --surface-glass: rgba(12, 12, 16, 0.82);
+  --surface-glass-strong: rgba(14, 14, 20, 0.94);
+
+  /* Cor de destaque exclusiva para ações principais */
+  --accent: #e5a93c;
+  --accent-hover: #f2be5c;
+  --accent-soft: rgba(229, 169, 60, 0.14);
+  --accent-ring: rgba(229, 169, 60, 0.45);
+  --accent-ink: #0b0906;
+
+  /* Estados semânticos */
+  --status-success: #22c55e;
+  --status-success-soft: rgba(34, 197, 94, 0.14);
+  --status-danger: #ef4444;
+  --status-danger-soft: rgba(239, 68, 68, 0.14);
+  --status-info: #60a5fa;
+
+  /* Tipografia */
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-brand: 'Cinzel', Georgia, serif;
+
+  /* Texto */
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+
+  /* Bordas */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.2);
+
+  /* Raios */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 9999px;
+
+  /* Espaçamento */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+
+  /* Elevação */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.48);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.72);
+  --shadow-accent: 0 8px 28px rgba(229, 169, 60, 0.26);
+
+  /* Transições */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 380ms;
+
+  /* Mapeamento retrocompatível para tokens legados de style.css */
+  --bg-dark: var(--surface-0);
+  --bg-panel: var(--surface-1);
+  --bg-card: var(--surface-2);
+  --bg-elevated: var(--surface-3);
+  --crimson: var(--accent);
+  --blue-accent: var(--accent);
+  --blue-bright: var(--accent-hover);
+  --gold: var(--accent);
+  --gold-soft: var(--accent-soft);
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --border-color: var(--border-subtle);
+  --emerald: var(--status-success);
+  --card-width: 186px;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --card-width: 162px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --card-width: 140px;
+  }
+}

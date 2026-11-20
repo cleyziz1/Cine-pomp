@@ -1,0 +1,508 @@
+/* ============================================================================
+   CINE POMPEIA — REDESIGN PREMIUM ("OBSIDIAN CINEMA")
+   Camada visual moderna, leve, cinematográfica, acessível e responsiva
+   ============================================================================ */
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(229, 169, 60, 0.07), transparent 60%),
+    var(--surface-0);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Foco acessível em teclado / controle remoto */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   HEADER COMPACTO & GLASSMORPHIC (FASE 5)
+   ========================================== */
+.cinema-topbar {
+  padding: 0.65rem clamp(1rem, 3vw, 2.25rem);
+  background: var(--surface-glass);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 0.9rem;
+  min-height: 64px;
+}
+
+.logo-mark {
+  font-family: var(--font-brand);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+  gap: 0.55rem;
+}
+
+.logo-mark::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-ring);
+  flex-shrink: 0;
+}
+
+.main-nav-tabs {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  padding: 0.2rem;
+  border-radius: var(--radius-pill);
+  gap: 0.2rem;
+}
+
+.nav-tab {
+  color: var(--text-secondary);
+  padding: 0.42rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+
+.nav-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-tab.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-accent);
+}
+
+.topbar-search {
+  flex: 1;
+  max-width: 360px;
+  min-width: 190px;
+  position: relative;
+}
+
+.topbar-search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 2.1rem 0.5rem 1rem;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+
+.topbar-search input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.topbar-search input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-ring);
+  outline: none;
+}
+
+.room-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.36rem 0.8rem;
+  font-size: 0.78rem;
+  gap: 0.45rem;
+}
+
+/* Botões refinados e coerentes */
+.btn-primary,
+.btn-gold,
+.btn-hero-play,
+.btn-blue-pill {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+  box-shadow: var(--shadow-accent);
+}
+
+.btn-primary:hover,
+.btn-gold:hover,
+.btn-hero-play:hover,
+.btn-blue-pill:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(229, 169, 60, 0.34);
+}
+
+.btn-secondary,
+.btn-hero-info {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btn-secondary:hover,
+.btn-hero-info:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   PILLS DE CATEGORIAS MINIMALISTAS (FASE 3)
+   ========================================== */
+.platform-hub-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem clamp(1rem, 3vw, 2.25rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.platform-hub-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.platform-pill {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.44rem 1rem;
+  font-size: 0.81rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.platform-pill:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-default);
+}
+
+.platform-pill.active {
+  background: var(--text-primary);
+  color: var(--surface-0);
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================
+   HERO BANNER CINEMATOGRÁFICO (FASE 3)
+   ========================================== */
+.hero-banner {
+  position: relative;
+  min-height: clamp(420px, 56vh, 580px);
+  margin: 0;
+  border-radius: 0;
+  background-size: cover;
+  background-position: center 22%;
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(2rem, 5vw, 3.75rem) clamp(1rem, 3vw, 2.25rem);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9, 9, 11, 0.96) 0%, rgba(9, 9, 11, 0.72) 44%, rgba(9, 9, 11, 0.18) 100%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.25) 0%, rgba(9, 9, 11, 0.35) 55%, var(--surface-0) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.hero-top-badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(229, 169, 60, 0.3);
+  border-radius: var(--radius-pill);
+  padding: 0.24rem 0.72rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-rating,
+.hero-year {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.22rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.hero-title {
+  font-size: clamp(1.9rem, 4.2vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.08;
+  color: var(--text-primary);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.65);
+}
+
+.hero-overview {
+  font-size: clamp(0.9rem, 1.25vw, 1.02rem);
+  color: rgba(245, 245, 247, 0.82);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 56ch;
+}
+
+.hero-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.btn-hero-play,
+.btn-hero-info {
+  padding: 0.78rem 1.45rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* ==========================================
+   CARROSSÉIS E CARDS MODERNOS 2:3 (FASE 4)
+   ========================================== */
+.streaming-rows-container {
+  padding: 1.75rem clamp(1rem, 3vw, 2.25rem) 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.streaming-row-header h2,
+.row-title {
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+
+.poster-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+  will-change: transform;
+}
+
+.poster-card:hover,
+.poster-card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(229, 169, 60, 0.42);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.62);
+}
+
+.poster-card img {
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.poster-card:hover img {
+  transform: scale(1.04);
+}
+
+/* Skeleton loading suave (FASE 4) */
+@keyframes cineShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.skeleton-card {
+  flex: 0 0 var(--card-width);
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: cineShimmer 1.4s ease-in-out infinite;
+  border: 1px solid var(--border-subtle);
+}
+
+/* ==========================================
+   LOBBY, MODAIS E PAINEL ADMIN (FASE 6 & 10)
+   ========================================== */
+.modal-backdrop {
+  background: rgba(5, 5, 8, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lobby-card,
+.modal-card,
+.detail-modal-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.cinema-badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(229, 169, 60, 0.28);
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.brand-title {
+  font-family: var(--font-brand);
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+
+.lobby-form input,
+.lobby-form select,
+.lobby-form textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.lobby-form input:focus,
+.lobby-form select:focus,
+.lobby-form textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* ==========================================
+   SALA DE CINEMA & PLAYER INTEGRADO (FASE 7)
+   ========================================== */
+.player-subtoolbar {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.85rem;
+}
+
+.shield-badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(229, 169, 60, 0.3);
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.screen-stage {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+}
+
+.cine-seek-bar-blue {
+  accent-color: var(--accent);
+}
+
+.chat-sidebar {
+  background: var(--surface-1);
+  border-left: 1px solid var(--border-subtle);
+}
+
+/* ==========================================
+   RESPONSIVIDADE COMPLETA (FASE 9)
+   ========================================== */
+@media (max-width: 900px) {
+  .cinema-topbar {
+    padding: 0.6rem 1rem;
+  }
+  .topbar-search {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  .hero-banner {
+    min-height: 380px;
+    padding: 1.75rem 1rem;
+  }
+}
+
+@media (min-width: 1680px) {
+  .streaming-rows-container,
+  .platform-hub-bar {
+    max-width: 1760px;
+    margin-inline: auto;
+  }
+}
+
+/* ==========================================
+   PREFERS-REDUCED-MOTION (FASE 8)
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
