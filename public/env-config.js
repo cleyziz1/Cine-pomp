@@ -4,5 +4,5 @@ window.__CINE_ENV__ = Object.freeze({
   architecture: 'hybrid-vercel-cloudflare',
   backendOrigin: "https://cine-pomp-staging.cz-santosf.workers.dev",
   useSameOriginProxy: true,
-  builtAt: "2026-11-20T20:08:56.931Z"
+  builtAt: "2026-11-20T21:59:32.088Z"
 });

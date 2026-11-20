@@ -718,7 +718,7 @@ WEBVTT
 /media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=160,0,160,90
 
 00:39:50.000 --> 00:40:00.000
-/media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=160,0,160,90
+/media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=0,90,160,90
 
 00:40:00.000 --> 00:40:10.000
 /media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=0,90,160,90
@@ -1434,5 +1434,5 @@ WEBVTT
 01:19:30.000 --> 01:19:40.000
 /media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=160,90,160,90
 
-01:19:40.000 --> 01:19:43.828
+01:19:40.000 --> 01:19:43.000
 /media_cache/1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2/sprite.jpg#xywh=160,90,160,90

@@ -269,13 +269,17 @@
           <div id="managerMoviesList" class="stremio-addons-list" style="max-height: 210px;"></div>
         </div>
 
-        <!-- FASE 8: DIAGNÓSTICO DE SAÚDE POR FILME (ADMIN) -->
+        <!-- SEÇÃO 11 & FASE 8: INTEGRIDADE AUDIOVISUAL & SAÚDE DOS FILMES (ADMIN) -->
         <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.55rem; flex-wrap:wrap;">
-            <h4 style="color:#fff; margin:0;">🩺 Diagnóstico de Saúde por Filme (<span id="healthSummaryBadge">carregando...</span>)</h4>
-            <button type="button" id="refreshMoviesHealthBtn" class="btn-secondary btn-sm">🔄 Atualizar Saúde</button>
+            <h4 style="color:#fff; margin:0;">Integridade Audiovisual (<span id="healthSummaryBadge">carregando...</span>)</h4>
+            <div style="display:flex; gap:0.4rem;">
+              <button type="button" id="runAudiovisualAuditBtn" class="btn-gold btn-sm">▶ Executar Auditoria</button>
+              <button type="button" id="refreshMoviesHealthBtn" class="btn-secondary btn-sm">Atualizar</button>
+            </div>
           </div>
-          <div id="adminMoviesHealthList" class="stremio-addons-list" style="max-height: 220px;"></div>
+          <div id="audiovisualAuditKpis" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); gap:0.45rem; margin-bottom:0.65rem; font-size:0.74rem;"></div>
+          <div id="adminMoviesHealthList" class="stremio-addons-list" style="max-height: 240px;"></div>
         </div>
       </div>
     </div>

@@ -382,7 +382,7 @@ WEBVTT
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,0,160,90
 
 00:21:10.000 --> 00:21:20.000
-/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,0,160,90
+/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,0,160,90
 
 00:21:20.000 --> 00:21:30.000
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,0,160,90
@@ -763,7 +763,7 @@ WEBVTT
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,0,160,90
 
 00:42:20.000 --> 00:42:30.000
-/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,0,160,90
+/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,90,160,90
 
 00:42:30.000 --> 00:42:40.000
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,90,160,90
@@ -1144,7 +1144,7 @@ WEBVTT
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,90,160,90
 
 01:03:30.000 --> 01:03:40.000
-/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=0,90,160,90
+/media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,90,160,90
 
 01:03:40.000 --> 01:03:50.000
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,90,160,90
@@ -1524,5 +1524,5 @@ WEBVTT
 01:24:30.000 --> 01:24:40.000
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,90,160,90
 
-01:24:40.000 --> 01:24:45.781
+01:24:40.000 --> 01:24:45.000
 /media_cache/10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ/sprite.jpg#xywh=160,90,160,90

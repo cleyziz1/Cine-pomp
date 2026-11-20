@@ -13,6 +13,14 @@ const {
   generateRequestId,
   patchEbmlHeaderForUnsupportedAudio
 } = require('./src/shared/media-utils.mjs');
+const {
+  computeFileVersionHash,
+  auditSingleMovieRecord,
+  runCatalogAudiovisualAudit,
+  AudiovisualAuditQueue
+} = require('./src/shared/audiovisual-audit.mjs');
+
+const localAuditQueue = new AudiovisualAuditQueue({ maxConcurrent: 2, maxRetries: 3 });
 
 let FFMPEG_BIN = 'ffmpeg';
 let FFPROBE_BIN = 'ffprobe';
@@ -1487,6 +1495,45 @@ app.post('/api/drive/watch', requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// SEÇÃO 7 & 11 — Motor Permanente de Integridade Audiovisual (/api/admin/audiovisual-audit)
+function buildLocalAudiovisualAuditReport(reason = 'admin_query') {
+  const movies = (driveCatalog.movies || []).map(enrichMovieWithPlaybackInfo);
+  const regFiles = (mediaRegistry && mediaRegistry.files) || {};
+  const thumbMetaByFileId = {};
+  for (const mv of movies) {
+    if (!mv || !mv.driveFileId) continue;
+    const fid = mv.driveFileId;
+    const metaPath = path.join(PUBLIC_MEDIA_CACHE_DIR, fid, 'meta.json');
+    if (fs.existsSync(metaPath)) {
+      try {
+        thumbMetaByFileId[fid] = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+      } catch (_) {}
+    }
+    const rEntry = regFiles[fid];
+    const vHash = computeFileVersionHash(fid, rEntry || {}, mv);
+    localAuditQueue.enqueue(fid, vHash, reason, async () => auditSingleMovieRecord(mv, rEntry, thumbMetaByFileId[fid] || null));
+  }
+  const report = runCatalogAudiovisualAudit(movies, regFiles, thumbMetaByFileId);
+  return {
+    ...report,
+    queue: localAuditQueue.getSnapshot(),
+    schedule: {
+      fastCheckCron: '*/15 * * * *',
+      deepAuditCron: '0 3 * * *',
+      trigger: reason
+    }
+  };
+}
+
+app.get('/api/admin/audiovisual-audit', requireAdmin, (req, res) => {
+  const force = req.query.force === '1';
+  res.json(buildLocalAudiovisualAuditReport(force ? 'manual_force' : 'admin_query'));
+});
+
+app.post('/api/admin/audiovisual-audit/run', requireAdmin, (_req, res) => {
+  res.json(buildLocalAudiovisualAuditReport('manual_force'));
 });
 
 // FASE 8 — Diagnóstico de Saúde por Filme para o Painel Administrativo
@@ -3525,7 +3572,8 @@ async function handleVideoStreamRequest(req, res) {
   const fileId = req.params.id || req.params.fileId;
   const isRawInternal = req.query.raw === '1';
   const isSeekProbe = req.query.seek === '1';
-  const customChunkMB = Math.min(16, Math.max(1, parseInt(req.query.chunkMB || '0', 10) || 0));
+  const parsedChunkMB = parseInt(req.query.chunkMB || '0', 10) || 0;
+  const customChunkMB = parsedChunkMB > 0 ? Math.min(16, Math.max(1, parsedChunkMB)) : 0;
   const requestedTrack = Math.max(0, parseInt(req.query.audioTrack, 10) || 0);
 
   if (!isValidDriveFileId(fileId)) {
@@ -3674,7 +3722,7 @@ async function handleVideoStreamRequest(req, res) {
           res.setHeader('Content-Range', `bytes ${start}-${localEnd}/${totalSize}`);
           res.setHeader('Content-Length', String(chunkLen));
           res.setHeader('Accept-Ranges', 'bytes');
-          res.setHeader('Cache-Control', 'private, max-age=3600');
+          res.setHeader('Cache-Control', 'private, max-age=60');
           res.setHeader('X-Content-Type-Options', 'nosniff');
           const regEntry = mediaRegistry && mediaRegistry.files && mediaRegistry.files[fileId];
           const shouldPatchEbml =

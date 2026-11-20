@@ -1,0 +1,2562 @@
+{
+  "summary": {
+    "totalRegistered": 29,
+    "totalAudited": 29,
+    "approved": 19,
+    "attention": 5,
+    "fixAvailable": 5,
+    "criticalError": 0,
+    "pending": 0,
+    "autoFixableCount": 0,
+    "controlledProposalsCount": 10,
+    "lastAuditAt": "2026-11-20T21:55:28.911Z",
+    "nextScheduledAuditAt": "2026-11-20T22:10:28.911Z",
+    "durationMs": 2
+  },
+  "items": [
+    {
+      "fileId": "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j",
+      "title": "O Espetacular Homem-Aranha",
+      "versionHash": "1AayQ_w6esYnD4tUK2Fl32aORrXNjt06j:2438411852:mp4:8177:hls1",
+      "sizeBytes": 2438411852,
+      "sizeMB": 2325.5,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 8177,
+      "durationDetectedSec": 8177,
+      "uploadStatus": "OK",
+      "audioStatus": "HLS AAC-LC 100% (8033s)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (136 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1022,
+            "deltaSec": 1022
+          },
+          {
+            "pct": 10,
+            "targetSec": 818,
+            "tileIndex": 0,
+            "tileSec": 1022,
+            "deltaSec": 204
+          },
+          {
+            "pct": 25,
+            "targetSec": 2044,
+            "tileIndex": 0,
+            "tileSec": 1022,
+            "deltaSec": 1022
+          },
+          {
+            "pct": 50,
+            "targetSec": 4089,
+            "tileIndex": 2,
+            "tileSec": 5111,
+            "deltaSec": 1022
+          },
+          {
+            "pct": 75,
+            "targetSec": 6133,
+            "tileIndex": 2,
+            "tileSec": 5111,
+            "deltaSec": 1022
+          },
+          {
+            "pct": 90,
+            "targetSec": 7359,
+            "tileIndex": 3,
+            "tileSec": 7155,
+            "deltaSec": 204
+          },
+          {
+            "pct": 95,
+            "targetSec": 7768,
+            "tileIndex": 3,
+            "tileSec": 7155,
+            "deltaSec": 613
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.909Z"
+    },
+    {
+      "fileId": "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+      "title": "Moana: Um Mar de Aventuras",
+      "versionHash": "1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6:1992794821:mkv:6433:m4a0",
+      "sizeBytes": 1992794821,
+      "sizeMB": 1900.5,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 6433,
+      "durationDetectedSec": 6433,
+      "uploadStatus": "OK",
+      "audioStatus": "Dual-Audio (AAC EN 100% nativo + Sidecar PT-BR 90s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (107 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 804,
+            "deltaSec": 804
+          },
+          {
+            "pct": 10,
+            "targetSec": 643,
+            "tileIndex": 0,
+            "tileSec": 804,
+            "deltaSec": 161
+          },
+          {
+            "pct": 25,
+            "targetSec": 1608,
+            "tileIndex": 0,
+            "tileSec": 804,
+            "deltaSec": 804
+          },
+          {
+            "pct": 50,
+            "targetSec": 3216,
+            "tileIndex": 1,
+            "tileSec": 2412,
+            "deltaSec": 804
+          },
+          {
+            "pct": 75,
+            "targetSec": 4825,
+            "tileIndex": 2,
+            "tileSec": 4021,
+            "deltaSec": 804
+          },
+          {
+            "pct": 90,
+            "targetSec": 5790,
+            "tileIndex": 3,
+            "tileSec": 5629,
+            "deltaSec": 161
+          },
+          {
+            "pct": 95,
+            "targetSec": 6111,
+            "tileIndex": 3,
+            "tileSec": 5629,
+            "deltaSec": 482
+          }
+        ]
+      },
+      "overallStatus": "Atenção",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Gerar trilha HLS AAC-LC PT-BR completa (100% da duração) para substituir sidecar de 90s.",
+          "command": "node scripts/generate-full-audio-cache.js 1NforhhY8ngcAv39HhoS7wBHnwH1NdpJ6",
+          "estimatedSizeMB": 39
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.910Z"
+    },
+    {
+      "fileId": "1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4",
+      "title": "Homem-Aranha 2",
+      "versionHash": "1MvZzeKQf9j_q6La6p5pWo0XfKjS1VHr4:2290496386:mp4:7648:m4a0",
+      "sizeBytes": 2290496386,
+      "sizeMB": 2184.4,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 2,
+      "durationCatalogSec": 7648,
+      "durationDetectedSec": 7648,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (127 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 956,
+            "deltaSec": 956
+          },
+          {
+            "pct": 10,
+            "targetSec": 765,
+            "tileIndex": 0,
+            "tileSec": 956,
+            "deltaSec": 191
+          },
+          {
+            "pct": 25,
+            "targetSec": 1912,
+            "tileIndex": 0,
+            "tileSec": 956,
+            "deltaSec": 956
+          },
+          {
+            "pct": 50,
+            "targetSec": 3824,
+            "tileIndex": 1,
+            "tileSec": 2868,
+            "deltaSec": 956
+          },
+          {
+            "pct": 75,
+            "targetSec": 5736,
+            "tileIndex": 2,
+            "tileSec": 4780,
+            "deltaSec": 956
+          },
+          {
+            "pct": 90,
+            "targetSec": 6883,
+            "tileIndex": 3,
+            "tileSec": 6692,
+            "deltaSec": 191
+          },
+          {
+            "pct": 95,
+            "targetSec": 7266,
+            "tileIndex": 3,
+            "tileSec": 6692,
+            "deltaSec": 574
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ",
+      "title": "O Espetacular Homem-Aranha 2: A Ameaça de Electro",
+      "versionHash": "1njsqsXqcPWN9Am8P4iZg2h_afu9ql0RJ:2256410963:mp4:8496:m4a0",
+      "sizeBytes": 2256410963,
+      "sizeMB": 2151.9,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 8496,
+      "durationDetectedSec": 8496,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (142 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1062,
+            "deltaSec": 1062
+          },
+          {
+            "pct": 10,
+            "targetSec": 850,
+            "tileIndex": 0,
+            "tileSec": 1062,
+            "deltaSec": 212
+          },
+          {
+            "pct": 25,
+            "targetSec": 2124,
+            "tileIndex": 0,
+            "tileSec": 1062,
+            "deltaSec": 1062
+          },
+          {
+            "pct": 50,
+            "targetSec": 4248,
+            "tileIndex": 1,
+            "tileSec": 3186,
+            "deltaSec": 1062
+          },
+          {
+            "pct": 75,
+            "targetSec": 6372,
+            "tileIndex": 2,
+            "tileSec": 5310,
+            "deltaSec": 1062
+          },
+          {
+            "pct": 90,
+            "targetSec": 7646,
+            "tileIndex": 3,
+            "tileSec": 7434,
+            "deltaSec": 212
+          },
+          {
+            "pct": 95,
+            "targetSec": 8071,
+            "tileIndex": 3,
+            "tileSec": 7434,
+            "deltaSec": 637
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1vWwsFm3vDakms27RVGkbasAqW2rH7vUa",
+      "title": "Homem-Aranha 3",
+      "versionHash": "1vWwsFm3vDakms27RVGkbasAqW2rH7vUa:2499998949:mp4:8352:m4a0",
+      "sizeBytes": 2499998949,
+      "sizeMB": 2384.2,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 2,
+      "durationCatalogSec": 8352,
+      "durationDetectedSec": 8352,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (139 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1044,
+            "deltaSec": 1044
+          },
+          {
+            "pct": 10,
+            "targetSec": 835,
+            "tileIndex": 0,
+            "tileSec": 1044,
+            "deltaSec": 209
+          },
+          {
+            "pct": 25,
+            "targetSec": 2088,
+            "tileIndex": 0,
+            "tileSec": 1044,
+            "deltaSec": 1044
+          },
+          {
+            "pct": 50,
+            "targetSec": 4176,
+            "tileIndex": 1,
+            "tileSec": 3132,
+            "deltaSec": 1044
+          },
+          {
+            "pct": 75,
+            "targetSec": 6264,
+            "tileIndex": 2,
+            "tileSec": 5220,
+            "deltaSec": 1044
+          },
+          {
+            "pct": 90,
+            "targetSec": 7516,
+            "tileIndex": 3,
+            "tileSec": 7308,
+            "deltaSec": 208
+          },
+          {
+            "pct": 95,
+            "targetSec": 7934,
+            "tileIndex": 3,
+            "tileSec": 7308,
+            "deltaSec": 626
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+      "title": "Homem-Aranha: Longe de Casa",
+      "versionHash": "13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_:3339726301:mkv:7764:m4a0",
+      "sizeBytes": 3339726301,
+      "sizeMB": 3185,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 7764,
+      "durationDetectedSec": 7764,
+      "uploadStatus": "OK",
+      "audioStatus": "Dual-Audio (AAC EN 100% nativo + Sidecar PT-BR 90s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (129 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 970,
+            "deltaSec": 970
+          },
+          {
+            "pct": 10,
+            "targetSec": 776,
+            "tileIndex": 0,
+            "tileSec": 970,
+            "deltaSec": 194
+          },
+          {
+            "pct": 25,
+            "targetSec": 1941,
+            "tileIndex": 1,
+            "tileSec": 2911,
+            "deltaSec": 970
+          },
+          {
+            "pct": 50,
+            "targetSec": 3882,
+            "tileIndex": 2,
+            "tileSec": 4852,
+            "deltaSec": 970
+          },
+          {
+            "pct": 75,
+            "targetSec": 5823,
+            "tileIndex": 3,
+            "tileSec": 6793,
+            "deltaSec": 970
+          },
+          {
+            "pct": 90,
+            "targetSec": 6987,
+            "tileIndex": 3,
+            "tileSec": 6793,
+            "deltaSec": 194
+          },
+          {
+            "pct": 95,
+            "targetSec": 7376,
+            "tileIndex": 3,
+            "tileSec": 6793,
+            "deltaSec": 583
+          }
+        ]
+      },
+      "overallStatus": "Atenção",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Gerar trilha HLS AAC-LC PT-BR completa (100% da duração) para substituir sidecar de 90s.",
+          "command": "node scripts/generate-full-audio-cache.js 13UZDtd0NQ8ON50ChOwBFdsuLC3AtjPk_",
+          "estimatedSizeMB": 47
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
+      "title": "Homem-Aranha: Sem Volta Para Casa",
+      "versionHash": "1RVUVf05FlyvnRHW9YiowePQrJfw5IFod:6784412730:mkv:8890:m4a0",
+      "sizeBytes": 6784412730,
+      "sizeMB": 6470.1,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTrackCount": 3,
+      "subtitleTrackCount": 4,
+      "durationCatalogSec": 8890,
+      "durationDetectedSec": 8890,
+      "uploadStatus": "OK",
+      "audioStatus": "Sidecar AAC parcial (90s / 8890s) • Origem: AC-3 (Dolby Digital 5.1), E-AC-3 (Dolby Digital Plus)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (148 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1111,
+            "deltaSec": 1111
+          },
+          {
+            "pct": 10,
+            "targetSec": 889,
+            "tileIndex": 0,
+            "tileSec": 1111,
+            "deltaSec": 222
+          },
+          {
+            "pct": 25,
+            "targetSec": 2222,
+            "tileIndex": 0,
+            "tileSec": 1111,
+            "deltaSec": 1111
+          },
+          {
+            "pct": 50,
+            "targetSec": 4445,
+            "tileIndex": 1,
+            "tileSec": 3334,
+            "deltaSec": 1111
+          },
+          {
+            "pct": 75,
+            "targetSec": 6667,
+            "tileIndex": 2,
+            "tileSec": 5556,
+            "deltaSec": 1111
+          },
+          {
+            "pct": 90,
+            "targetSec": 8001,
+            "tileIndex": 3,
+            "tileSec": 7779,
+            "deltaSec": 222
+          },
+          {
+            "pct": 95,
+            "targetSec": 8445,
+            "tileIndex": 3,
+            "tileSec": 7779,
+            "deltaSec": 666
+          }
+        ]
+      },
+      "overallStatus": "Correção disponível",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Extrair e converter faixa AC-3 (Dolby Digital 5.1)/E-AC-3 (Dolby Digital Plus) para HLS AAC-LC Estéreo 100% completo.",
+          "command": "node scripts/generate-full-audio-cache.js 1RVUVf05FlyvnRHW9YiowePQrJfw5IFod",
+          "estimatedSizeMB": 53
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU",
+      "title": "Homem-Aranha: Um Novo Dia",
+      "versionHash": "1jHPPYUSl1HEI0KmmBxxWgXogep1jAssU:3116729579:mkv:8701:m4a0",
+      "sizeBytes": 3116729579,
+      "sizeMB": 2972.3,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 37,
+      "durationCatalogSec": 8701,
+      "durationDetectedSec": 8701,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (145 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1088,
+            "deltaSec": 1088
+          },
+          {
+            "pct": 10,
+            "targetSec": 870,
+            "tileIndex": 0,
+            "tileSec": 1088,
+            "deltaSec": 218
+          },
+          {
+            "pct": 25,
+            "targetSec": 2175,
+            "tileIndex": 0,
+            "tileSec": 1088,
+            "deltaSec": 1087
+          },
+          {
+            "pct": 50,
+            "targetSec": 4350,
+            "tileIndex": 1,
+            "tileSec": 3263,
+            "deltaSec": 1087
+          },
+          {
+            "pct": 75,
+            "targetSec": 6526,
+            "tileIndex": 3,
+            "tileSec": 7613,
+            "deltaSec": 1087
+          },
+          {
+            "pct": 90,
+            "targetSec": 7831,
+            "tileIndex": 3,
+            "tileSec": 7613,
+            "deltaSec": 218
+          },
+          {
+            "pct": 95,
+            "targetSec": 8266,
+            "tileIndex": 3,
+            "tileSec": 7613,
+            "deltaSec": 653
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
+      "title": "O Resgate do Soldado Ryan",
+      "versionHash": "1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ:2926316477:mkv:10126:m4a0",
+      "sizeBytes": 2926316477,
+      "sizeMB": 2790.8,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 1,
+      "durationCatalogSec": 10126,
+      "durationDetectedSec": 10126,
+      "uploadStatus": "OK",
+      "audioStatus": "Dual-Audio (AAC EN 100% nativo + Sidecar PT-BR 90s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (169 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1266,
+            "deltaSec": 1266
+          },
+          {
+            "pct": 10,
+            "targetSec": 1013,
+            "tileIndex": 0,
+            "tileSec": 1266,
+            "deltaSec": 253
+          },
+          {
+            "pct": 25,
+            "targetSec": 2531,
+            "tileIndex": 0,
+            "tileSec": 1266,
+            "deltaSec": 1265
+          },
+          {
+            "pct": 50,
+            "targetSec": 5063,
+            "tileIndex": 1,
+            "tileSec": 3797,
+            "deltaSec": 1266
+          },
+          {
+            "pct": 75,
+            "targetSec": 7594,
+            "tileIndex": 2,
+            "tileSec": 6329,
+            "deltaSec": 1265
+          },
+          {
+            "pct": 90,
+            "targetSec": 9113,
+            "tileIndex": 3,
+            "tileSec": 8860,
+            "deltaSec": 253
+          },
+          {
+            "pct": 95,
+            "targetSec": 9619,
+            "tileIndex": 3,
+            "tileSec": 8860,
+            "deltaSec": 759
+          }
+        ]
+      },
+      "overallStatus": "Atenção",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Gerar trilha HLS AAC-LC PT-BR completa (100% da duração) para substituir sidecar de 90s.",
+          "command": "node scripts/generate-full-audio-cache.js 1NamT9cBP-X-sklL8NZKuZYRiC3FFXzNJ",
+          "estimatedSizeMB": 61
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi",
+      "title": "Carros 2",
+      "versionHash": "1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi:6870026537:mkv:6422:m4a0",
+      "sizeBytes": 6870026537,
+      "sizeMB": 6551.8,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 6422,
+      "durationDetectedSec": 6422,
+      "uploadStatus": "OK",
+      "audioStatus": "Sidecar AAC parcial (90s / 6422s) • Origem: AC-3 (Dolby Digital 5.1)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (107 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 803,
+            "deltaSec": 803
+          },
+          {
+            "pct": 10,
+            "targetSec": 642,
+            "tileIndex": 0,
+            "tileSec": 803,
+            "deltaSec": 161
+          },
+          {
+            "pct": 25,
+            "targetSec": 1605,
+            "tileIndex": 0,
+            "tileSec": 803,
+            "deltaSec": 802
+          },
+          {
+            "pct": 50,
+            "targetSec": 3211,
+            "tileIndex": 2,
+            "tileSec": 4013,
+            "deltaSec": 802
+          },
+          {
+            "pct": 75,
+            "targetSec": 4816,
+            "tileIndex": 2,
+            "tileSec": 4013,
+            "deltaSec": 803
+          },
+          {
+            "pct": 90,
+            "targetSec": 5779,
+            "tileIndex": 3,
+            "tileSec": 5619,
+            "deltaSec": 160
+          },
+          {
+            "pct": 95,
+            "targetSec": 6100,
+            "tileIndex": 3,
+            "tileSec": 5619,
+            "deltaSec": 481
+          }
+        ]
+      },
+      "overallStatus": "Correção disponível",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Extrair e converter faixa AC-3 (Dolby Digital 5.1) para HLS AAC-LC Estéreo 100% completo.",
+          "command": "node scripts/generate-full-audio-cache.js 1LMNLyic4K4EPQhVJPPmgBkOdk6c3Vgqi",
+          "estimatedSizeMB": 39
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH",
+      "title": "Toy Story 5",
+      "versionHash": "134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH:2241510103:mkv:6207:m4a0",
+      "sizeBytes": 2241510103,
+      "sizeMB": 2137.7,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)",
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 3,
+      "durationCatalogSec": 6207,
+      "durationDetectedSec": 6207,
+      "uploadStatus": "OK",
+      "audioStatus": "Dual-Audio (AAC EN 100% nativo + Sidecar PT-BR 90s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (103 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 776,
+            "deltaSec": 776
+          },
+          {
+            "pct": 10,
+            "targetSec": 621,
+            "tileIndex": 0,
+            "tileSec": 776,
+            "deltaSec": 155
+          },
+          {
+            "pct": 25,
+            "targetSec": 1552,
+            "tileIndex": 0,
+            "tileSec": 776,
+            "deltaSec": 776
+          },
+          {
+            "pct": 50,
+            "targetSec": 3103,
+            "tileIndex": 1,
+            "tileSec": 2328,
+            "deltaSec": 775
+          },
+          {
+            "pct": 75,
+            "targetSec": 4655,
+            "tileIndex": 2,
+            "tileSec": 3879,
+            "deltaSec": 776
+          },
+          {
+            "pct": 90,
+            "targetSec": 5586,
+            "tileIndex": 3,
+            "tileSec": 5431,
+            "deltaSec": 155
+          },
+          {
+            "pct": 95,
+            "targetSec": 5896,
+            "tileIndex": 3,
+            "tileSec": 5431,
+            "deltaSec": 465
+          }
+        ]
+      },
+      "overallStatus": "Atenção",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Gerar trilha HLS AAC-LC PT-BR completa (100% da duração) para substituir sidecar de 90s.",
+          "command": "node scripts/generate-full-audio-cache.js 134ZasWjMLyOFSHBcVtxNXvS_ZshNHLgH",
+          "estimatedSizeMB": 37
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq",
+      "title": "Harry Potter e o Prisioneiro de Azkaban",
+      "versionHash": "17CjmCYWUpjB8XlwobdKI7fCTE8Va-wpq:2298002262:mkv:8502:hls1",
+      "sizeBytes": 2298002262,
+      "sizeMB": 2191.5,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 8502,
+      "durationDetectedSec": 8502,
+      "uploadStatus": "OK",
+      "audioStatus": "HLS AAC-LC 100% (8502s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (142 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1063,
+            "deltaSec": 1063
+          },
+          {
+            "pct": 10,
+            "targetSec": 850,
+            "tileIndex": 0,
+            "tileSec": 1063,
+            "deltaSec": 213
+          },
+          {
+            "pct": 25,
+            "targetSec": 2126,
+            "tileIndex": 1,
+            "tileSec": 3188,
+            "deltaSec": 1062
+          },
+          {
+            "pct": 50,
+            "targetSec": 4251,
+            "tileIndex": 1,
+            "tileSec": 3188,
+            "deltaSec": 1063
+          },
+          {
+            "pct": 75,
+            "targetSec": 6377,
+            "tileIndex": 2,
+            "tileSec": 5314,
+            "deltaSec": 1063
+          },
+          {
+            "pct": 90,
+            "targetSec": 7652,
+            "tileIndex": 3,
+            "tileSec": 7440,
+            "deltaSec": 212
+          },
+          {
+            "pct": 95,
+            "targetSec": 8077,
+            "tileIndex": 3,
+            "tileSec": 7440,
+            "deltaSec": 637
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z",
+      "title": "Procurando Nemo",
+      "versionHash": "1FxU_dp2EAkrYdvg1pBXqb-kILHoUnQ5Z:707937666:mkv:6054:m4a0",
+      "sizeBytes": 707937666,
+      "sizeMB": 675.1,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 1,
+      "durationCatalogSec": 6054,
+      "durationDetectedSec": 6054,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (MP3)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (101 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 757,
+            "deltaSec": 757
+          },
+          {
+            "pct": 10,
+            "targetSec": 605,
+            "tileIndex": 0,
+            "tileSec": 757,
+            "deltaSec": 152
+          },
+          {
+            "pct": 25,
+            "targetSec": 1514,
+            "tileIndex": 1,
+            "tileSec": 2270,
+            "deltaSec": 756
+          },
+          {
+            "pct": 50,
+            "targetSec": 3027,
+            "tileIndex": 1,
+            "tileSec": 2270,
+            "deltaSec": 757
+          },
+          {
+            "pct": 75,
+            "targetSec": 4541,
+            "tileIndex": 3,
+            "tileSec": 5297,
+            "deltaSec": 756
+          },
+          {
+            "pct": 90,
+            "targetSec": 5449,
+            "tileIndex": 3,
+            "tileSec": 5297,
+            "deltaSec": 152
+          },
+          {
+            "pct": 95,
+            "targetSec": 5751,
+            "tileIndex": 3,
+            "tileSec": 5297,
+            "deltaSec": 454
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e",
+      "title": "Chicago P.D.: Distrito 21",
+      "versionHash": "1TkM-Ch8w6lBDyc3DdJL1rZmdLyBwBd3e:841351737:mp4:5823:hls1",
+      "sizeBytes": 841351737,
+      "sizeMB": 802.4,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 5823,
+      "durationDetectedSec": 5823,
+      "uploadStatus": "OK",
+      "audioStatus": "HLS AAC-LC 100% (5823s)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (97 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 728,
+            "deltaSec": 728
+          },
+          {
+            "pct": 10,
+            "targetSec": 582,
+            "tileIndex": 0,
+            "tileSec": 728,
+            "deltaSec": 146
+          },
+          {
+            "pct": 25,
+            "targetSec": 1456,
+            "tileIndex": 0,
+            "tileSec": 728,
+            "deltaSec": 728
+          },
+          {
+            "pct": 50,
+            "targetSec": 2912,
+            "tileIndex": 2,
+            "tileSec": 3639,
+            "deltaSec": 727
+          },
+          {
+            "pct": 75,
+            "targetSec": 4367,
+            "tileIndex": 2,
+            "tileSec": 3639,
+            "deltaSec": 728
+          },
+          {
+            "pct": 90,
+            "targetSec": 5241,
+            "tileIndex": 3,
+            "tileSec": 5095,
+            "deltaSec": 146
+          },
+          {
+            "pct": 95,
+            "targetSec": 5532,
+            "tileIndex": 3,
+            "tileSec": 5095,
+            "deltaSec": 437
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm",
+      "title": "Lilo & Stitch",
+      "versionHash": "1WVL9lFYRRomMsvAibEukp1jrj7VX6CHm:330723534:mp4:5116:m4a0",
+      "sizeBytes": 330723534,
+      "sizeMB": 315.4,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 5116,
+      "durationDetectedSec": 5116,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (85 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 640,
+            "deltaSec": 640
+          },
+          {
+            "pct": 10,
+            "targetSec": 512,
+            "tileIndex": 0,
+            "tileSec": 640,
+            "deltaSec": 128
+          },
+          {
+            "pct": 25,
+            "targetSec": 1279,
+            "tileIndex": 0,
+            "tileSec": 640,
+            "deltaSec": 639
+          },
+          {
+            "pct": 50,
+            "targetSec": 2558,
+            "tileIndex": 1,
+            "tileSec": 1919,
+            "deltaSec": 639
+          },
+          {
+            "pct": 75,
+            "targetSec": 3837,
+            "tileIndex": 2,
+            "tileSec": 3198,
+            "deltaSec": 639
+          },
+          {
+            "pct": 90,
+            "targetSec": 4605,
+            "tileIndex": 3,
+            "tileSec": 4477,
+            "deltaSec": 128
+          },
+          {
+            "pct": 95,
+            "targetSec": 4861,
+            "tileIndex": 3,
+            "tileSec": 4477,
+            "deltaSec": 384
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn",
+      "title": "A Princesa e o Sapo",
+      "versionHash": "1RFhTNE1ygeKhGa8w5ysN3Vo6UexRXYnn:606718764:mp4:5858:m4a0",
+      "sizeBytes": 606718764,
+      "sizeMB": 578.6,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 5858,
+      "durationDetectedSec": 5858,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (98 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 732,
+            "deltaSec": 732
+          },
+          {
+            "pct": 10,
+            "targetSec": 586,
+            "tileIndex": 0,
+            "tileSec": 732,
+            "deltaSec": 146
+          },
+          {
+            "pct": 25,
+            "targetSec": 1464,
+            "tileIndex": 0,
+            "tileSec": 732,
+            "deltaSec": 732
+          },
+          {
+            "pct": 50,
+            "targetSec": 2929,
+            "tileIndex": 1,
+            "tileSec": 2197,
+            "deltaSec": 732
+          },
+          {
+            "pct": 75,
+            "targetSec": 4393,
+            "tileIndex": 2,
+            "tileSec": 3661,
+            "deltaSec": 732
+          },
+          {
+            "pct": 90,
+            "targetSec": 5272,
+            "tileIndex": 3,
+            "tileSec": 5125,
+            "deltaSec": 147
+          },
+          {
+            "pct": 95,
+            "targetSec": 5565,
+            "tileIndex": 3,
+            "tileSec": 5125,
+            "deltaSec": 440
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN",
+      "title": "Barbie: A Princesa e a Pop Star",
+      "versionHash": "19pYQK72iWgHojbZeAJ5cjfmexFoyu4DN:765583360:avi:4526:m4a0",
+      "sizeBytes": 765583360,
+      "sizeMB": 730.1,
+      "container": "avi",
+      "videoCodecs": [
+        "MPEG-4 Visual (AVI/Xvid)"
+      ],
+      "audioCodecs": [
+        "MP3"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 4526,
+      "durationDetectedSec": 4526,
+      "uploadStatus": "OK",
+      "audioStatus": "AVI (compat.mp4 parcial: 90s / 4526s)",
+      "videoStatus": "Atenção (AVI com compat.mp4 parcial de 90s)",
+      "durationStatus": "OK (75 min)",
+      "seekStatus": "Limitado a 90s (compat.mp4 parcial)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 566,
+            "deltaSec": 566
+          },
+          {
+            "pct": 10,
+            "targetSec": 453,
+            "tileIndex": 0,
+            "tileSec": 566,
+            "deltaSec": 113
+          },
+          {
+            "pct": 25,
+            "targetSec": 1132,
+            "tileIndex": 1,
+            "tileSec": 1697,
+            "deltaSec": 565
+          },
+          {
+            "pct": 50,
+            "targetSec": 2263,
+            "tileIndex": 1,
+            "tileSec": 1697,
+            "deltaSec": 566
+          },
+          {
+            "pct": 75,
+            "targetSec": 3395,
+            "tileIndex": 3,
+            "tileSec": 3960,
+            "deltaSec": 565
+          },
+          {
+            "pct": 90,
+            "targetSec": 4074,
+            "tileIndex": 3,
+            "tileSec": 3960,
+            "deltaSec": 114
+          },
+          {
+            "pct": 95,
+            "targetSec": 4300,
+            "tileIndex": 3,
+            "tileSec": 3960,
+            "deltaSec": 340
+          }
+        ]
+      },
+      "overallStatus": "Correção disponível",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "remux_full_avi_to_mp4",
+          "description": "Transcodificar AVI integralmente para MP4 H.264 + AAC-LC sem alterar original no Drive.",
+          "estimatedSizeMB": 380
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2",
+      "title": "Barbie: Escola de Princesas",
+      "versionHash": "1WMuYuKP2UCWOrIdeN8twMuBD6DxRC5Y2:309203948:mp4:4784:m4a0",
+      "sizeBytes": 309203948,
+      "sizeMB": 294.9,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 4784,
+      "durationDetectedSec": 4784,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (80 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 598,
+            "deltaSec": 598
+          },
+          {
+            "pct": 10,
+            "targetSec": 478,
+            "tileIndex": 0,
+            "tileSec": 598,
+            "deltaSec": 120
+          },
+          {
+            "pct": 25,
+            "targetSec": 1196,
+            "tileIndex": 0,
+            "tileSec": 598,
+            "deltaSec": 598
+          },
+          {
+            "pct": 50,
+            "targetSec": 2392,
+            "tileIndex": 1,
+            "tileSec": 1794,
+            "deltaSec": 598
+          },
+          {
+            "pct": 75,
+            "targetSec": 3588,
+            "tileIndex": 2,
+            "tileSec": 2990,
+            "deltaSec": 598
+          },
+          {
+            "pct": 90,
+            "targetSec": 4305,
+            "tileIndex": 3,
+            "tileSec": 4186,
+            "deltaSec": 119
+          },
+          {
+            "pct": 95,
+            "targetSec": 4545,
+            "tileIndex": 3,
+            "tileSec": 4186,
+            "deltaSec": 359
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
+      "title": "Uma Sexta-Feira Mais Louca Ainda",
+      "versionHash": "1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_:2716675369:mkv:6633:m4a0",
+      "sizeBytes": 2716675369,
+      "sizeMB": 2590.8,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 3,
+      "durationCatalogSec": 6633,
+      "durationDetectedSec": 6633,
+      "uploadStatus": "OK",
+      "audioStatus": "Sidecar AAC parcial (90s / 6633s) • Origem: E-AC-3 (Dolby Digital Plus)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (111 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 829,
+            "deltaSec": 829
+          },
+          {
+            "pct": 10,
+            "targetSec": 663,
+            "tileIndex": 0,
+            "tileSec": 829,
+            "deltaSec": 166
+          },
+          {
+            "pct": 25,
+            "targetSec": 1658,
+            "tileIndex": 0,
+            "tileSec": 829,
+            "deltaSec": 829
+          },
+          {
+            "pct": 50,
+            "targetSec": 3317,
+            "tileIndex": 2,
+            "tileSec": 4146,
+            "deltaSec": 829
+          },
+          {
+            "pct": 75,
+            "targetSec": 4975,
+            "tileIndex": 2,
+            "tileSec": 4146,
+            "deltaSec": 829
+          },
+          {
+            "pct": 90,
+            "targetSec": 5970,
+            "tileIndex": 3,
+            "tileSec": 5804,
+            "deltaSec": 166
+          },
+          {
+            "pct": 95,
+            "targetSec": 6301,
+            "tileIndex": 3,
+            "tileSec": 5804,
+            "deltaSec": 497
+          }
+        ]
+      },
+      "overallStatus": "Correção disponível",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Extrair e converter faixa E-AC-3 (Dolby Digital Plus) para HLS AAC-LC Estéreo 100% completo.",
+          "command": "node scripts/generate-full-audio-cache.js 1vlQOZLfXBkACbwSg4N1x68yzfKZXA8X_",
+          "estimatedSizeMB": 40
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT",
+      "title": "Máquina de Guerra",
+      "versionHash": "1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT:3609371218:mkv:6560:m4a0",
+      "sizeBytes": 3609371218,
+      "sizeMB": 3442.2,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 2,
+      "durationCatalogSec": 6560,
+      "durationDetectedSec": 6560,
+      "uploadStatus": "OK",
+      "audioStatus": "Sidecar AAC parcial (90s / 6560s) • Origem: E-AC-3 (Dolby Digital Plus)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (109 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 820,
+            "deltaSec": 820
+          },
+          {
+            "pct": 10,
+            "targetSec": 656,
+            "tileIndex": 0,
+            "tileSec": 820,
+            "deltaSec": 164
+          },
+          {
+            "pct": 25,
+            "targetSec": 1640,
+            "tileIndex": 0,
+            "tileSec": 820,
+            "deltaSec": 820
+          },
+          {
+            "pct": 50,
+            "targetSec": 3280,
+            "tileIndex": 1,
+            "tileSec": 2460,
+            "deltaSec": 820
+          },
+          {
+            "pct": 75,
+            "targetSec": 4920,
+            "tileIndex": 2,
+            "tileSec": 4100,
+            "deltaSec": 820
+          },
+          {
+            "pct": 90,
+            "targetSec": 5904,
+            "tileIndex": 3,
+            "tileSec": 5740,
+            "deltaSec": 164
+          },
+          {
+            "pct": 95,
+            "targetSec": 6232,
+            "tileIndex": 3,
+            "tileSec": 5740,
+            "deltaSec": 492
+          }
+        ]
+      },
+      "overallStatus": "Correção disponível",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Extrair e converter faixa E-AC-3 (Dolby Digital Plus) para HLS AAC-LC Estéreo 100% completo.",
+          "command": "node scripts/generate-full-audio-cache.js 1R9PXGjplmt9f2kCQsQv1DzPpZJe7i3BT",
+          "estimatedSizeMB": 39
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
+      "title": "Velozes & Furiosos 7",
+      "versionHash": "11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka:2681238470:mkv:8395:m4a0",
+      "sizeBytes": 2681238470,
+      "sizeMB": 2557,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AC-3 (Dolby Digital 5.1)",
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 8395,
+      "durationDetectedSec": 8395,
+      "uploadStatus": "OK",
+      "audioStatus": "Dual-Audio (AAC EN 100% nativo + Sidecar PT-BR 90s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (140 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1049,
+            "deltaSec": 1049
+          },
+          {
+            "pct": 10,
+            "targetSec": 839,
+            "tileIndex": 0,
+            "tileSec": 1049,
+            "deltaSec": 210
+          },
+          {
+            "pct": 25,
+            "targetSec": 2099,
+            "tileIndex": 1,
+            "tileSec": 3148,
+            "deltaSec": 1049
+          },
+          {
+            "pct": 50,
+            "targetSec": 4197,
+            "tileIndex": 1,
+            "tileSec": 3148,
+            "deltaSec": 1049
+          },
+          {
+            "pct": 75,
+            "targetSec": 6296,
+            "tileIndex": 2,
+            "tileSec": 5247,
+            "deltaSec": 1049
+          },
+          {
+            "pct": 90,
+            "targetSec": 7555,
+            "tileIndex": 3,
+            "tileSec": 7346,
+            "deltaSec": 209
+          },
+          {
+            "pct": 95,
+            "targetSec": 7975,
+            "tileIndex": 3,
+            "tileSec": 7346,
+            "deltaSec": 629
+          }
+        ]
+      },
+      "overallStatus": "Atenção",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [
+        {
+          "type": "transcode_full_hls_audio",
+          "description": "Gerar trilha HLS AAC-LC PT-BR completa (100% da duração) para substituir sidecar de 90s.",
+          "command": "node scripts/generate-full-audio-cache.js 11PUCi0OoEV2hsP5iZW3E-0IPt5bKL6Ka",
+          "estimatedSizeMB": 50
+        }
+      ],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk",
+      "title": "Bird Box",
+      "versionHash": "1sOZ4eAXNWvLH8xy76Y5PZqSvcYm9APAk:1159309072:mp4:7431:m4a0",
+      "sizeBytes": 1159309072,
+      "sizeMB": 1105.6,
+      "container": "mp4",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 7431,
+      "durationDetectedSec": 7431,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MP4)",
+      "durationStatus": "OK (124 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 929,
+            "deltaSec": 929
+          },
+          {
+            "pct": 10,
+            "targetSec": 743,
+            "tileIndex": 0,
+            "tileSec": 929,
+            "deltaSec": 186
+          },
+          {
+            "pct": 25,
+            "targetSec": 1858,
+            "tileIndex": 1,
+            "tileSec": 2786,
+            "deltaSec": 928
+          },
+          {
+            "pct": 50,
+            "targetSec": 3715,
+            "tileIndex": 1,
+            "tileSec": 2786,
+            "deltaSec": 929
+          },
+          {
+            "pct": 75,
+            "targetSec": 5573,
+            "tileIndex": 2,
+            "tileSec": 4644,
+            "deltaSec": 929
+          },
+          {
+            "pct": 90,
+            "targetSec": 6688,
+            "tileIndex": 3,
+            "tileSec": 6502,
+            "deltaSec": 186
+          },
+          {
+            "pct": 95,
+            "targetSec": 7059,
+            "tileIndex": 3,
+            "tileSec": 6502,
+            "deltaSec": 557
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ",
+      "title": "Por Água Abaixo",
+      "versionHash": "10DYzJO7xYqUwVqyaXGtB7mtmDUf_4TlQ:2409627347:mkv:5086:m4a0",
+      "sizeBytes": 2409627347,
+      "sizeMB": 2298,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 1,
+      "durationCatalogSec": 5086,
+      "durationDetectedSec": 5086,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (85 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 636,
+            "deltaSec": 636
+          },
+          {
+            "pct": 10,
+            "targetSec": 509,
+            "tileIndex": 0,
+            "tileSec": 636,
+            "deltaSec": 127
+          },
+          {
+            "pct": 25,
+            "targetSec": 1271,
+            "tileIndex": 0,
+            "tileSec": 636,
+            "deltaSec": 635
+          },
+          {
+            "pct": 50,
+            "targetSec": 2543,
+            "tileIndex": 1,
+            "tileSec": 1907,
+            "deltaSec": 636
+          },
+          {
+            "pct": 75,
+            "targetSec": 3814,
+            "tileIndex": 2,
+            "tileSec": 3179,
+            "deltaSec": 635
+          },
+          {
+            "pct": 90,
+            "targetSec": 4577,
+            "tileIndex": 3,
+            "tileSec": 4450,
+            "deltaSec": 127
+          },
+          {
+            "pct": 95,
+            "targetSec": 4831,
+            "tileIndex": 3,
+            "tileSec": 4450,
+            "deltaSec": 381
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN",
+      "title": "Capitão América Guerra Civil",
+      "versionHash": "1XOa5GObpQn2urVO8EeTl2o7omZCTpwXN:4568442642:mkv:8859:hls1",
+      "sizeBytes": 4568442642,
+      "sizeMB": 4356.8,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "E-AC-3 (Dolby Digital Plus)"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 3,
+      "durationCatalogSec": 8859,
+      "durationDetectedSec": 8859,
+      "uploadStatus": "OK",
+      "audioStatus": "HLS AAC-LC 100% (8859s)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (148 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 1107,
+            "deltaSec": 1107
+          },
+          {
+            "pct": 10,
+            "targetSec": 886,
+            "tileIndex": 0,
+            "tileSec": 1107,
+            "deltaSec": 221
+          },
+          {
+            "pct": 25,
+            "targetSec": 2215,
+            "tileIndex": 1,
+            "tileSec": 3322,
+            "deltaSec": 1107
+          },
+          {
+            "pct": 50,
+            "targetSec": 4429,
+            "tileIndex": 1,
+            "tileSec": 3322,
+            "deltaSec": 1107
+          },
+          {
+            "pct": 75,
+            "targetSec": 6644,
+            "tileIndex": 2,
+            "tileSec": 5537,
+            "deltaSec": 1107
+          },
+          {
+            "pct": 90,
+            "targetSec": 7973,
+            "tileIndex": 3,
+            "tileSec": 7751,
+            "deltaSec": 222
+          },
+          {
+            "pct": 95,
+            "targetSec": 8416,
+            "tileIndex": 3,
+            "tileSec": 7751,
+            "deltaSec": 665
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1UPS01K81aZYh6sofmAUkwBjFYN7D09RH",
+      "title": "Coração Selvagem",
+      "versionHash": "1UPS01K81aZYh6sofmAUkwBjFYN7D09RH:2837889116:mkv:6300:m4a0",
+      "sizeBytes": 2837889116,
+      "sizeMB": 2706.4,
+      "container": "mkv",
+      "videoCodecs": [
+        "H.264 (AVC)"
+      ],
+      "audioCodecs": [
+        "AAC"
+      ],
+      "audioTrackCount": 2,
+      "subtitleTrackCount": 2,
+      "durationCatalogSec": 6300,
+      "durationDetectedSec": 6300,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (AAC)",
+      "videoStatus": "OK (H.264 (AVC) • MKV)",
+      "durationStatus": "OK (105 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 787,
+            "deltaSec": 787
+          },
+          {
+            "pct": 10,
+            "targetSec": 630,
+            "tileIndex": 0,
+            "tileSec": 787,
+            "deltaSec": 157
+          },
+          {
+            "pct": 25,
+            "targetSec": 1575,
+            "tileIndex": 1,
+            "tileSec": 2362,
+            "deltaSec": 787
+          },
+          {
+            "pct": 50,
+            "targetSec": 3150,
+            "tileIndex": 2,
+            "tileSec": 3937,
+            "deltaSec": 787
+          },
+          {
+            "pct": 75,
+            "targetSec": 4725,
+            "tileIndex": 3,
+            "tileSec": 5512,
+            "deltaSec": 787
+          },
+          {
+            "pct": 90,
+            "targetSec": 5670,
+            "tileIndex": 3,
+            "tileSec": 5512,
+            "deltaSec": 158
+          },
+          {
+            "pct": 95,
+            "targetSec": 5985,
+            "tileIndex": 3,
+            "tileSec": 5512,
+            "deltaSec": 473
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV",
+      "title": "Hot Wheels AcceleRacers 1: Ignição",
+      "versionHash": "1iZOHBAZExihvaMAlTSkcqsxYZRqkqULV:3193328516:webm:3606:m4a0",
+      "sizeBytes": 3193328516,
+      "sizeMB": 3045.4,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 3606,
+      "durationDetectedSec": 3606,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (Opus)",
+      "videoStatus": "OK (VP9 • WEBM)",
+      "durationStatus": "OK (60 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 451,
+            "deltaSec": 451
+          },
+          {
+            "pct": 10,
+            "targetSec": 361,
+            "tileIndex": 0,
+            "tileSec": 451,
+            "deltaSec": 90
+          },
+          {
+            "pct": 25,
+            "targetSec": 902,
+            "tileIndex": 1,
+            "tileSec": 1352,
+            "deltaSec": 450
+          },
+          {
+            "pct": 50,
+            "targetSec": 1803,
+            "tileIndex": 1,
+            "tileSec": 1352,
+            "deltaSec": 451
+          },
+          {
+            "pct": 75,
+            "targetSec": 2705,
+            "tileIndex": 3,
+            "tileSec": 3155,
+            "deltaSec": 450
+          },
+          {
+            "pct": 90,
+            "targetSec": 3246,
+            "tileIndex": 3,
+            "tileSec": 3155,
+            "deltaSec": 91
+          },
+          {
+            "pct": 95,
+            "targetSec": 3426,
+            "tileIndex": 3,
+            "tileSec": 3155,
+            "deltaSec": 271
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6",
+      "title": "Hot Wheels AcceleRacers 2: A Velocidade do Silêncio",
+      "versionHash": "1yZDOGrt0uDuxJMV49tKtWZLp08WPMmm6:3437458729:webm:3634:m4a0",
+      "sizeBytes": 3437458729,
+      "sizeMB": 3278.2,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 3634,
+      "durationDetectedSec": 3634,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (Opus)",
+      "videoStatus": "OK (VP9 • WEBM)",
+      "durationStatus": "OK (61 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 454,
+            "deltaSec": 454
+          },
+          {
+            "pct": 10,
+            "targetSec": 363,
+            "tileIndex": 0,
+            "tileSec": 454,
+            "deltaSec": 91
+          },
+          {
+            "pct": 25,
+            "targetSec": 909,
+            "tileIndex": 1,
+            "tileSec": 1363,
+            "deltaSec": 454
+          },
+          {
+            "pct": 50,
+            "targetSec": 1817,
+            "tileIndex": 1,
+            "tileSec": 1363,
+            "deltaSec": 454
+          },
+          {
+            "pct": 75,
+            "targetSec": 2726,
+            "tileIndex": 3,
+            "tileSec": 3180,
+            "deltaSec": 454
+          },
+          {
+            "pct": 90,
+            "targetSec": 3271,
+            "tileIndex": 3,
+            "tileSec": 3180,
+            "deltaSec": 91
+          },
+          {
+            "pct": 95,
+            "targetSec": 3452,
+            "tileIndex": 3,
+            "tileSec": 3180,
+            "deltaSec": 272
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP",
+      "title": "Hot Wheels AcceleRacers 3: Ponto de Ruptura",
+      "versionHash": "1JtQCKY79dzXi4VnicZp-3w3i_j7lKaJP:4053590335:webm:3637:m4a0",
+      "sizeBytes": 4053590335,
+      "sizeMB": 3865.8,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 3637,
+      "durationDetectedSec": 3637,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (Opus)",
+      "videoStatus": "OK (VP9 • WEBM)",
+      "durationStatus": "OK (61 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "Atenção (Regenerar sprite)",
+      "previewValidation": {
+        "valid": false,
+        "totalTiles": 4,
+        "distinctTilesUsed": 3,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 455,
+            "deltaSec": 455
+          },
+          {
+            "pct": 10,
+            "targetSec": 364,
+            "tileIndex": 0,
+            "tileSec": 455,
+            "deltaSec": 91
+          },
+          {
+            "pct": 25,
+            "targetSec": 909,
+            "tileIndex": 0,
+            "tileSec": 455,
+            "deltaSec": 454
+          },
+          {
+            "pct": 50,
+            "targetSec": 1819,
+            "tileIndex": 2,
+            "tileSec": 2273,
+            "deltaSec": 454
+          },
+          {
+            "pct": 75,
+            "targetSec": 2728,
+            "tileIndex": 2,
+            "tileSec": 2273,
+            "deltaSec": 455
+          },
+          {
+            "pct": 90,
+            "targetSec": 3273,
+            "tileIndex": 3,
+            "tileSec": 3183,
+            "deltaSec": 90
+          },
+          {
+            "pct": 95,
+            "targetSec": 3455,
+            "tileIndex": 3,
+            "tileSec": 3183,
+            "deltaSec": 272
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    },
+    {
+      "fileId": "1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr",
+      "title": "Hot Wheels AcceleRacers 4: A Corrida Final",
+      "versionHash": "1ITsZwQ8Bmk35OQRtdpWSz8bKjk-w_Krr:3914516471:webm:3635:m4a0",
+      "sizeBytes": 3914516471,
+      "sizeMB": 3733.2,
+      "container": "webm",
+      "videoCodecs": [
+        "VP9"
+      ],
+      "audioCodecs": [
+        "Opus"
+      ],
+      "audioTrackCount": 1,
+      "subtitleTrackCount": 0,
+      "durationCatalogSec": 3635,
+      "durationDetectedSec": 3635,
+      "uploadStatus": "OK",
+      "audioStatus": "Nativo (Opus)",
+      "videoStatus": "OK (VP9 • WEBM)",
+      "durationStatus": "OK (61 min)",
+      "seekStatus": "OK (HTTP 206 Range)",
+      "previewStatus": "OK (4 quadros + VTT)",
+      "previewValidation": {
+        "valid": true,
+        "totalTiles": 4,
+        "distinctTilesUsed": 4,
+        "precisionMode": "quadrant_sprite_plus_ondemand_ffmpeg",
+        "samplePoints": [
+          {
+            "pct": 0,
+            "targetSec": 0,
+            "tileIndex": 0,
+            "tileSec": 454,
+            "deltaSec": 454
+          },
+          {
+            "pct": 10,
+            "targetSec": 363,
+            "tileIndex": 0,
+            "tileSec": 454,
+            "deltaSec": 91
+          },
+          {
+            "pct": 25,
+            "targetSec": 909,
+            "tileIndex": 1,
+            "tileSec": 1363,
+            "deltaSec": 454
+          },
+          {
+            "pct": 50,
+            "targetSec": 1817,
+            "tileIndex": 1,
+            "tileSec": 1363,
+            "deltaSec": 454
+          },
+          {
+            "pct": 75,
+            "targetSec": 2726,
+            "tileIndex": 2,
+            "tileSec": 2272,
+            "deltaSec": 454
+          },
+          {
+            "pct": 90,
+            "targetSec": 3271,
+            "tileIndex": 3,
+            "tileSec": 3180,
+            "deltaSec": 91
+          },
+          {
+            "pct": 95,
+            "targetSec": 3453,
+            "tileIndex": 3,
+            "tileSec": 3180,
+            "deltaSec": 273
+          }
+        ]
+      },
+      "overallStatus": "Aprovado",
+      "autoFixableIssues": [],
+      "controlledFixProposals": [],
+      "auditedAt": "2026-11-20T21:55:28.911Z"
+    }
+  ],
+  "safeFixesApplied": {
+    "fixedCatalogDurationCount": 0,
+    "fixedVttCount": 29
+  }
+}

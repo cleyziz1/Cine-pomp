@@ -6,6 +6,9 @@
   "vars": {
     "ENVIRONMENT": "production"
   },
+  "triggers": {
+    "crons": ["*/15 * * * *", "0 3 * * *"]
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

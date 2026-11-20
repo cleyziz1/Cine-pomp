@@ -17,6 +17,15 @@ import {
   parseMovieFilename,
   computeTitleSimilarity
 } from './shared/media-utils.mjs';
+import {
+  computeFileVersionHash,
+  auditSingleMovieRecord,
+  runCatalogAudiovisualAudit,
+  AudiovisualAuditQueue
+} from './shared/audiovisual-audit.mjs';
+
+const auditQueue = new AudiovisualAuditQueue({ maxConcurrent: 2, maxRetries: 3 });
+let lastAudiovisualAuditReport = null;
 
 const OFFICIAL_DRIVE_FOLDER_ID = '185iFV7I5x107sxJDTVbSxA9F0pY3GtTr';
 const OFFICIAL_DRIVE_FOLDER_URL = `https://drive.google.com/drive/folders/${OFFICIAL_DRIVE_FOLDER_ID}?usp=drive_link`;
@@ -1437,6 +1446,17 @@ async function reconcileDriveFolderWorker(env, requestUrl, options = {}) {
           catalogUpdatedAt: completedIso,
           durationMs: completedMs - syncStart
         });
+        // Enfileira auditoria idempotente automática após detecção de novo upload ou alteração
+        const reg = await getMediaRegistry(env, requestUrl);
+        const regFiles = (reg && reg.files) || {};
+        for (const mv of cat.movies || []) {
+          if (!mv || !mv.driveFileId) continue;
+          const rEntry = regFiles[mv.driveFileId];
+          const vHash = computeFileVersionHash(mv.driveFileId, rEntry || {}, mv);
+          auditQueue.enqueue(mv.driveFileId, vHash, trigger === 'manual' ? 'manual_sync' : 'upload_detected', async () =>
+            auditSingleMovieRecord(mv, rEntry, null)
+          );
+        }
       }
 
       return {
@@ -1476,11 +1496,42 @@ async function reconcileDriveFolderWorker(env, requestUrl, options = {}) {
   return activeDriveSyncPromise;
 }
 
+async function executeWorkerAudiovisualAudit(env, requestUrl, reason = 'periodic') {
+  const cat = await getCatalog(env, requestUrl);
+  const reg = await getMediaRegistry(env, requestUrl);
+  const regFiles = (reg && reg.files) || {};
+  const movies = (cat.movies || []).map((m) => enrichMovieForWorkerCatalog(m, reg));
+
+  for (const mv of movies) {
+    if (!mv || !mv.driveFileId) continue;
+    const rEntry = regFiles[mv.driveFileId];
+    const vHash = computeFileVersionHash(mv.driveFileId, rEntry || {}, mv);
+    auditQueue.enqueue(mv.driveFileId, vHash, reason, async () => auditSingleMovieRecord(mv, rEntry, null));
+  }
+
+  lastAudiovisualAuditReport = runCatalogAudiovisualAudit(movies, regFiles, {});
+  return {
+    ...lastAudiovisualAuditReport,
+    queue: auditQueue.getSnapshot(),
+    schedule: {
+      fastCheckCron: '*/15 * * * *',
+      deepAuditCron: '0 3 * * *',
+      trigger: reason
+    }
+  };
+}
+
 export default {
   async scheduled(event, env, ctx) {
-    const task = reconcileDriveFolderWorker(env, 'https://cine-pomp.workers.dev/api/drive/catalog', {
-      trigger: 'cron'
-    }).catch(() => {});
+    const cronExpr = (event && event.cron) || '*/15 * * * *';
+    const task = (async () => {
+      await reconcileDriveFolderWorker(env, 'https://cine-pomp.workers.dev/api/drive/catalog', {
+        trigger: `cron:${cronExpr}`
+      }).catch(() => {});
+      await executeWorkerAudiovisualAudit(env, 'https://cine-pomp.workers.dev/api/drive/catalog', `cron:${cronExpr}`).catch(
+        () => {}
+      );
+    })();
     if (ctx && typeof ctx.waitUntil === 'function') {
       ctx.waitUntil(task);
     } else {
@@ -1846,6 +1897,22 @@ export default {
           'Cache-Control': 'no-cache, must-revalidate'
         }
       );
+    }
+
+    if (
+      (path === '/api/admin/audiovisual-audit' && request.method === 'GET') ||
+      (path === '/api/admin/audiovisual-audit/run' && request.method === 'POST')
+    ) {
+      if (!(await verifyAdminRequest(request, env))) {
+        return jsonResponse({ error: 'Acesso negado: restrito ao Administrador.' }, 403);
+      }
+      const isForce = path.endsWith('/run') || url.searchParams.get('force') === '1';
+      const report = await executeWorkerAudiovisualAudit(
+        env,
+        request.url,
+        isForce ? 'manual_force' : 'admin_query'
+      );
+      return jsonResponse(report);
     }
 
     if (path === '/api/drive/sync-status' && request.method === 'GET') {

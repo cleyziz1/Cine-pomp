@@ -1579,41 +1579,90 @@
     cancelEditMovieBtn.addEventListener('click', resetSingleMovieForm);
   }
 
-  async function loadAdminMoviesHealth() {
+  async function loadAdminMoviesHealth(forceRun = false) {
     if (!adminMoviesHealthList || !isAdminUser()) return;
     if (healthSummaryBadge) healthSummaryBadge.textContent = 'verificando...';
+    const kpiContainer = document.getElementById('audiovisualAuditKpis');
     adminMoviesHealthList.innerHTML =
-      '<p style="font-size:0.78rem; color:var(--text-muted);">Analisando saúde dos filmes...</p>';
+      '<p style="font-size:0.78rem; color:var(--text-muted);">Analisando integridade audiovisual dos filmes...</p>';
     try {
-      const res = await fetch('/api/admin/movies-health', { headers: getAdminAuthHeaders() });
-      if (!res.ok) throw new Error('Falha ao carregar saúde');
-      const data = await res.json();
+      const [resHealth, resAudit] = await Promise.all([
+        fetch('/api/admin/movies-health', { headers: getAdminAuthHeaders() }),
+        fetch(forceRun ? '/api/admin/audiovisual-audit/run' : '/api/admin/audiovisual-audit', {
+          method: forceRun ? 'POST' : 'GET',
+          headers: getAdminAuthHeaders()
+        }).catch(() => null)
+      ]);
+      if (!resHealth.ok) throw new Error('Falha ao carregar saúde');
+      const data = await resHealth.json();
+      const auditData = resAudit && resAudit.ok ? await resAudit.json() : null;
       const s = data.summary || {};
+      const as = (auditData && auditData.summary) || null;
+      const q = (auditData && auditData.queue) || null;
+
       if (healthSummaryBadge) {
-        healthSummaryBadge.textContent = `${s.ready || 0}/${s.total || 0} Prontos • ${s.partial || 0} Parciais • ${s.error || 0} Erros`;
+        healthSummaryBadge.textContent = as
+          ? `${as.approved || 0}/${as.totalAudited || s.total || 0} Aprovados • ${as.attention || 0} Atenção • ${as.fixAvailable || 0} Correção Disponível • ${as.criticalError || 0} Críticos`
+          : `${s.ready || 0}/${s.total || 0} Prontos • ${s.partial || 0} Parciais • ${s.error || 0} Erros`;
       }
+
+      if (kpiContainer && as) {
+        const lastTime = as.lastAuditAt ? new Date(as.lastAuditAt).toLocaleTimeString('pt-BR') : '-';
+        const nextTime = as.nextScheduledAuditAt ? new Date(as.nextScheduledAuditAt).toLocaleTimeString('pt-BR') : '-';
+        kpiContainer.innerHTML = `
+          <div style="background:var(--surface-2, #18181f); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+            <div style="color:var(--text-muted);">Cadastrados / Auditados</div>
+            <strong style="color:#fff;">${as.totalRegistered || 0} / ${as.totalAudited || 0}</strong>
+          </div>
+          <div style="background:var(--surface-2, #18181f); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+            <div style="color:var(--text-muted);">Aprovados / Atenção</div>
+            <strong style="color:#4ade80;">${as.approved || 0}</strong> / <strong style="color:#fbbf24;">${as.attention || 0}</strong>
+          </div>
+          <div style="background:var(--surface-2, #18181f); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+            <div style="color:var(--text-muted);">Correção / Críticos</div>
+            <strong style="color:#60a5fa;">${as.fixAvailable || 0}</strong> / <strong style="color:#f87171;">${as.criticalError || 0}</strong>
+          </div>
+          <div style="background:var(--surface-2, #18181f); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+            <div style="color:var(--text-muted);">Fila Idempotente / DLQ</div>
+            <strong style="color:#fff;">${q ? q.completedVersionsCount : 0} ok • ${q ? q.dlqCount : 0} dlq</strong>
+          </div>
+          <div style="background:var(--surface-2, #18181f); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.07);">
+            <div style="color:var(--text-muted);">Última / Próxima (Cron 15m)</div>
+            <strong style="color:#fff;">${escapeHtml(lastTime)} → ${escapeHtml(nextTime)}</strong>
+          </div>
+        `;
+      }
+
+      const auditByFileId = new Map();
+      if (auditData && Array.isArray(auditData.items)) {
+        for (const it of auditData.items) auditByFileId.set(it.fileId, it);
+      }
+
       const list = Array.isArray(data.movies) ? data.movies : [];
       adminMoviesHealthList.innerHTML = list
         .map((m) => {
+          const aItem = auditByFileId.get(m.driveFileId);
+          const statusLabel = (aItem && aItem.overallStatus) || m.overallStatus;
           const badgeColor =
-            m.overallStatus === 'Pronto'
+            statusLabel === 'Aprovado' || statusLabel === 'Pronto'
               ? '#4ade80'
-              : m.overallStatus === 'Erro'
+              : statusLabel === 'Erro crítico' || statusLabel === 'Erro'
               ? '#f87171'
+              : statusLabel === 'Correção disponível'
+              ? '#60a5fa'
               : '#fbbf24';
           return `
             <div class="addon-row-item" style="flex-direction:column; align-items:stretch; gap:4px;">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                 <strong style="font-size:0.8rem;">${escapeHtml(m.title)} (${escapeHtml(m.year || 'HD')})</strong>
-                <span style="font-size:0.72rem; font-weight:700; color:${badgeColor};">${escapeHtml(m.overallStatus)}</span>
+                <span style="font-size:0.72rem; font-weight:700; color:${badgeColor};">${escapeHtml(statusLabel)}</span>
               </div>
               <div style="font-size:0.7rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:8px;">
                 <span>📦 ${escapeHtml((m.container || 'mp4').toUpperCase())} (${m.fileSizeMB || 0} MB)</span>
                 <span>🎞️ ${escapeHtml(m.videoCodec || 'H.264')}</span>
-                <span>🔊 ${escapeHtml(m.audioCodec || 'AAC')} [${escapeHtml(m.compatibleMode || 'native')}]</span>
-                <span>🖼️ Capa: ${m.posterFound ? 'OK' : 'Pendente'} (${escapeHtml(m.posterSource || 'tmdb')})</span>
-                <span>🎞️ Thumbs: ${m.thumbnailsGenerated ? 'OK' : 'Pendente'}</span>
-                ${m.needsReview ? '<span style="color:#fbbf24;">⚠️ Revisar capa</span>' : ''}
+                <span>🔊 ${escapeHtml((aItem && aItem.audioStatus) || `${m.audioCodec || 'AAC'} [${m.compatibleMode || 'native'}]`)}</span>
+                <span>⏱️ ${escapeHtml((aItem && aItem.durationStatus) || 'OK')}</span>
+                <span>🖼️ Preview: ${escapeHtml((aItem && aItem.previewStatus) || (m.thumbnailsGenerated ? 'OK' : 'Pendente'))}</span>
               </div>
             </div>
           `;
@@ -1622,12 +1671,16 @@
     } catch (_) {
       if (healthSummaryBadge) healthSummaryBadge.textContent = 'indisponível';
       adminMoviesHealthList.innerHTML =
-        '<p style="font-size:0.78rem; color:#fca5a5;">Não foi possível consultar /api/admin/movies-health.</p>';
+        '<p style="font-size:0.78rem; color:#fca5a5;">Não foi possível consultar a integridade audiovisual.</p>';
     }
   }
 
   if (refreshMoviesHealthBtn) {
-    refreshMoviesHealthBtn.addEventListener('click', loadAdminMoviesHealth);
+    refreshMoviesHealthBtn.addEventListener('click', () => loadAdminMoviesHealth(false));
+  }
+  const runAudiovisualAuditBtn = document.getElementById('runAudiovisualAuditBtn');
+  if (runAudiovisualAuditBtn) {
+    runAudiovisualAuditBtn.addEventListener('click', () => loadAdminMoviesHealth(true));
   }
 
   function openDriveManager() {
@@ -2993,7 +3046,15 @@
     if (!url) return;
 
     const effectivePlayback = { ...(playback || {}) };
-    if ((!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) && roomState && roomState.participantCount <= 1) {
+    const isMkvMedia =
+      String(media.container || '').toLowerCase() === 'mkv' ||
+      /\.mkv($|\?)/i.test(String(media.fileName || media.rawUrl || ''));
+    if (
+      !isMkvMedia &&
+      (!effectivePlayback.currentTime || effectivePlayback.currentTime === 0) &&
+      roomState &&
+      roomState.participantCount <= 1
+    ) {
       const savedPos = getResumePosition(media.id);
       if (savedPos > 5) {
         effectivePlayback.currentTime = savedPos;
@@ -3366,15 +3427,20 @@
     const tileH = Number(meta && meta.height) || Math.floor(img.naturalHeight / rows) || 90;
 
     let tile = null;
+    let chosenIdx = 0;
     if (tiles.length > 0) {
-      tile = tiles.reduce((best, cur) =>
-        Math.abs((cur.t || 0) - targetSec) < Math.abs((best.t || 0) - targetSec) ? cur : best
-      );
+      for (let i = 0; i < tiles.length; i++) {
+        if (Math.abs((tiles[i].t || 0) - targetSec) < Math.abs(((tile && tile.t) || 0) - targetSec) || !tile) {
+          tile = tiles[i];
+          chosenIdx = typeof tiles[i].tileIndex === 'number' ? tiles[i].tileIndex : i;
+        }
+      }
     } else {
       const dur = Math.max(1, Number(meta && meta.duration) || getEffectiveDuration() || 1);
       const total = cols * rows;
-      const idx = Math.min(total - 1, Math.max(0, Math.floor((targetSec / dur) * total)));
-      tile = { x: (idx % cols) * tileW, y: Math.floor(idx / cols) * tileH, w: tileW, h: tileH };
+      chosenIdx = Math.min(total - 1, Math.max(0, Math.floor((targetSec / dur) * total)));
+      const approxT = Math.round(((chosenIdx + 0.5) / total) * dur);
+      tile = { tileIndex: chosenIdx, t: approxT, x: (chosenIdx % cols) * tileW, y: Math.floor(chosenIdx / cols) * tileH, w: tileW, h: tileH };
     }
 
     try {
@@ -3383,7 +3449,13 @@
       canvas.height = tile.h || tileH;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, tile.x || 0, tile.y || 0, tile.w || tileW, tile.h || tileH, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL('image/jpeg', 0.85);
+      const tileTime = typeof tile.t === 'number' ? tile.t : 0;
+      return {
+        dataUrl: canvas.toDataURL('image/jpeg', 0.85),
+        tileIndex: chosenIdx,
+        tileTime,
+        deltaSec: Math.abs(tileTime - targetSec)
+      };
     } catch (_) {
       return null;
     }
@@ -3401,26 +3473,33 @@
     lastPreviewFileId = fileId;
     lastPreviewSnappedSec = snapped;
 
-    // 1. Tenta crop instantâneo (< 1ms) do sprite sheet local/deploy (/media_cache/<fileId>/sprite.jpg)
-    const meta = clientThumbMetaCache.get(fileId);
-    if (meta && meta.spriteUrl && !clientSpriteImageCache.has(fileId)) {
-      preloadSpriteImageForFile(fileId, meta.spriteUrl);
-    }
-    const spriteTileUrl = renderSpriteTileForTimestamp(fileId, targetSec, meta);
-    if (spriteTileUrl) {
-      clientThumbFrameCache.set(cacheKey, spriteTileUrl);
-      seekPreviewImg.src = spriteTileUrl;
+    // 1. Se já temos o frame exato em cache (extraído via FFmpeg ou sprite preciso), exibe imediatamente
+    const cached = clientThumbFrameCache.get(cacheKey);
+    if (cached && cached !== 'loading' && cached !== 'error') {
+      seekPreviewImg.src = cached;
+      seekPreviewImg.dataset.tileTimestamp = String(snapped);
       seekPreviewImg.classList.remove('hidden');
       seekPreviewPlaceholder.classList.add('hidden');
       return;
     }
 
-    const cached = clientThumbFrameCache.get(cacheKey);
-    if (cached && cached !== 'loading' && cached !== 'error') {
-      seekPreviewImg.src = cached;
+    // 2. Exibe crop instantâneo (< 1ms) do sprite sheet (/media_cache/<fileId>/sprite.jpg)
+    const meta = clientThumbMetaCache.get(fileId);
+    if (meta && meta.spriteUrl && !clientSpriteImageCache.has(fileId)) {
+      preloadSpriteImageForFile(fileId, meta.spriteUrl);
+    }
+    const spriteMatch = renderSpriteTileForTimestamp(fileId, targetSec, meta);
+    if (spriteMatch && spriteMatch.dataUrl) {
+      seekPreviewImg.src = spriteMatch.dataUrl;
+      seekPreviewImg.dataset.tileIndex = String(spriteMatch.tileIndex);
+      seekPreviewImg.dataset.tileTimestamp = String(spriteMatch.tileTime);
       seekPreviewImg.classList.remove('hidden');
       seekPreviewPlaceholder.classList.add('hidden');
-      return;
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (spriteMatch.deltaSec <= 180 || !isLocal) {
+        clientThumbFrameCache.set(cacheKey, spriteMatch.dataUrl);
+        return;
+      }
     }
 
     if (thumbFetchDebounceTimer) clearTimeout(thumbFetchDebounceTimer);
