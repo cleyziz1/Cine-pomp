@@ -168,7 +168,10 @@ export function patchEbmlHeaderForUnsupportedAudio(inputBytes) {
     headerAscii += String.fromCharCode.apply(null, view.subarray(i, Math.min(scanLen, i + 4096)));
   }
 
-  const unsupportedTokens = ['A_AC3', 'A_EAC3', 'A_DTS'];
+  // Mascara SEMPRE A_EAC3 e A_DTS (evita travamento do demuxer Chromium em MKV E-AC-3 sem A_AAC, ex: Guerra Civil)
+  // e mascara A_AC3 apenas quando A_AAC coexiste (Dual-Audio MKV, preservando demuxing rápido em MKVs AC-3 puros como Harry Potter 3).
+  const hasAac = headerAscii.includes('A_AAC');
+  const unsupportedTokens = hasAac ? ['A_AC3', 'A_EAC3', 'A_DTS'] : ['A_EAC3', 'A_DTS'];
   const codecPositions = [];
   for (const token of unsupportedTokens) {
     let from = 0;
