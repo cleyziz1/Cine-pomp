@@ -10,6 +10,38 @@ export const SECURITY_HEADERS = Object.freeze({
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
 });
 
+export function isAllowedCorsOrigin(origin, extraOriginsCsv = '') {
+  if (!origin) return false;
+  const clean = String(origin).trim().toLowerCase();
+  if (
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(clean) ||
+    /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(clean) ||
+    /^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev$/.test(clean)
+  ) {
+    return true;
+  }
+  if (extraOriginsCsv) {
+    const extras = String(extraOriginsCsv)
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (extras.includes(clean)) return true;
+  }
+  return false;
+}
+
+export function buildCorsHeaders(origin, extraOriginsCsv = '') {
+  if (!isAllowedCorsOrigin(origin, extraOriginsCsv)) return {};
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Range, If-None-Match, X-Request-Id',
+    'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges, ETag, X-Request-Id, Content-Disposition',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin'
+  };
+}
+
 export function generateRequestId() {
   return `cp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }

@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "lint": "node -c server.js && node -c src/worker.js && node -c src/shared/media-utils.mjs && node -c public/app.js && node -c scripts/prepare-vercel.js",
+    "build:vercel": "node scripts/prepare-vercel.js",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

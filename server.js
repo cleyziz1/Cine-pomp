@@ -262,6 +262,40 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'cine-pompeia-node-server',
+    environment: process.env.NODE_ENV || 'development',
+    officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+    totalMovies: Array.isArray(driveCatalog.movies) ? driveCatalog.movies.length : 0,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/videos/:id/download', async (req, res) => {
+  const fileId = req.params.id;
+  if (!isValidDriveFileId(fileId)) {
+    return res.status(400).json({ error: 'ID de arquivo inválido.' });
+  }
+  const meta = await getDriveFileMetadata(fileId).catch(() => null);
+  const safeName = String((meta && meta.name) || `${fileId}.mp4`).replace(/["\\\r\n]/g, '_');
+  if (req.method === 'HEAD') {
+    res.setHeader('Content-Type', (meta && meta.mimeType) || 'application/octet-stream');
+    if (meta && meta.size) res.setHeader('Content-Length', String(meta.size));
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).end();
+  }
+  const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
+    fileId
+  )}&export=download&confirm=t`;
+  res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+  res.setHeader('Cache-Control', 'no-store');
+  return res.redirect(302, directDownloadUrl);
+});
+
 app.get('/api/auth/me', (req, res) => {
   const isAdmin = isRequestAdmin(req);
   res.json({

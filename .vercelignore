@@ -1,0 +1,12 @@
+# Evita duplicação de ~200 MB de mídia/HLS na Vercel (servidos pela Cloudflare)
+public/media_cache/
+prepared_media/
+custom_streams.json
+server.js
+api/
+tests/
+scripts/generate-full-audio-cache.js
+.env
+.env.local
+.git/
+node_modules/

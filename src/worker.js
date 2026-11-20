@@ -5,6 +5,7 @@
 
 import {
   SECURITY_HEADERS,
+  buildCorsHeaders,
   generateRequestId,
   constantTimeEqual,
   isValidDriveFileId,
@@ -1489,11 +1490,29 @@ export default {
 
   async fetch(request, env, ctx) {
     const requestId = request.headers.get('x-request-id') || generateRequestId();
+    const origin = request.headers.get('origin') || '';
+    const corsHeaders = buildCorsHeaders(origin, env && env.ALLOWED_ORIGINS);
+
+    // Preflight CORS para arquitetura híbrida (Front-end Vercel -> Back-end Cloudflare)
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          ...SECURITY_HEADERS,
+          ...corsHeaders,
+          'X-Request-Id': requestId
+        }
+      });
+    }
+
     const res = await this._handleRequest(request, env, ctx, requestId);
     const outHeaders = new Headers(res.headers);
     outHeaders.set('X-Request-Id', requestId);
     for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
       if (!outHeaders.has(k)) outHeaders.set(k, v);
+    }
+    for (const [k, v] of Object.entries(corsHeaders)) {
+      outHeaders.set(k, v);
     }
     return new Response(res.body, {
       status: res.status,
@@ -1505,6 +1524,19 @@ export default {
   async _handleRequest(request, env, ctx, requestId) {
     const url = new URL(request.url);
     const path = url.pathname;
+
+    // Health-check leve para monitoramento da arquitetura híbrida (Vercel <-> Cloudflare)
+    if (path === '/api/health' && (request.method === 'GET' || request.method === 'HEAD')) {
+      return jsonResponse({
+        status: 'ok',
+        service: 'cine-pompeia-cloudflare-worker',
+        environment: (env && env.ENVIRONMENT) || 'production',
+        officialFolderId: OFFICIAL_DRIVE_FOLDER_ID,
+        syncStatus: lastAutoSyncState.status,
+        lastReconciledAt: lastAutoSyncState.lastCompletedAt,
+        timestamp: new Date().toISOString()
+      });
+    }
 
     // 0. Autenticação e RBAC (/api/auth/*) com rate limiting + comparação em tempo constante
     if (path === '/api/auth/login' && request.method === 'POST') {
@@ -1549,6 +1581,41 @@ export default {
       path.match(/^\/api\/gdrive\/stream\/([a-zA-Z0-9_-]+)$/);
     if (streamMatch) {
       return handleStream(request, env, streamMatch[1]);
+    }
+
+    // 1b. Download direto seguro sem carregar o filme na memória do Worker (/api/videos/:id/download)
+    const downloadMatch = path.match(/^\/api\/videos\/([a-zA-Z0-9_-]+)\/download$/);
+    if (downloadMatch && (request.method === 'GET' || request.method === 'HEAD')) {
+      const fileId = downloadMatch[1];
+      if (!isValidDriveFileId(fileId)) {
+        return jsonResponse({ error: 'ID de arquivo inválido.' }, 400);
+      }
+      const meta = await getDriveFileMetadata(fileId, env, { requestUrl: request.url });
+      if (meta.errorStatus) return jsonResponse({ error: meta.error }, meta.errorStatus);
+      const safeName = String(meta.name || `${fileId}.mp4`).replace(/["\\\r\n]/g, '_');
+      if (request.method === 'HEAD') {
+        return new Response(null, {
+          status: 200,
+          headers: {
+            'Content-Type': meta.mimeType || 'application/octet-stream',
+            'Content-Length': String(meta.size || 0),
+            'Content-Disposition': `attachment; filename="${safeName}"`,
+            'Accept-Ranges': 'bytes',
+            'Cache-Control': 'no-store'
+          }
+        });
+      }
+      const directDownloadUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(
+        fileId
+      )}&export=download&confirm=t`;
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: directDownloadUrl,
+          'Content-Disposition': `attachment; filename="${safeName}"`,
+          'Cache-Control': 'no-store'
+        }
+      });
     }
 
     // 2. Metadados do vídeo (/api/videos/:id/meta ou /api/gdrive/meta/:fileId)
