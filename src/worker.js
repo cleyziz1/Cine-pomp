@@ -629,9 +629,17 @@ async function probeMediaCodecsWorker(fileId, env, requestUrl) {
       primaryTrackCompat: primaryCompat,
       isEbmlRemappableDual: isEbmlDual,
       hasSidecarAudio0: hasSidecar,
-      sidecarAudioUrl: regEntry.sidecarAudioUrl || (hasSidecar ? `/media_cache/${fileId}/audio_0.m4a` : null),
+      sidecarAudioHlsUrl: regEntry.sidecarAudioHlsUrl || null,
+      sidecarAudioUrl:
+        regEntry.sidecarAudioHlsUrl ||
+        regEntry.sidecarAudioUrl ||
+        (hasSidecar ? `/media_cache/${fileId}/audio_0.m4a` : null),
+      sidecarAudioDurationSec: Number(regEntry.sidecarAudioDurationSec || 0),
+      sidecarAudioComplete: regEntry.sidecarAudioComplete !== false,
       hasCompatMp4,
       compatMp4Url: regEntry.compatMp4Url || null,
+      compatDurationSec: Number(regEntry.compatDurationSec || 0),
+      compatComplete: regEntry.compatComplete !== false,
       requiresSidecarAudio: !primaryCompat && hasSidecar,
       requiresAudioFallbackOrRemux: hasCompatMp4,
       recommendedCustomPlayerUrl,
@@ -791,8 +799,21 @@ async function handleStream(request, env, fileId) {
   }
 
   const totalSize = meta.size;
-  const MAX_CHUNK_BYTES = 4 * 1024 * 1024;
+  const MAX_CHUNK_BYTES = 8 * 1024 * 1024;
   const rangeHeader = request.headers.get('range');
+
+  if (request.method === 'HEAD') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Content-Type': meta.mimeType,
+        'Content-Length': String(totalSize),
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'private, max-age=3600',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
+  }
 
   let start = 0;
   let end = Math.min(MAX_CHUNK_BYTES - 1, totalSize - 1);
@@ -858,10 +879,37 @@ async function handleStream(request, env, fileId) {
     )}?alt=media&supportsAllDrives=true&key=${encodeURIComponent(googleApiKey)}`;
   }
 
-  const upstream = await fetch(upstreamUrl, {
-    headers: upstreamHeaders,
-    redirect: 'follow'
-  });
+  // Retry controlado (máx. 2 tentativas) apenas para falhas transitórias do Google Drive (5xx / 429 / rede)
+  let upstream = null;
+  let lastFetchErr = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(upstreamUrl, {
+        headers: upstreamHeaders,
+        redirect: 'follow'
+      });
+      if (res.status === 206 || res.status === 200) {
+        upstream = res;
+        break;
+      }
+      upstream = res;
+      if (![429, 500, 502, 503, 504].includes(res.status) || attempt === 1) {
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 350 * (attempt + 1)));
+    } catch (err) {
+      lastFetchErr = err;
+      if (attempt === 1) break;
+      await new Promise((r) => setTimeout(r, 350 * (attempt + 1)));
+    }
+  }
+
+  if (!upstream) {
+    return jsonResponse(
+      { error: 'Falha transitória de rede ao obter fluxo do Google Drive: ' + (lastFetchErr ? lastFetchErr.message : '') },
+      502
+    );
+  }
 
   if (!upstream.ok && upstream.status !== 206) {
     return jsonResponse({ error: 'Falha ao obter fluxo de vídeo do Google Drive.' }, upstream.status);
@@ -875,15 +923,33 @@ async function handleStream(request, env, fileId) {
     );
   }
 
+  // Proteção contra corrupção de stream: se pedimos start > 0 e o Drive ignorou Range retornando 200 (byte 0),
+  // jamais empacotar como 206 com Content-Range falso!
+  if (start > 0 && upstream.status === 200) {
+    try {
+      upstream.body && upstream.body.cancel();
+    } catch (_) {}
+    return jsonResponse(
+      { error: 'Origem retornou fluxo completo (200) para requisição parcial (Range > 0).' },
+      502
+    );
+  }
+
   const chunkLen = end - start + 1;
+  const upstreamContentRange = upstream.headers.get('content-range');
+  const upstreamContentLength = upstream.headers.get('content-length');
+  const effectiveStatus = rangeHeader || upstream.status === 206 ? 206 : 200;
   const responseHeaders = {
     'Content-Type': meta.mimeType,
-    'Content-Range': `bytes ${start}-${end}/${totalSize}`,
-    'Content-Length': String(chunkLen),
+    'Content-Length':
+      effectiveStatus === 200 && upstreamContentLength ? upstreamContentLength : String(chunkLen),
     'Accept-Ranges': 'bytes',
     'Cache-Control': 'private, max-age=3600',
     'X-Content-Type-Options': 'nosniff'
   };
+  if (effectiveStatus === 206) {
+    responseHeaders['Content-Range'] = upstreamContentRange || `bytes ${start}-${end}/${totalSize}`;
+  }
 
   // Quando start === 0 em arquivo MKV Dual Audio (AC-3/E-AC-3 + AAC), aplica o remapeamento EBML de 1 byte
   // no primeiro bloco para que o <video> selecione nativamente a faixa AAC sem alterar offsets de Range!
@@ -945,13 +1011,13 @@ async function handleStream(request, env, fileId) {
     });
 
     return new Response(transformedStream, {
-      status: 206,
+      status: effectiveStatus,
       headers: responseHeaders
     });
   }
 
   return new Response(upstream.body, {
-    status: 206,
+    status: effectiveStatus,
     headers: responseHeaders
   });
 }
@@ -994,7 +1060,10 @@ function enrichMovieForWorkerCatalog(movie, reg) {
     enriched.videoCodecs = regEntry.videoCodecs || ['H.264 (AVC)'];
     enriched.audioCodecs = regEntry.audioCodecs || ['AAC'];
     enriched.hasSidecarAudio0 = Boolean(regEntry.hasSidecarAudio0);
-    enriched.sidecarAudioUrl = regEntry.sidecarAudioUrl || null;
+    enriched.sidecarAudioHlsUrl = regEntry.sidecarAudioHlsUrl || null;
+    enriched.sidecarAudioUrl = regEntry.sidecarAudioHlsUrl || regEntry.sidecarAudioUrl || null;
+    enriched.sidecarAudioDurationSec = Number(regEntry.sidecarAudioDurationSec || 0);
+    enriched.sidecarAudioComplete = regEntry.sidecarAudioComplete !== false;
     enriched.isEbmlRemappableDual = Boolean(regEntry.isEbmlRemappableDual);
     enriched.requiresSidecarAudio = Boolean(!regEntry.primaryTrackCompat && regEntry.hasSidecarAudio0);
     enriched.requiresAudioFallbackOrRemux = hasCompatMp4;
@@ -1267,33 +1336,45 @@ export default {
         const hasPoster = Boolean(m.poster && !m.poster.includes('placehold.co'));
         const vCodec = (regEntry && regEntry.videoCodecs && regEntry.videoCodecs.join(', ')) || 'H.264 (AVC)';
         const aCodec = (regEntry && regEntry.audioCodecs && regEntry.audioCodecs.join(', ')) || 'AAC';
+        const sidecarComplete = Boolean(!regEntry || regEntry.primaryTrackCompat || regEntry.sidecarAudioComplete !== false);
+        const compatComplete = Boolean(!regEntry || !regEntry.hasCompatMp4 || regEntry.compatComplete !== false);
         const compatAvailable = Boolean(
           !regEntry ||
             regEntry.primaryTrackCompat ||
             regEntry.isEbmlRemappableDual ||
-            regEntry.hasSidecarAudio0 ||
-            regEntry.hasCompatMp4
+            (regEntry.hasSidecarAudio0 && sidecarComplete) ||
+            (regEntry.hasCompatMp4 && compatComplete)
         );
         const compatMode = !regEntry
           ? 'native_stream'
           : regEntry.primaryTrackCompat
           ? 'native_aac_opus_mp3'
+          : regEntry.sidecarAudioHlsUrl
+          ? 'sidecar_aac_hls_full'
           : regEntry.isEbmlRemappableDual
           ? 'ebml_dual_aac_plus_sidecar_ptbr'
           : regEntry.hasSidecarAudio0
-          ? 'sidecar_aac_m4a'
+          ? sidecarComplete
+            ? 'sidecar_aac_m4a'
+            : 'sidecar_aac_truncated'
           : regEntry.hasCompatMp4
-          ? 'compat_mp4_h264_aac'
+          ? compatComplete
+            ? 'compat_mp4_h264_aac'
+            : 'compat_mp4_truncated'
           : 'native_stream';
         const hasThumbs = Boolean(!regEntry || regEntry.hasThumbnailsSprite !== false);
         const errors = [];
         if (!hasOriginal) errors.push('Arquivo original ausente ou sem tamanho.');
-        if (!compatAvailable) errors.push('Versão de áudio compatível pendente.');
+        if (!compatAvailable && !regEntry?.hasSidecarAudio0 && !regEntry?.hasCompatMp4) {
+          errors.push('Versão de áudio compatível pendente.');
+        }
 
+        const isFullyReady =
+          hasOriginal && hasMeta && hasPoster && compatAvailable && sidecarComplete && compatComplete && hasThumbs;
         const overallStatus =
           errors.length > 0
             ? 'Erro'
-            : hasOriginal && hasMeta && hasPoster && compatAvailable && hasThumbs
+            : isFullyReady
             ? 'Pronto'
             : 'Parcialmente disponível';
 

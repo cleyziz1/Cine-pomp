@@ -591,10 +591,19 @@ function enrichMovieWithPlaybackInfo(movie) {
     (audioTracks.length > 0
       ? Boolean(audioTracks[0].browserSupported)
       : (cachedDiag.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
+  const hasSidecarHls0 =
+    Boolean(cachedDiag.sidecarAudioHlsUrl) ||
+    fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0', 'index.m3u8'));
   const hasSidecarAudio0 =
+    hasSidecarHls0 ||
     Boolean(cachedDiag.hasSidecarAudio0) ||
     fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a'));
-  const sidecarAudioUrl = hasSidecarAudio0
+  const sidecarAudioHlsUrl = hasSidecarHls0
+    ? `/media_cache/${fileId}/audio_0/index.m3u8`
+    : null;
+  const sidecarAudioUrl = sidecarAudioHlsUrl
+    ? sidecarAudioHlsUrl
+    : hasSidecarAudio0
     ? `/media_cache/${fileId}/audio_0.m4a`
     : `/api/videos/${fileId}/audio-stream.m4a?track=0`;
 
@@ -614,7 +623,10 @@ function enrichMovieWithPlaybackInfo(movie) {
     videoCodecs: cachedDiag.videoCodecs || ['H.264 (AVC)'],
     audioCodecs: cachedDiag.audioCodecs || ['AAC'],
     hasSidecarAudio0,
+    sidecarAudioHlsUrl,
     sidecarAudioUrl,
+    sidecarAudioDurationSec: Number(cachedDiag.sidecarAudioDurationSec || 0),
+    sidecarAudioComplete: hasSidecarHls0 || cachedDiag.sidecarAudioComplete !== false,
     isEbmlRemappableDual: Boolean(cachedDiag.isEbmlRemappableDual),
     requiresSidecarAudio: !primaryTrackCompat && cachedDiag.container !== 'avi' && !preparedMp4,
     requiresAudioFallbackOrRemux: hasCompatMp4,
@@ -2063,9 +2075,14 @@ function hydrateCachesFromMediaRegistry() {
         (audioTracks.length > 0
           ? Boolean(audioTracks[0].browserSupported)
           : (entry.audioCodecs || []).some((c) => ['AAC', 'Opus', 'Vorbis', 'MP3'].includes(c)));
+      const hasSidecarHls =
+        Boolean(entry.sidecarAudioHlsUrl) ||
+        fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0', 'index.m3u8'));
       const hasSidecar =
+        hasSidecarHls ||
         Boolean(entry.hasSidecarAudio0) ||
         fs.existsSync(path.join(PUBLIC_MEDIA_CACHE_DIR, fileId, 'audio_0.m4a'));
+      const sidecarHlsUrl = hasSidecarHls ? `/media_cache/${fileId}/audio_0/index.m3u8` : null;
       const isEbmlDual = Boolean(entry.isEbmlRemappableDual);
       const hasCompatMp4 =
         Boolean(entry.hasCompatMp4) ||
@@ -2098,9 +2115,14 @@ function hydrateCachesFromMediaRegistry() {
         primaryTrackCompat,
         isEbmlRemappableDual: isEbmlDual,
         hasSidecarAudio0: hasSidecar,
-        sidecarAudioUrl: hasSidecar
+        sidecarAudioHlsUrl: sidecarHlsUrl,
+        sidecarAudioUrl: sidecarHlsUrl
+          ? sidecarHlsUrl
+          : hasSidecar
           ? `/media_cache/${fileId}/audio_0.m4a`
           : `/api/videos/${fileId}/audio-stream.m4a?track=0`,
+        sidecarAudioDurationSec: Number(entry.sidecarAudioDurationSec || 0),
+        sidecarAudioComplete: hasSidecarHls || entry.sidecarAudioComplete !== false,
         hasCompatMp4,
         compatMp4Url: hasCompatMp4 ? `/media_cache/${fileId}/compat.mp4` : null,
         requiresSidecarAudio: !primaryTrackCompat && entry.container !== 'avi' && !preparedPath,

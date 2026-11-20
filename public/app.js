@@ -2134,29 +2134,85 @@
   let compatSidecarFileId = '';
   let compatSidecarTrackIdx = 0;
   let compatSidecarOffsetSec = 0;
+  let compatSidecarHls = null;
+  let compatSidecarCurrentUrl = '';
+  let compatSidecarLastHardSeekAt = 0;
+  let compatSidecarWaiting = false;
+  let compatSidecarRecoveryAttempts = 0;
+  let userAudioMuted = false;
+  let userAudioVolume = 1;
+
+  // Telemetria estruturada de áudio/vídeo para auditoria em produção e localhost
+  const cineAudioTelemetry = {
+    events: [],
+    hardSeeks: 0,
+    recoveries: 0,
+    log(source, type, detail = {}) {
+      this.events.push({
+        ts: Date.now(),
+        source,
+        type,
+        vTime: Number((nativeVideo && nativeVideo.currentTime) || 0).toFixed(2),
+        aTime: Number((compatSidecarAudio && compatSidecarAudio.currentTime) || 0).toFixed(2),
+        ...detail
+      });
+      if (this.events.length > 200) this.events.shift();
+    }
+  };
+  window.__cineAudioTelemetry = cineAudioTelemetry;
+
+  function destroyCompatSidecarHls() {
+    if (compatSidecarHls) {
+      try {
+        compatSidecarHls.destroy();
+      } catch (_) {}
+      compatSidecarHls = null;
+    }
+  }
+
+  function applyAudioMuteAndVolumeUi() {
+    const effectivelyMuted = userAudioMuted || userAudioVolume === 0;
+    if (nativeMuteBtn) nativeMuteBtn.textContent = effectivelyMuted ? '🔇' : '🔊';
+    if (nativeVolumeBar) nativeVolumeBar.value = String(effectivelyMuted ? 0 : userAudioVolume);
+    if (compatSidecarAudioActive && compatSidecarAudio) {
+      // Muta o <video> internamente para evitar áudio duplo em MKV Dual-Audio (ex.: EN no <video> + PT-BR no <audio>)
+      if (!nativeVideo.muted) nativeVideo.muted = true;
+      compatSidecarAudio.muted = effectivelyMuted;
+      compatSidecarAudio.volume = userAudioVolume;
+    } else {
+      nativeVideo.muted = effectivelyMuted;
+      nativeVideo.volume = userAudioVolume;
+    }
+  }
 
   function stopCompatSidecarAudio() {
     compatSidecarAudioActive = false;
     compatSidecarFileId = '';
     compatSidecarOffsetSec = 0;
-    if (!compatSidecarAudio) return;
-    try {
-      compatSidecarAudio.pause();
-      compatSidecarAudio.removeAttribute('src');
-      compatSidecarAudio.load();
-    } catch (_) {}
+    compatSidecarCurrentUrl = '';
+    compatSidecarWaiting = false;
+    compatSidecarRecoveryAttempts = 0;
+    destroyCompatSidecarHls();
+    if (compatSidecarAudio) {
+      try {
+        compatSidecarAudio.pause();
+        compatSidecarAudio.removeAttribute('src');
+        compatSidecarAudio.load();
+      } catch (_) {}
+    }
+    applyAudioMuteAndVolumeUi();
   }
 
   function syncCompatSidecarAudio(forceSeek = false) {
     if (!compatSidecarAudioActive || !compatSidecarAudio) return;
-    compatSidecarAudio.volume = nativeVideo.volume;
-    compatSidecarAudio.muted = nativeVideo.muted;
-    compatSidecarAudio.playbackRate = nativeVideo.playbackRate || 1;
+    applyAudioMuteAndVolumeUi();
 
+    const baseRate = nativeVideo.playbackRate || 1;
     const videoTime = nativeVideo.currentTime || 0;
     const targetAudioTime = Math.max(0, videoTime - compatSidecarOffsetSec);
 
     if (nativeVideo.paused || nativeVideo.ended || nativeVideo.readyState < 2) {
+      compatSidecarAudio.playbackRate = baseRate;
       if (!compatSidecarAudio.paused) {
         try {
           compatSidecarAudio.pause();
@@ -2165,36 +2221,65 @@
       if (forceSeek && Number.isFinite(targetAudioTime) && compatSidecarAudio.readyState >= 1) {
         const maxDur = Number.isFinite(compatSidecarAudio.duration) ? compatSidecarAudio.duration : Infinity;
         if (targetAudioTime < maxDur) {
-          compatSidecarAudio.currentTime = targetAudioTime;
+          try {
+            compatSidecarAudio.currentTime = targetAudioTime;
+            compatSidecarLastHardSeekAt = Date.now();
+          } catch (_) {}
         }
       }
       return;
     }
 
-    // Se o áudio sidecar em cache (/media_cache/<id>/audio_0.m4a) tiver duração menor que o seek atual e estivermos no localhost,
-    // muda dinamicamente para /api/videos/:id/audio-stream.m4a?start=<sec>
+    // Se o sidecar estático for menor que a posição atual (ex.: arquivo truncado antigo) e estivermos no localhost,
+    // comuta dinamicamente para /api/videos/:id/audio-stream.m4a?start=<sec> (FFmpeg completo)
     const maxDur = Number.isFinite(compatSidecarAudio.duration) ? compatSidecarAudio.duration : 0;
-    if (maxDur > 5 && targetAudioTime >= maxDur - 0.5 && window.location.hostname === 'localhost') {
+    if (
+      !compatSidecarHls &&
+      maxDur > 5 &&
+      targetAudioTime >= maxDur - 0.5 &&
+      window.location.hostname === 'localhost'
+    ) {
       const seekSec = Math.floor(videoTime);
       compatSidecarOffsetSec = seekSec;
-      compatSidecarAudio.src = `/api/videos/${encodeURIComponent(compatSidecarFileId)}/audio-stream.m4a?track=${compatSidecarTrackIdx}&start=${seekSec}`;
+      const dynUrl = `/api/videos/${encodeURIComponent(compatSidecarFileId)}/audio-stream.m4a?track=${compatSidecarTrackIdx}&start=${seekSec}`;
+      compatSidecarCurrentUrl = dynUrl;
+      compatSidecarAudio.src = dynUrl;
       compatSidecarAudio.load();
       compatSidecarAudio.play().catch(() => {});
       return;
     }
 
-    if (maxDur > 0 && targetAudioTime >= maxDur) {
+    if (maxDur > 0 && targetAudioTime >= maxDur && !compatSidecarHls) {
       if (!compatSidecarAudio.paused) compatSidecarAudio.pause();
       return;
     }
 
-    if (
-      compatSidecarAudio.readyState >= 1 &&
-      (forceSeek || Math.abs((compatSidecarAudio.currentTime || 0) - targetAudioTime) > 0.14)
-    ) {
-      try {
-        compatSidecarAudio.currentTime = targetAudioTime;
-      } catch (_) {}
+    // Evita hard-seek enquanto o elemento <audio> está fazendo buffering (evita loops de corte!)
+    if (!forceSeek && compatSidecarWaiting) {
+      return;
+    }
+
+    if (compatSidecarAudio.readyState >= 1) {
+      const audioTime = compatSidecarAudio.currentTime || 0;
+      const drift = targetAudioTime - audioTime; // > 0: áudio atrasado; < 0: áudio adiantado
+      const absDrift = Math.abs(drift);
+      const now = Date.now();
+
+      if (forceSeek || (absDrift > 0.5 && now - compatSidecarLastHardSeekAt > 1500)) {
+        try {
+          compatSidecarAudio.playbackRate = baseRate;
+          compatSidecarAudio.currentTime = targetAudioTime;
+          compatSidecarLastHardSeekAt = now;
+          cineAudioTelemetry.hardSeeks++;
+          cineAudioTelemetry.log('sidecar', 'hardSeek', { drift: Number(drift.toFixed(3)), forceSeek });
+        } catch (_) {}
+      } else if (absDrift > 0.12) {
+        // Correção suave via playbackRate (±2%) sem limpar o buffer de áudio
+        const nudge = drift > 0 ? 1.02 : 0.98;
+        compatSidecarAudio.playbackRate = Number((baseRate * nudge).toFixed(3));
+      } else if (compatSidecarAudio.playbackRate !== baseRate) {
+        compatSidecarAudio.playbackRate = baseRate;
+      }
     }
 
     if (compatSidecarAudio.paused) {
@@ -2202,29 +2287,113 @@
     }
   }
 
+  function loadSidecarAudioSource(targetUrl) {
+    if (!compatSidecarAudio || !targetUrl) return;
+    if (compatSidecarCurrentUrl === targetUrl) return;
+
+    destroyCompatSidecarHls();
+    compatSidecarCurrentUrl = targetUrl;
+    compatSidecarWaiting = false;
+    compatSidecarRecoveryAttempts = 0;
+
+    const isHls = targetUrl.includes('.m3u8');
+    if (isHls && window.Hls && window.Hls.isSupported()) {
+      const hls = new window.Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        maxBufferLength: 60,
+        maxMaxBufferLength: 120,
+        backBufferLength: 60,
+        startPosition: Math.max(0, nativeVideo.currentTime || 0)
+      });
+      compatSidecarHls = hls;
+      hls.loadSource(targetUrl);
+      hls.attachMedia(compatSidecarAudio);
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        cineAudioTelemetry.log('sidecar_hls', 'manifest_parsed', { targetUrl });
+        syncCompatSidecarAudio(true);
+      });
+      hls.on(window.Hls.Events.ERROR, (_ev, data) => {
+        cineAudioTelemetry.log('sidecar_hls', 'error', { type: data.type, details: data.details, fatal: data.fatal });
+        if (!data || !data.fatal) return;
+        if (compatSidecarRecoveryAttempts >= 3) return;
+        compatSidecarRecoveryAttempts++;
+        cineAudioTelemetry.recoveries++;
+        if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+          hls.startLoad();
+        } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+        }
+      });
+    } else {
+      compatSidecarAudio.src = targetUrl;
+      compatSidecarAudio.load();
+    }
+  }
+
+  if (compatSidecarAudio) {
+    compatSidecarAudio.addEventListener('waiting', () => {
+      compatSidecarWaiting = true;
+      cineAudioTelemetry.log('sidecar', 'waiting');
+    });
+    compatSidecarAudio.addEventListener('stalled', () => {
+      cineAudioTelemetry.log('sidecar', 'stalled');
+      if (compatSidecarHls && compatSidecarRecoveryAttempts < 3) {
+        compatSidecarRecoveryAttempts++;
+        cineAudioTelemetry.recoveries++;
+        try {
+          compatSidecarHls.startLoad();
+        } catch (_) {}
+      }
+    });
+    compatSidecarAudio.addEventListener('canplay', () => {
+      compatSidecarWaiting = false;
+      if (compatSidecarAudioActive && !nativeVideo.paused && compatSidecarAudio.paused) {
+        compatSidecarAudio.play().catch(() => {});
+      }
+    });
+    compatSidecarAudio.addEventListener('playing', () => {
+      compatSidecarWaiting = false;
+      cineAudioTelemetry.log('sidecar', 'playing');
+    });
+    compatSidecarAudio.addEventListener('error', () => {
+      const code = compatSidecarAudio.error ? compatSidecarAudio.error.code : 0;
+      cineAudioTelemetry.log('sidecar', 'error', { code });
+    });
+  }
+
   function attachCompatSidecarAudio(fileId, trackIdx = 0, diag = null) {
     if (!compatSidecarAudio || !fileId) return;
     const isTrack0 = trackIdx === 0;
-    const hasStaticM4a = Boolean(diag && diag.hasSidecarAudio0);
-    const targetUrl =
-      isTrack0 && hasStaticM4a
-        ? diag.sidecarAudioUrl || `/media_cache/${encodeURIComponent(fileId)}/audio_0.m4a`
-        : `/api/videos/${encodeURIComponent(fileId)}/audio-stream.m4a?track=${trackIdx}`;
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const hasFullHls = Boolean(isTrack0 && diag && diag.sidecarAudioHlsUrl);
+    const hasCompleteStaticM4a = Boolean(isTrack0 && diag && diag.hasSidecarAudio0 && diag.sidecarAudioComplete !== false);
+    const hasAnyStaticM4a = Boolean(isTrack0 && diag && diag.hasSidecarAudio0);
+
+    let targetUrl;
+    if (hasFullHls) {
+      targetUrl = diag.sidecarAudioHlsUrl;
+    } else if (isLocalhost && !hasCompleteStaticM4a) {
+      // No localhost, se o m4a estático estiver truncado, usa FFmpeg completo on-the-fly
+      targetUrl = `/api/videos/${encodeURIComponent(fileId)}/audio-stream.m4a?track=${trackIdx}`;
+    } else if (hasAnyStaticM4a) {
+      targetUrl = diag.sidecarAudioUrl || `/media_cache/${encodeURIComponent(fileId)}/audio_0.m4a`;
+    } else {
+      targetUrl = `/api/videos/${encodeURIComponent(fileId)}/audio-stream.m4a?track=${trackIdx}`;
+    }
 
     compatSidecarAudioActive = true;
     compatSidecarFileId = fileId;
     compatSidecarTrackIdx = trackIdx;
     compatSidecarOffsetSec = 0;
 
-    if (!compatSidecarAudio.src || !compatSidecarAudio.src.endsWith(targetUrl)) {
-      compatSidecarAudio.src = targetUrl;
-      compatSidecarAudio.load();
-    }
+    loadSidecarAudioSource(targetUrl);
     syncCompatSidecarAudio(true);
 
     if (syncModeIndicator) {
-      syncModeIndicator.textContent =
-        '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Sincronizado • WebSocket/P2P)';
+      syncModeIndicator.textContent = hasFullHls
+        ? '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Completo HLS • WebSocket/P2P)'
+        : '🔊 Player Personalizado Ativo (Áudio AAC-LC Estéreo Sincronizado • WebSocket/P2P)';
     }
   }
 
@@ -2805,7 +2974,10 @@
         audioCodecs: media.audioCodecs || [],
         browserAudioSupported: !preRequiresCompat,
         hasSidecarAudio0: Boolean(media.hasSidecarAudio0),
+        sidecarAudioHlsUrl: media.sidecarAudioHlsUrl || null,
         sidecarAudioUrl: media.sidecarAudioUrl || null,
+        sidecarAudioDurationSec: Number(media.sidecarAudioDurationSec || 0),
+        sidecarAudioComplete: media.sidecarAudioComplete !== false,
         isEbmlRemappableDual: Boolean(media.isEbmlRemappableDual),
         requiresSidecarAudio: Boolean(media.requiresSidecarAudio),
         requiresAudioFallbackOrRemux: preRequiresCompat,
@@ -2851,9 +3023,12 @@
       banner.style.cssText =
         'position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(229,9,20,0.94);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 18px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.6);';
       banner.addEventListener('click', () => {
-        nativeVideo.muted = false;
-        nativeMuteBtn.textContent = '🔊';
+        userAudioMuted = false;
+        applyAudioMuteAndVolumeUi();
         nativeVideo.play().catch(() => {});
+        if (compatSidecarAudioActive && compatSidecarAudio) {
+          compatSidecarAudio.play().catch(() => {});
+        }
         banner.remove();
       });
       screenWrapper.appendChild(banner);
@@ -2932,14 +3107,15 @@
   });
 
   nativeMuteBtn.addEventListener('click', () => {
-    nativeVideo.muted = !nativeVideo.muted;
-    nativeMuteBtn.textContent = nativeVideo.muted ? '🔇' : '🔊';
+    userAudioMuted = !userAudioMuted;
+    if (!userAudioMuted && userAudioVolume === 0) userAudioVolume = 1;
+    applyAudioMuteAndVolumeUi();
   });
 
   nativeVolumeBar.addEventListener('input', () => {
-    nativeVideo.volume = Number(nativeVolumeBar.value);
-    nativeVideo.muted = nativeVideo.volume === 0;
-    nativeMuteBtn.textContent = nativeVideo.muted ? '🔇' : '🔊';
+    userAudioVolume = Number(nativeVolumeBar.value);
+    userAudioMuted = userAudioVolume === 0;
+    applyAudioMuteAndVolumeUi();
   });
 
   nativeSettingsGearBtn.addEventListener('click', () => {
@@ -3384,9 +3560,11 @@
     }, 1800);
   });
   nativeVideo.addEventListener('volumechange', () => {
-    nativeMuteBtn.textContent = nativeVideo.muted || nativeVideo.volume === 0 ? '🔇' : '🔊';
-    nativeVolumeBar.value = String(nativeVideo.muted ? 0 : nativeVideo.volume);
-    syncCompatSidecarAudio(false);
+    if (!compatSidecarAudioActive) {
+      userAudioMuted = nativeVideo.muted;
+      userAudioVolume = nativeVideo.volume;
+    }
+    applyAudioMuteAndVolumeUi();
   });
   nativeVideo.addEventListener('ratechange', () => {
     syncCompatSidecarAudio(false);
