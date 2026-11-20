@@ -4,9 +4,15 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const zlib = require('zlib');
 const { spawn, execFile } = require('child_process');
 const { Readable } = require('stream');
 const { Server } = require('socket.io');
+const {
+  SECURITY_HEADERS,
+  generateRequestId,
+  patchEbmlHeaderForUnsupportedAudio
+} = require('./src/shared/media-utils.mjs');
 
 let FFMPEG_BIN = 'ffmpeg';
 let FFPROBE_BIN = 'ffprobe';
@@ -27,7 +33,39 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-app.use(express.json());
+app.disable('x-powered-by');
+app.use(express.json({ limit: '1mb' }));
+
+// Observabilidade (X-Request-Id), Cabeçalhos de Segurança e Compressão Gzip para JSONs > 4KB
+app.use((req, res, next) => {
+  const reqId = req.headers['x-request-id'] || generateRequestId();
+  req.requestId = reqId;
+  res.setHeader('X-Request-Id', reqId);
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
+    res.setHeader(k, v);
+  }
+
+  const origJson = res.json.bind(res);
+  res.json = (payload) => {
+    const acceptEnc = String(req.headers['accept-encoding'] || '');
+    if (acceptEnc.includes('gzip')) {
+      const raw = Buffer.from(JSON.stringify(payload));
+      if (raw.length >= 4096) {
+        try {
+          const gz = zlib.gzipSync(raw, { level: 6 });
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Vary', 'Accept-Encoding');
+          res.setHeader('Content-Length', String(gz.length));
+          return res.send(gz);
+        } catch (_) {}
+      }
+    }
+    return origJson(payload);
+  };
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
@@ -182,7 +220,23 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+const localLoginAttemptsByIp = new Map();
+const LOCAL_LOGIN_RATE_LIMIT_MAX = 8;
+const LOCAL_LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+
 app.post('/api/auth/login', (req, res) => {
+  const clientIp =
+    (req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',')[0].trim() : '') ||
+    req.socket.remoteAddress ||
+    'unknown';
+  const now = Date.now();
+  const rec = localLoginAttemptsByIp.get(clientIp);
+  if (rec && now - rec.firstAt <= LOCAL_LOGIN_RATE_LIMIT_WINDOW_MS && rec.count >= LOCAL_LOGIN_RATE_LIMIT_MAX) {
+    const retryAfterSec = Math.max(1, Math.ceil((LOCAL_LOGIN_RATE_LIMIT_WINDOW_MS - (now - rec.firstAt)) / 1000));
+    res.setHeader('Retry-After', String(retryAfterSec));
+    return res.status(429).json({ error: 'Muitas tentativas de login. Aguarde antes de tentar novamente.' });
+  }
+
   const password = String((req.body && req.body.password) || '').trim();
   if (!password) {
     return res.status(400).json({ error: 'Informe a senha de administrador.' });
@@ -190,9 +244,15 @@ app.post('/api/auth/login', (req, res) => {
   const passBuf = Buffer.from(password);
   const adminBuf = Buffer.from(ADMIN_PASSWORD);
   if (passBuf.length !== adminBuf.length || !crypto.timingSafeEqual(passBuf, adminBuf)) {
+    if (!rec || now - rec.firstAt > LOCAL_LOGIN_RATE_LIMIT_WINDOW_MS) {
+      localLoginAttemptsByIp.set(clientIp, { count: 1, firstAt: now });
+    } else {
+      rec.count += 1;
+    }
     console.warn('[RBAC Auth] Falha de login administrativo (senha incorreta).');
     return res.status(401).json({ error: 'Senha de administrador incorreta.' });
   }
+  localLoginAttemptsByIp.delete(clientIp);
   const token = createAdminToken();
   res.json({
     success: true,
@@ -636,6 +696,7 @@ function enrichMovieWithPlaybackInfo(movie) {
 
 // Retorna o catálogo organizado em fileiras estilo Netflix/Prime Video
 app.get('/api/drive/catalog', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   const { query = '', category = 'all', includeUnavailable = 'false' } = req.query;
   const q = String(query).toLowerCase().trim();
   const isAdmin = isRequestAdmin(req);
@@ -3423,31 +3484,7 @@ async function handleVideoMetadataRequest(req, res) {
   });
 }
 
-function patchEbmlHeaderForDualAudioMkv(buf) {
-  if (!buf || buf.length < 64) return buf;
-  if (buf[0] !== 0x1a || buf[1] !== 0x45 || buf[2] !== 0xdf || buf[3] !== 0xa3) {
-    return buf;
-  }
-  const scanLen = Math.min(buf.length, 32768);
-  const headerAscii = buf.subarray(0, scanLen).toString('latin1');
-  const aacPos = headerAscii.indexOf('A_AAC');
-  if (aacPos === -1) return buf;
-  const ac3Pos = headerAscii.indexOf('A_AC3');
-  const eac3Pos = headerAscii.indexOf('A_EAC3');
-  const dtsPos = headerAscii.indexOf('A_DTS');
-  const targetCodecPos = ac3Pos !== -1 ? ac3Pos : eac3Pos !== -1 ? eac3Pos : dtsPos;
-  if (targetCodecPos === -1 || targetCodecPos > aacPos) return buf;
-
-  const trackEntryStart = Math.max(0, headerAscii.lastIndexOf('\xae', targetCodecPos));
-  const patched = Buffer.from(buf);
-  for (let i = trackEntryStart; i < targetCodecPos; i++) {
-    if (patched[i] === 0x83 && patched[i + 1] === 0x81 && patched[i + 2] === 0x02) {
-      patched[i + 2] = 0x20;
-      break;
-    }
-  }
-  return patched;
-}
+const patchEbmlHeaderForDualAudioMkv = patchEbmlHeaderForUnsupportedAudio;
 
 async function handleVideoStreamRequest(req, res) {
   const reqStartMs = Date.now();

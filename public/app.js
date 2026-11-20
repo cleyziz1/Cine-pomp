@@ -1318,6 +1318,9 @@
     renderStreamingRows(rows);
   }
 
+  let lastKnownCatalogReconciledAt = null;
+  let lastKnownCatalogCount = -1;
+
   async function loadDriveStreamingCatalog(category = 'all', query = '') {
     currentCategory = category;
     let loadedFromServer = false;
@@ -1330,8 +1333,10 @@
         const rawText = await res.text();
         if (rawText) {
           const data = JSON.parse(rawText);
+          if (data.lastReconciledAt) lastKnownCatalogReconciledAt = data.lastReconciledAt;
           if (Array.isArray(data.movies)) {
             loadedFromServer = true;
+            lastKnownCatalogCount = data.movies.length;
             for (const m of data.movies) {
               if (m && m.id && m.id !== 'demo_1' && m.id !== 'demo_2' && m.status !== 'unavailable') {
                 mergedMap.set(m.id, m);
@@ -1627,20 +1632,52 @@
     renderManagerMoviesList(allDriveMovies);
     driveManagerModal.classList.remove('hidden');
     loadAdminMoviesHealth();
-    fetch('/api/drive/sync-status')
+    fetch('/api/drive/sync-status', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((st) => {
         if (st && autoSyncStatusBadge) {
           const folderCode = st.officialFolderId || '185iFV7I5x107sxJDTVbSxA9F0pY3GtTr';
-          const count = typeof st.catalogCount === 'number' ? st.catalogCount : allDriveMovies.length;
+          const count =
+            typeof st.totalMovies === 'number'
+              ? st.totalMovies
+              : typeof st.catalogCount === 'number'
+              ? st.catalogCount
+              : allDriveMovies.length;
+          const syncSrc = (st.lastAutoSync && st.lastAutoSync.source) || 'drive';
           autoSyncStatusBadge.innerHTML = `
-            <span>⚡ <strong>Sincronização Automática Ativa</strong> (${count} filmes monitorados na pasta oficial)</span>
+            <span>⚡ <strong>Sincronização Automática Ativa</strong> (${count} filmes • origem: ${escapeHtml(syncSrc)})</span>
             <code style="font-size:0.7rem; background:rgba(0,0,0,0.35); padding:2px 6px; border-radius:4px; color:#a7f3d0;">${escapeHtml(folderCode)}</code>
           `;
         }
       })
       .catch(() => {});
   }
+
+  // Revalidação automática leve do catálogo a cada 60s quando a aba está visível (sem interromper reprodução na sala)
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    fetch('/api/drive/sync-status', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((st) => {
+        if (!st) return;
+        const remoteCount = typeof st.totalMovies === 'number' ? st.totalMovies : st.catalogCount;
+        const remoteReconciled = st.lastReconciledAt || (st.lastAutoSync && st.lastAutoSync.lastCompletedAt) || null;
+        const countChanged = typeof remoteCount === 'number' && lastKnownCatalogCount >= 0 && remoteCount !== lastKnownCatalogCount;
+        const timeChanged =
+          remoteReconciled &&
+          lastKnownCatalogReconciledAt &&
+          remoteReconciled !== lastKnownCatalogReconciledAt &&
+          st.lastAutoSync &&
+          ((st.lastAutoSync.addedCount || 0) > 0 ||
+            (st.lastAutoSync.removedCount || 0) > 0 ||
+            (st.lastAutoSync.renamedCount || 0) > 0);
+        if (countChanged || timeChanged) {
+          const q = typeof catalogSearchInput !== 'undefined' && catalogSearchInput ? catalogSearchInput.value : '';
+          loadDriveStreamingCatalog(currentCategory || 'all', q || '');
+        }
+      })
+      .catch(() => {});
+  }, 60000);
 
   openDriveManagerBtn.addEventListener('click', openDriveManager);
   openDriveFromRoomBtn.addEventListener('click', openDriveManager);
